@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".presentation.MainActivity"
+        android:background="@color/white">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:defaultNavHost="true"
+            app:layout_constraintBottom_toTopOf="@+id/main_bnv"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navGraph="@navigation/main_graph" />
+
+        <View
+            android:id="@+id/bottom_nav_divider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/sw_gray1"
+            app:layout_constraintBottom_toTopOf="@id/main_bnv" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/main_bnv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/bottom_bar"
+            android:padding="8dp"
+            app:itemActiveIndicatorStyle="@android:color/transparent"
+            app:itemIconSize="32dp"
+            android:elevation="4dp"
+            app:itemIconTint="@drawable/sel_main_bnv_color"
+            app:itemTextColor="@drawable/sel_main_bnv_color"
+            app:itemTextAppearanceActive="@style/TextAppearance.Sweepic.ActiveBnv"
+            app:itemTextAppearanceInactive="@style/TextAppearance.Sweepic.InActiveBnv"
+            app:itemBackground="@color/bottom_bar"
+            app:labelVisibilityMode="labeled"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/nav_host_fragment"
+            app:menu="@menu/main_menu" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
