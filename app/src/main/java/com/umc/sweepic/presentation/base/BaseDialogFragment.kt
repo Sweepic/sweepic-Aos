@@ -49,31 +49,47 @@ abstract class BaseDialogFragment<V : ViewDataBinding>(@LayoutRes val layoutReso
         _binding = null
     }
 
+    protected open fun Context.dialogFragmentResize(dialogFragment: DialogFragment, width: Float) {
+        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        if (Build.VERSION.SDK_INT < 30) {
+            val display = windowManager.defaultDisplay
+            val size = Point()
+            display.getSize(size)
+            val params: ViewGroup.LayoutParams? = dialog?.window?.attributes
+            val deviceWidth = size.x
+            params?.width = (deviceWidth * width).toInt()
+            dialog?.window?.attributes = params as WindowManager.LayoutParams
+
+        } else {
+            val rect = windowManager.currentWindowMetrics.bounds
+            val x = (rect.width() * width).toInt()
+            val params: ViewGroup.LayoutParams? = dialog?.window?.attributes
+            params?.width = x
+            dialog?.window?.attributes = params as WindowManager.LayoutParams
+        }
+    }
+
     protected open fun Context.dialogFragmentResize(dialogFragment: DialogFragment, width: Float, height: Float) {
         val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         if (Build.VERSION.SDK_INT < 30) {
-
             val display = windowManager.defaultDisplay
             val size = Point()
-
             display.getSize(size)
-
-            val window = dialogFragment.dialog?.window
-
-            val x = (size.x * width).toInt()
-            val y = (size.y * height).toInt()
-            window?.setLayout(x, y)
+            val params: ViewGroup.LayoutParams? = dialog?.window?.attributes
+            val deviceWidth = size.x
+            val deviceHeight = size.y
+            params?.width = (deviceWidth * width).toInt()
+            params?.height = (deviceHeight * height).toInt()
+            dialog?.window?.attributes = params as WindowManager.LayoutParams
 
         } else {
-
             val rect = windowManager.currentWindowMetrics.bounds
-
-            val window = dialogFragment.dialog?.window
-
             val x = (rect.width() * width).toInt()
             val y = (rect.height() * height).toInt()
-
-            window?.setLayout(x, y)
+            val params: ViewGroup.LayoutParams? = dialog?.window?.attributes
+            params?.width = x
+            params?.height = y
+            dialog?.window?.attributes = params as WindowManager.LayoutParams
         }
     }
 }
