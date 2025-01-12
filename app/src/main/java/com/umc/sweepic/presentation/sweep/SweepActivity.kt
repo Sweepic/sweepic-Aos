@@ -10,7 +10,9 @@ import com.umc.sweepic.databinding.ActivitySweepBinding
 import com.umc.sweepic.presentation.base.BaseActivity
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
 import com.umc.sweepic.presentation.sweep.dialog.SweepTagDialog
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep) {
     private lateinit var adapter: SweepTagRVA
     private var locationTag: String? = null // 장소 태그를 저장할 변수
@@ -23,7 +25,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
     override fun initView() {
         switchToggle()
-
+        setupMoveButton()
         // 장소 태그
         setupTagClickListener(
             binding.tvSweepLocationTag,
@@ -57,11 +59,18 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         ) { etcTag = it }
     }
 
+    private fun setupMoveButton() {
+        binding.ivSweepMove.setOnClickListener {
+            startActivity(MoveActivity.newIntent(this))
+        }
+    }
+
     companion object {
         fun newIntent(context: Context): Intent {
             return Intent(context, SweepActivity::class.java)
         }
     }
+
 
     private fun switchToggle() {
         binding.switchSweepAiBtn.setOnCheckedChangeListener { _, isChecked ->
