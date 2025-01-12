@@ -32,7 +32,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             when (menuItem.itemId) {
                 R.id.sweepActivity -> {
                     // SweepActivity로 이동
-                    startActivity(SweepActivity.newIntent(this))
+                    startActivity(SweepActivity.newIntent(this, ""))
                     true
                 }
                 else -> {

@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivityMoveBinding
+import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.presentation.base.BaseActivity
 import com.umc.sweepic.presentation.sweep.adapter.GalleryRVA
 import com.umc.sweepic.util.extension.repeatOnStarted
@@ -88,7 +89,12 @@ class MoveActivity: BaseActivity<ActivityMoveBinding>(R.layout.activity_move) {
     }
 
     private fun setRecyclerView() {
-        adapter = GalleryRVA()
+        adapter = GalleryRVA { clickedGallery ->
+            // GalleryRVA에서 Gallery 객체를 클릭한 경우
+            // SweepActivity로 이동하며, clickedGallery.uri를 인텐트에 담아 전송
+            val intent = SweepActivity.newIntent(this, clickedGallery.uri.toString())
+            startActivity(intent)
+        }
         binding.rvMoveGallery.layoutManager = GridLayoutManager(this, 3)
         binding.rvMoveGallery.adapter = adapter
     }
@@ -109,5 +115,9 @@ class MoveActivity: BaseActivity<ActivityMoveBinding>(R.layout.activity_move) {
             }
         }
     }
-
+    private fun goToSweepActivity(gallery: Gallery) {
+        // 이미지 Uri를 전달하고 싶다면, Uri.toString() 등으로 변환해 Intent Extra로 넘기기
+        val intent = SweepActivity.newIntent(this, gallery.uri.toString())
+        startActivity(intent)
+    }
 }

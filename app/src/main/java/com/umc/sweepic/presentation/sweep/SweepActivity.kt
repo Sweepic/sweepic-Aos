@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
 import com.umc.sweepic.presentation.base.BaseActivity
@@ -26,6 +27,77 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     override fun initView() {
         switchToggle()
         setupMoveButton()
+
+        setupTags()
+
+        // 1) 인텐트에서 이미지 URI 받기
+        val imageUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
+        if (!imageUriString.isNullOrEmpty()) {
+            // 2) Glide 등으로 로드
+            Glide.with(this)
+                .load(imageUriString)
+                .into(binding.ivSweepMainImg)
+        }
+    }
+
+    private fun setupMoveButton() {
+        binding.ivSweepMove.setOnClickListener {
+            startActivity(MoveActivity.newIntent(this))
+        }
+    }
+
+    companion object {
+        private const val EXTRA_IMAGE_URI = "extra_image_uri"
+
+        fun newIntent(context: Context, imageUriString: String): Intent {
+            return Intent(context, SweepActivity::class.java).apply {
+                putExtra(EXTRA_IMAGE_URI, imageUriString)
+            }
+        }
+    }
+
+
+    private fun switchToggle() {
+        binding.switchSweepAiBtn.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                // ON 상태: 왼쪽에 AI 표시
+                binding.tvSweepAiOn.visibility = View.VISIBLE
+            } else {
+                // OFF 상태: 오른쪽에 AI 표시
+                binding.tvSweepAiOn.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setupTagClickListener(textView: TextView, dialogTag: String, title: String, hint: String, onSave: (String) -> Unit) {
+        textView.setOnClickListener {
+            // TextView의 현재 상태 저장
+            val originalText = textView.text.toString()
+            val originalTextColor = textView.currentTextColor
+            val originalBackground = textView.background
+
+            val dialog = SweepTagDialog(
+                title = title,
+                hint = hint,
+                onTagEntered = { inputText ->
+                    // 확인 시 TextView 업데이트
+                    textView.text = inputText
+                    textView.setTextColor(ContextCompat.getColor(this, R.color.sweepic))
+                    textView.setBackgroundResource(R.drawable.shape_rect_16_blue_line)
+                    onSave(inputText)
+                },
+                onCancel = {
+                    // 취소 시 TextView 복원
+                    textView.text = originalText
+                    textView.setTextColor(originalTextColor)
+                    textView.background = originalBackground
+                }
+            )
+            dialog.show(supportFragmentManager, dialogTag)
+        }
+    }
+    // 태그 관련 코드 정리
+    private fun setupTags() {
         // 장소 태그
         setupTagClickListener(
             binding.tvSweepLocationTag,
@@ -58,60 +130,4 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             hint = "기타 내용을 입력해주세요."
         ) { etcTag = it }
     }
-
-    private fun setupMoveButton() {
-        binding.ivSweepMove.setOnClickListener {
-            startActivity(MoveActivity.newIntent(this))
-        }
-    }
-
-    companion object {
-        fun newIntent(context: Context): Intent {
-            return Intent(context, SweepActivity::class.java)
-        }
-    }
-
-
-    private fun switchToggle() {
-        binding.switchSweepAiBtn.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                // ON 상태: 왼쪽에 AI 표시
-                binding.tvSweepAiOn.visibility = View.VISIBLE
-                binding.tvSweepAiOff.visibility = View.GONE
-            } else {
-                // OFF 상태: 오른쪽에 AI 표시
-                binding.tvSweepAiOn.visibility = View.GONE
-                binding.tvSweepAiOff.visibility = View.VISIBLE
-            }
-        }
-    }
-
-    private fun setupTagClickListener(textView: TextView, dialogTag: String, title: String, hint: String, onSave: (String) -> Unit) {
-        textView.setOnClickListener {
-            // TextView의 현재 상태 저장
-            val originalText = textView.text.toString()
-            val originalTextColor = textView.currentTextColor
-            val originalBackground = textView.background
-
-            val dialog = SweepTagDialog(
-                title = title,
-                hint = hint,
-                onTagEntered = { inputText ->
-                    // 확인 시 TextView 업데이트
-                    textView.text = inputText
-                    textView.setTextColor(ContextCompat.getColor(this, R.color.sweepic))
-                    textView.setBackgroundResource(R.drawable.shape_rect_16_blue_line)
-                    onSave(inputText)
-                },
-                onCancel = {
-                    // 취소 시 TextView 복원
-                    textView.text = originalText
-                    textView.setTextColor(originalTextColor)
-                    textView.background = originalBackground
-                }
-            )
-            dialog.show(supportFragmentManager, dialogTag)
-        }
-    }
-
 }

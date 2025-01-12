@@ -1,21 +1,17 @@
 package com.umc.sweepic.presentation.sweep.adapter
 
-import android.net.Uri
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ItemMoveGalleryBinding
 import com.umc.sweepic.domain.model.sweep.Gallery
 
-class GalleryRVA :
-    PagingDataAdapter<Gallery, GalleryRVA.ImageViewHolder>(diffCallback) {
+class GalleryRVA(
+    private val onItemClick: (Gallery) -> Unit
+): PagingDataAdapter<Gallery, GalleryRVA.ImageViewHolder>(diffCallback) {
 
     companion object {
         val diffCallback = object : DiffUtil.ItemCallback<Gallery>() {
@@ -27,16 +23,14 @@ class GalleryRVA :
         }
     }
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): ImageViewHolder = ImageViewHolder(
-        ItemMoveGalleryBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+        val binding = ItemMoveGalleryBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-    )
+        return ImageViewHolder(binding, onItemClick)
+    }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         val item = getItem(position)
@@ -46,13 +40,17 @@ class GalleryRVA :
     }
 
     inner class ImageViewHolder(
-        private val binding: ItemMoveGalleryBinding
+        private val binding: ItemMoveGalleryBinding,
+        private val onItemClick: (Gallery) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Gallery) {
             binding.run {
                 Glide.with(binding.root.context)
                     .load(item.uri)
                     .into(binding.ivGalleryImage)
+            }
+            binding.root.setOnClickListener {
+                onItemClick(item)
             }
         }
     }

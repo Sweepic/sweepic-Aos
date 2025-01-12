@@ -150,6 +150,7 @@
             app:layout_constraintEnd_toStartOf="@+id/tv_sweep_divide_count"/>
 
         <ImageView
+            android:id="@+id/iv_sweep_main_img"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:src="@drawable/ic_ex_image"
@@ -200,28 +201,18 @@
                     app:layout_constraintTop_toTopOf="@id/switch_sweep_ai_btn"
                     app:layout_constraintBottom_toBottomOf="@id/switch_sweep_ai_btn" />
 
-                <TextView
-                    android:id="@+id/tv_sweep_ai_off"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="AI"
-                    style="@style/TextAppearance.Sweepic.Content.Light"
-                    android:textColor="@color/black"
-                    android:visibility="visible"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toEndOf="@id/switch_sweep_ai_btn"
-                    app:layout_constraintTop_toTopOf="@id/switch_sweep_ai_btn"
-                    app:layout_constraintBottom_toBottomOf="@id/switch_sweep_ai_btn" />
-
-<!--                <androidx.recyclerview.widget.RecyclerView-->
-<!--                    android:id="@+id/rv_sweep_tag_container"-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:layout_marginStart="10dp"-->
-<!--                    tools:layout="@layout/item_sweep_tag"-->
-<!--                    app:layout_constraintEnd_toEndOf="parent"-->
-<!--                    app:layout_constraintStart_toEndOf="@+id/switch_sweep_ai_btn"/>-->
+<!--                <TextView-->
+<!--                    android:id="@+id/tv_sweep_ai_off"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="AI"-->
+<!--                    style="@style/TextAppearance.Sweepic.Content.Light"-->
+<!--                    android:textColor="@color/black"-->
+<!--                    android:visibility="visible"-->
+<!--                    android:layout_marginEnd="8dp"-->
+<!--                    app:layout_constraintEnd_toEndOf="@id/switch_sweep_ai_btn"-->
+<!--                    app:layout_constraintTop_toTopOf="@id/switch_sweep_ai_btn"-->
+<!--                    app:layout_constraintBottom_toBottomOf="@id/switch_sweep_ai_btn" />-->
 
                 <TextView
                     android:id="@+id/tv_sweep_location_tag"
