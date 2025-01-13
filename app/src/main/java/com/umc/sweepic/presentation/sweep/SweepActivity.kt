@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
@@ -12,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
 import com.umc.sweepic.domain.model.sweep.Gallery
+import com.umc.sweepic.presentation.MainActivity
 import com.umc.sweepic.presentation.base.BaseActivity
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepVPA
@@ -37,47 +39,45 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         switchToggle()
         setupMoveButton()
         setupTags()
-        // 1) 인텐트로부터 선택된 이미지 URI 가져오기
+
         val selectedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
+        val allImages: List<Gallery> = moveViewModel.loadAllImagesDesc()
 
-        // 2) 전체 갤러리 목록 로드
-        val allImages: List<Gallery> = moveViewModel.loadAllImagesDesc() // ViewModel에서 전체 로드
-
-        // 3) ViewPager 어댑터 생성
         pagerAdapter = SweepVPA(allImages)
         binding.vpSweepMainImg.adapter = pagerAdapter
 
-        // 4) 선택된 URI를 가진 항목의 인덱스를 찾아서 ViewPager 초기 위치로 설정
-        selectedUriString?.let { uriStr ->
-            val selectedIndex = allImages.indexOfFirst { it.uri.toString() == uriStr }
-            if (selectedIndex >= 0) {
-                binding.vpSweepMainImg.setCurrentItem(selectedIndex, false)
-            }
+        // 선택된 이미지 인덱스 찾기
+        var selectedIndex = 0
+        if (!selectedUriString.isNullOrEmpty()) {
+            val foundIndex = allImages.indexOfFirst { it.uri.toString() == selectedUriString }
+            if (foundIndex >= 0) selectedIndex = foundIndex
         }
+
+        // ViewPager2 초기 위치 설정
+        binding.vpSweepMainImg.setCurrentItem(selectedIndex, false)
+
+        // ■■■ 추가 부분: 초기 페이지 데이터 직접 설정
+        updatePageInfo(allImages, selectedIndex)
+
+        // 전체 개수
         binding.tvSweepTotalCount.text = allImages.size.toString()
-        // 4) 현재 페이지 인덱스 변화 콜백 등록
+
+        // 페이지 변경 콜백 등록
         binding.vpSweepMainImg.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                // 페이지 인덱스 (1-based)
-                binding.tvSweepCount.text = (position + 1).toString()
-
-                val currentItem = allImages[position]
-
-                // "yy.MM.dd a HH:mm" → 예: "24.08.17 오전 10:11"
-                val dateFormat = SimpleDateFormat("yy.MM.dd a HH:mm", Locale("ko","KR"))
-                val dateString = dateFormat.format(currentItem.addedDate)
-
-                // 텍스트뷰에 날짜/시간 표시
-                binding.tvSweepDate.text = dateString
+                updatePageInfo(allImages, position)
             }
         })
-    }
 
-    private fun setupMoveButton() {
-        binding.ivSweepMove.setOnClickListener {
-            startActivity(MoveActivity.newIntent(this))
-        }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // SweepActivity에서 뒤로가기 누르면 MainActivity로 이동
+                startActivity(MainActivity.newIntent(this@SweepActivity))
+                finish()
+            }
+        })
+
     }
 
     companion object {
@@ -87,6 +87,25 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             return Intent(context, SweepActivity::class.java).apply {
                 putExtra(EXTRA_IMAGE_URI, imageUriString)
             }
+        }
+    }
+
+    private fun updatePageInfo(allImages: List<Gallery>, position: Int) {
+        // 페이지 인덱스 (1-based)
+        binding.tvSweepCount.text = (position + 1).toString()
+
+        val currentItem = allImages[position]
+        val dateFormat = SimpleDateFormat("yy.MM.dd a HH:mm", Locale("ko","KR"))
+
+        // currentItem.addedDate가 Long이면 new Date(...),
+        val dateString = dateFormat.format(currentItem.addedDate)
+
+        binding.tvSweepDate.text = dateString
+    }
+
+    private fun setupMoveButton() {
+        binding.ivSweepMove.setOnClickListener {
+            startActivity(MoveActivity.newIntent(this))
         }
     }
 

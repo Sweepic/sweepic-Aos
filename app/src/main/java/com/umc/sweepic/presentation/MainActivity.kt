@@ -1,5 +1,6 @@
 package com.umc.sweepic.presentation
 
+import android.content.Context
 import android.content.Intent
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -46,5 +47,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     override fun onResume() {
         super.onResume()
         binding.mainBnv.selectedItemId = navController.currentDestination?.id ?: R.id.challengeFragment
+    }
+    companion object {
+        fun newIntent(context: Context): Intent {
+            return Intent(context, MainActivity::class.java)
+        }
     }
 }

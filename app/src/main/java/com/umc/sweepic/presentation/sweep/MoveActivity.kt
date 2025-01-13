@@ -94,6 +94,7 @@ class MoveActivity: BaseActivity<ActivityMoveBinding>(R.layout.activity_move) {
             // SweepActivity로 이동하며, clickedGallery.uri를 인텐트에 담아 전송
             val intent = SweepActivity.newIntent(this, clickedGallery.uri.toString())
             startActivity(intent)
+            finish()
         }
         binding.rvMoveGallery.layoutManager = GridLayoutManager(this, 3)
         binding.rvMoveGallery.adapter = adapter
