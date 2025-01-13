@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -19,4 +20,7 @@ class MoveViewModel @Inject constructor(
         repository.getGalleryImagePagingSource()
     }.flow.cachedIn(viewModelScope)
 
+    fun loadAllImagesDesc(): List<Gallery> {
+        return repository.getAllGalleryImagesDesc()
+    }
 }

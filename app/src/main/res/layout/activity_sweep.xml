@@ -87,35 +87,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/TextAppearance.Sweepic.Content.Light"
-            android:text="00. 00. 00"
+            android:text="00. 00. 00 오후 00:00"
             android:textColor="@color/sw_gray2"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@+id/iv_sweep_move"
             app:layout_constraintStart_toStartOf="@+id/iv_sweep_move"/>
 
-        <TextView
-            android:id="@+id/tv_sweep_12_hour"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/TextAppearance.Sweepic.Content.Light"
-            android:text="오후"
-            android:textColor="@color/sw_gray2"
-            android:layout_marginStart="3dp"
-            android:layout_marginTop="-2dp"
-            app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_sweep_date"
-            app:layout_constraintStart_toEndOf="@+id/tv_sweep_date"/>
+<!--        <TextView-->
+<!--            android:id="@+id/tv_sweep_12_hour"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            style="@style/TextAppearance.Sweepic.Content.Light"-->
+<!--            android:text="오후"-->
+<!--            android:textColor="@color/sw_gray2"-->
+<!--            android:layout_marginStart="3dp"-->
+<!--            android:layout_marginTop="-2dp"-->
+<!--            app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"-->
+<!--            app:layout_constraintBottom_toBottomOf="@+id/tv_sweep_date"-->
+<!--            app:layout_constraintStart_toEndOf="@+id/tv_sweep_date"/>-->
 
-        <TextView
-            android:id="@+id/tv_sweep_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/TextAppearance.Sweepic.Content.Light"
-            android:textColor="@color/sw_gray2"
-            android:text="00:00"
-            android:layout_marginStart="3dp"
-            app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"
-            app:layout_constraintStart_toEndOf="@+id/tv_sweep_12_hour"/>
+<!--        <TextView-->
+<!--            android:id="@+id/tv_sweep_time"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            style="@style/TextAppearance.Sweepic.Content.Light"-->
+<!--            android:textColor="@color/sw_gray2"-->
+<!--            android:text="00:00"-->
+<!--            android:layout_marginStart="3dp"-->
+<!--            app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"-->
+<!--            app:layout_constraintStart_toEndOf="@+id/tv_sweep_12_hour"/>-->
 
         <TextView
             android:id="@+id/tv_sweep_total_count"
@@ -149,19 +149,28 @@
             app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"
             app:layout_constraintEnd_toStartOf="@+id/tv_sweep_divide_count"/>
 
-        <ImageView
-            android:id="@+id/iv_sweep_main_img"
+<!--        <ImageView-->
+<!--            android:id="@+id/iv_sweep_main_img"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:src="@drawable/ic_ex_image"-->
+<!--            android:layout_marginTop="10dp"-->
+<!--            android:layout_marginHorizontal="18dp"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/tv_sweep_date"-->
+<!--            app:layout_constraintBottom_toTopOf="@id/sv_sweep_ai_tag"/>-->
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/vp_sweep_main_img"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/ic_ex_image"
             android:layout_marginTop="10dp"
             android:layout_marginHorizontal="18dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_sweep_date"
-            app:layout_constraintBottom_toTopOf="@id/sv_sweep_ai_tag"/>
-
-
+            app:layout_constraintBottom_toTopOf="@id/sv_sweep_ai_tag" />
 
         <HorizontalScrollView
             android:id="@+id/sv_sweep_ai_tag"

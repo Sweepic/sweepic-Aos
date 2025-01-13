@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import com.umc.sweepic.data.datasource.GalleryDataSource
 import com.umc.sweepic.domain.model.sweep.GalleryModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -24,6 +25,7 @@ class GalleryDataSourceImpl @Inject constructor(
             MediaStore.Images.Media.DISPLAY_NAME,
             MediaStore.Images.Media.MIME_TYPE,
             MediaStore.Images.Media.DATE_TAKEN,
+            MediaStore.Images.Media.DATE_ADDED, // ← 추가
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Images.Media.SIZE,
             MediaStore.Images.Media.WIDTH,
@@ -68,23 +70,45 @@ class GalleryDataSourceImpl @Inject constructor(
                 sortOrder
             )
         }?.use { cursor ->
+            val dateTakenColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
+            val dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+            val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.TITLE)
+            val displayNameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+            val mimeTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
+            val folderColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
+            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+            val widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
+            val heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
+
             while (cursor.moveToNext()) {
+                val dateTaken = cursor.getLong(dateTakenColumn)   // 밀리초
+                val dateAdded = cursor.getLong(dateAddedColumn)   // 초
+                val finalDate = if (dateTaken > 0) {
+                    dateTaken
+                } else {
+                    dateAdded * 1000  // 초 → 밀리초로 보정
+                }
+
                 galleryImage.add(
                     GalleryModel(
                         uri = Uri.withAppendedPath(
                             contentUri,
-                            cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)).toString()
+                            cursor.getLong(idColumn).toString()
                         ),
-                        name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.TITLE)),
-                        fullName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)),
-                        mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)),
-                        addedDate = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)),
-                        folder = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)),
-                        size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)),
-                        width = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)),
-                        height = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)),
+                        name = cursor.getString(titleColumn),
+                        fullName = cursor.getString(displayNameColumn),
+                        mimeType = cursor.getString(mimeTypeColumn),
+                        // addedDate 대신, 최종 결정된 finalDate 사용
+                        addedDate = finalDate,
+                        folder = cursor.getString(folderColumn),
+                        size = cursor.getLong(sizeColumn),
+                        width = cursor.getInt(widthColumn),
+                        height = cursor.getInt(heightColumn),
                     )
                 )
+                Log.d("GalleryDataSourceImpl", "dateTaken=$dateTaken, dateAdded=$dateAdded, finalDate=$finalDate")
+
             }
         }
 

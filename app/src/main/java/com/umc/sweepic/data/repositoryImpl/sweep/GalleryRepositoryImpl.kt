@@ -34,4 +34,11 @@ class GalleryRepositoryImpl @Inject constructor(
             }
         }
     }
+    override fun getAllGalleryImagesDesc(): List<Gallery> {
+        val galleryModels = galleryDataSource.fetchGalleryImages(
+            limit = Int.MAX_VALUE,
+            offset = 0
+        )
+        return galleryModels.map { it.toGallery() }
+    }
 }

@@ -2,20 +2,29 @@ package com.umc.sweepic.presentation.sweep
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
+import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.presentation.base.BaseActivity
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
+import com.umc.sweepic.presentation.sweep.adapter.SweepVPA
 import com.umc.sweepic.presentation.sweep.dialog.SweepTagDialog
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @AndroidEntryPoint
 class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep) {
     private lateinit var adapter: SweepTagRVA
+    private lateinit var pagerAdapter: SweepVPA
+    private val moveViewModel: MoveViewModel by viewModels()
     private var locationTag: String? = null // 장소 태그를 저장할 변수
     private var peopleTag: String? = null // 사람 태그를 저장할 변수
     private var foodTag: String? = null // 음식 태그를 저장할 변수
@@ -27,17 +36,42 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     override fun initView() {
         switchToggle()
         setupMoveButton()
-
         setupTags()
+        // 1) 인텐트로부터 선택된 이미지 URI 가져오기
+        val selectedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
 
-        // 1) 인텐트에서 이미지 URI 받기
-        val imageUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
-        if (!imageUriString.isNullOrEmpty()) {
-            // 2) Glide 등으로 로드
-            Glide.with(this)
-                .load(imageUriString)
-                .into(binding.ivSweepMainImg)
+        // 2) 전체 갤러리 목록 로드
+        val allImages: List<Gallery> = moveViewModel.loadAllImagesDesc() // ViewModel에서 전체 로드
+
+        // 3) ViewPager 어댑터 생성
+        pagerAdapter = SweepVPA(allImages)
+        binding.vpSweepMainImg.adapter = pagerAdapter
+
+        // 4) 선택된 URI를 가진 항목의 인덱스를 찾아서 ViewPager 초기 위치로 설정
+        selectedUriString?.let { uriStr ->
+            val selectedIndex = allImages.indexOfFirst { it.uri.toString() == uriStr }
+            if (selectedIndex >= 0) {
+                binding.vpSweepMainImg.setCurrentItem(selectedIndex, false)
+            }
         }
+        binding.tvSweepTotalCount.text = allImages.size.toString()
+        // 4) 현재 페이지 인덱스 변화 콜백 등록
+        binding.vpSweepMainImg.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                // 페이지 인덱스 (1-based)
+                binding.tvSweepCount.text = (position + 1).toString()
+
+                val currentItem = allImages[position]
+
+                // "yy.MM.dd a HH:mm" → 예: "24.08.17 오전 10:11"
+                val dateFormat = SimpleDateFormat("yy.MM.dd a HH:mm", Locale("ko","KR"))
+                val dateString = dateFormat.format(currentItem.addedDate)
+
+                // 텍스트뷰에 날짜/시간 표시
+                binding.tvSweepDate.text = dateString
+            }
+        })
     }
 
     private fun setupMoveButton() {

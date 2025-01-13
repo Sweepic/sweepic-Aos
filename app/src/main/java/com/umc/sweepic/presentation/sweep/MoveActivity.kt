@@ -115,9 +115,4 @@ class MoveActivity: BaseActivity<ActivityMoveBinding>(R.layout.activity_move) {
             }
         }
     }
-    private fun goToSweepActivity(gallery: Gallery) {
-        // 이미지 Uri를 전달하고 싶다면, Uri.toString() 등으로 변환해 Intent Extra로 넘기기
-        val intent = SweepActivity.newIntent(this, gallery.uri.toString())
-        startActivity(intent)
-    }
 }
