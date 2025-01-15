@@ -3,6 +3,7 @@ package com.umc.sweepic.presentation.sweep
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -10,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
 import com.umc.sweepic.domain.model.sweep.Gallery
@@ -42,7 +44,14 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
         val selectedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
         val allImages: List<Gallery> = moveViewModel.loadAllImagesDesc()
-
+        // 이미지가 하나도 없다면 처리
+        if (allImages.isEmpty()) {
+            binding.tvSweepTotalCount.text = "0"
+            binding.tvSweepCount.text = "0"
+            binding.tvSweepDate.text = "날짜 정보 없음"
+            Log.d("SweepActivity", "갤러리에 이미지가 없습니다.")
+            return
+        }
         pagerAdapter = SweepVPA(allImages)
         binding.vpSweepMainImg.adapter = pagerAdapter
 
@@ -78,6 +87,9 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             }
         })
 
+        binding.layoutSweepAddFolderContainer.setOnClickListener {
+            showAlbumBottomSheet()
+        }
     }
 
     companion object {
@@ -149,6 +161,39 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             dialog.show(supportFragmentManager, dialogTag)
         }
     }
+
+    private fun showAlbumBottomSheet() {
+        // BottomSheetDialog 생성
+        val bottomSheetDialog = BottomSheetDialog(this)
+        // inflate하기 위해 LayoutInflater 사용
+        val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_album, null)
+        bottomSheetDialog.setContentView(view)
+
+        // 터치 영역들
+        val tvAddExisting: TextView = view.findViewById(R.id.tv_add_existing_album)
+        val tvCreateNew: TextView = view.findViewById(R.id.tv_create_new_album)
+        val tvCancel: TextView = view.findViewById(R.id.tv_cancel)
+
+        // 터치 리스너 설정 (필요에 따라 실제 동작 구현)
+        tvAddExisting.setOnClickListener {
+            // 기존 앨범 추가하기 처리
+            // 예: 기존 앨범 리스트를 보여준다거나, 해당 액티비티로 이동
+            bottomSheetDialog.dismiss()
+        }
+
+        tvCreateNew.setOnClickListener {
+            // 새 앨범 만들기 처리
+            bottomSheetDialog.dismiss()
+        }
+
+        tvCancel.setOnClickListener {
+            // 취소: 그냥 BottomSheetDialog 닫기
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.show()
+    }
+
     // 태그 관련 코드 정리
     private fun setupTags() {
         // 장소 태그
