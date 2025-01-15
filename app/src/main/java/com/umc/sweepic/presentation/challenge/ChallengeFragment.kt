@@ -46,7 +46,7 @@ class ChallengeFragment: BaseFragment<FragmentChallengeBinding>(R.layout.fragmen
 
         binding.vpChallenge.isNestedScrollingEnabled = false
         binding.vpChallenge.getChildAt(0).setOnTouchListener { _, _ -> true }
-        
+
         TabLayoutMediator(binding.tabLayout, binding.vpChallenge) { tab, position ->
             tab.text = when (position) {
                 0 -> "새로운 챌린지"
