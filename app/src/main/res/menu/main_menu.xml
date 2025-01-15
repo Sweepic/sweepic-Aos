@@ -6,7 +6,7 @@
         android:title="챌린지" />
 
     <item
-        android:id="@+id/sweepFragment"
+        android:id="@+id/sweepActivity"
         android:icon="@drawable/sel_main_icon_bnv_sweep"
         android:title="정리" />
 
