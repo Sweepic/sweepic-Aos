@@ -21,4 +21,28 @@
         android:label="RecordFragment"
         tools:layout="@layout/fragment_record"/>
 
+    <fragment
+        android:id="@+id/historyTagFragment"
+        android:name="com.umc.sweepic.presentation.record.history.HistoryTagFragment"
+        android:label="HistoryTagFragment"
+        tools:layout="@layout/fragment_history_tag" />
+
+    <fragment
+        android:id="@+id/memoFragment"
+        android:name="com.umc.sweepic.presentation.record.memo.MemoFragment"
+        android:label="MemoFragment" />
+
+    <fragment
+        android:id="@+id/memodetailFragment"
+        android:name="com.umc.sweepic.presentation.record.memo.MemoDetailFragment"
+        android:label="MemoDetailFragment" >
+        <argument
+            android:name="memoFolder"
+            app:argType="com.umc.sweepic.presentation.record.memo.MemoFolder" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_memoFragment_to_memodetailFragment"
+        app:destination="@id/memodetailFragment" />
+
 </navigation>

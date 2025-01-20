@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
@@ -36,6 +37,12 @@ class HistoryTagFragment : Fragment() {
         // 어댑터 설정
         adapter = HistoryTagAdapter(exampleData)
         recyclerView.adapter = adapter
+
+        //뒤로 가기 누르면 메인 히스토리 페이지로 이동
+        val backButton = view.findViewById<ImageView>(R.id.ic_history_back)
+        backButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
         return view
     }

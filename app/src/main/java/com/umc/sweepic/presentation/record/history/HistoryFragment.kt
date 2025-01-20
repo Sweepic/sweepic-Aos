@@ -39,5 +39,4 @@ class HistoryFragment : Fragment() {
         _binding = null
     }
 
-
 }
