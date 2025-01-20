@@ -123,39 +123,46 @@ class MemoDetailFragment : Fragment() {
     private fun handlePhotoMove() {
         val selectedItems = imageAdapter.getSelectedItems() // 선택된 사진 가져오기
 
-        //선택된 사진이 없는 상태에서 사진 이동 버튼 누르면
         if (selectedItems.isEmpty()) {
-
+            Toast.makeText(requireContext(), "이동할 사진을 선택해주세요.", Toast.LENGTH_SHORT).show()
             return
+        }
 
-            //사진 선택된 상태에서 사진 이동 누르면?
-        } else {
-            memoFolderViewModel.memoFolders.value?.let { folders ->
-                val currentFolder = arguments?.getParcelable<MemoFolder>("memoFolder")
-                if (currentFolder != null) {
-                    // 현재 폴더 제외한 목록 뜨게함
-                    val filteredFolders = folders.filter { it.id != currentFolder.id }
-
-                    // 다이얼로그 창
-                    val folderSelectDialog = FolderSelectDialog(filteredFolders) { selectedFolder ->
-                        // 선택된 폴더로 이동하기
+        memoFolderViewModel.memoFolders.value?.let { folders ->
+            val currentFolder = arguments?.getParcelable<MemoFolder>("memoFolder")
+            if (currentFolder != null) {
+                // 현재 폴더 제외하고 다이얼로그에 뜨게끔하기
+                val filteredFolders = folders.filter { it.id != currentFolder.id }
+                val folderSelectDialog = FolderSelectDialog(
+                    folders = filteredFolders,
+                    onMoveButtonClick = { selectedFolder ->
                         movePhotosToFolder(selectedFolder)
+                    },
+                    onDialogDismiss = {
+                        resetToDefaultState()
                     }
-                    folderSelectDialog.show(parentFragmentManager, "FolderSelectDialog")
-                }
+                )
+                folderSelectDialog.show(parentFragmentManager, "FolderSelectDialog")
             }
         }
     }
+
 
     //선택된 폴더로 이동
     private fun movePhotosToFolder(selectedFolder: MemoFolder) {
 
     }
 
-    //사진 선택 버튼 누르고 -> 취소버튼 누르면
-    private fun handleCancelSelection() {
+    //다이얼로그 창 닫을때 실행되는 메서드
+    private fun resetToDefaultState() {
         isSelectionMode = false
         imageAdapter.setSelectionMode(false)
+        binding.btnMenu.setImageResource(R.drawable.ic_menu)
+    }
+
+    //사진 선택 버튼 누르고 -> 취소버튼 누르면
+    private fun handleCancelSelection() {
+        resetToDefaultState()
     }
 
     override fun onDestroyView() {

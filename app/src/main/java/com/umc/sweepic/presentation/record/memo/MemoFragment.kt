@@ -1,60 +1,58 @@
-package com.umc.sweepic.presentation.record.memo
+package com.umc.sweepic.presentation.record
 
+import MemoAdapter
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
+import com.umc.sweepic.databinding.FragmentMemoBinding
+import com.umc.sweepic.presentation.record.memo.MemoFolder
+import com.umc.sweepic.presentation.record.memo.MemoFolderViewModel
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class MemoFragment : Fragment(R.layout.fragment_memo) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [MemoFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class MemoFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var _binding: FragmentMemoBinding? = null
+    private val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private val viewModel: MemoFolderViewModel by viewModels()
+    private lateinit var memoAdapter: MemoAdapter
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentMemoBinding.bind(view)
+
+        setupRecyclerView()
+        observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        memoAdapter = MemoAdapter(emptyList()) { memoFolder ->
+            navigateToDetailFragment(memoFolder)
+        }
+
+        binding.rvMemoList.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = memoAdapter
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_memo, container, false)
+    private fun observeViewModel() {
+        viewModel.memoFolders.observe(viewLifecycleOwner) { memoFolders ->
+            memoAdapter.updateData(memoFolders)
+        }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MemoFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MemoFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun navigateToDetailFragment(memoFolder: MemoFolder) {
+        val navController = requireParentFragment().findNavController() // 부모 프래그먼트의 NavController 사용
+        val action = RecordFragmentDirections.actionRecordFragmentToMemoDetailFragment(memoFolder)
+        navController.navigate(action)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
