@@ -22,4 +22,6 @@
     <style name="TextAppearance.Sweepic.Warning">
         <item name="android:textColor">@color/warning</item>
     </style>
+
+
 </resources>
