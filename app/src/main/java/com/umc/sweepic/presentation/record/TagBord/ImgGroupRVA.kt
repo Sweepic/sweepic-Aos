@@ -1,5 +1,6 @@
 package com.umc.sweepic.presentation.record.TagBord
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,8 +25,10 @@ class ImgGroupRVA(
 
     override fun onBindViewHolder(holder: GroupViewHolder, position: Int) {
         val (date, images) = groupedData[position]
-        val tags = tagsByDate[date] ?: emptyList() // 태그 예제 (데이터로 대체 가능)
-        holder.bind(date, images, tags)
+        val formattedDate = date.split("-")[1] // "yyyy-MM월 dd일" 형식에서 MM월 dd일 추출
+        val tags = tagsByDate[date] ?: emptyList()
+
+        holder.bind(formattedDate, images, tags)
     }
 
     override fun getItemCount(): Int = groupedData.size
@@ -47,10 +50,17 @@ class ImgGroupRVA(
             )
             chipRecyclerView.adapter = ChipAdapter(tags)
 
-
-            // 이미지 GridLayoutManager
-            recyclerView.layoutManager = GridLayoutManager(itemView.context, 5)
+            // 이미지 RecyclerView 설정
+            val spanCount = calculateSpanCount(itemView.context, 64) // 이미지 항목 너비를 80dp로 설정
+            recyclerView.layoutManager = GridLayoutManager(itemView.context, spanCount)
             recyclerView.adapter = ImgAdapter(images)
+        }
+
+        private fun calculateSpanCount(context: Context, itemWidthDp: Int): Int {
+            val displayMetrics = context.resources.displayMetrics
+            val screenWidthPx = displayMetrics.widthPixels
+            val screenWidthDp = screenWidthPx / displayMetrics.density
+            return (screenWidthDp / itemWidthDp).toInt()
         }
     }
 }

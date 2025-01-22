@@ -31,8 +31,9 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
 
     private lateinit var rvAdapter: ImgGroupRVA
     private lateinit var monthAdapter: MonthAdapter
-    private val REQUEST_CODE_READ_EXTERNAL_STORAGE = 1001
     private var isPopupVisible = false
+    private val imagesByDate = mutableMapOf<String, MutableList<String>>()
+    private val tagsByDate = mutableMapOf<String, List<String>>()
 
 
     override fun initObserver() {
@@ -92,15 +93,12 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
     private fun loadImagesFromMediaStore() {
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DATE_TAKEN
+            MediaStore.Images.Media.DATE_TAKEN,
+            MediaStore.Images.Media.DATE_MODIFIED,
+            MediaStore.Images.Media.DATE_ADDED
         )
 
         val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
-
-        val imagesByDate = mutableMapOf<String, MutableList<String>>()
-
-        val tagsByDate = mutableMapOf<String, List<String>>()
-
 
         val query = requireContext().contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -110,21 +108,34 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
             sortOrder
         )
 
-        if (query == null) {
-            Log.e("TagBoardFragment", "Failed to query MediaStore")
-            return
-        }
-
-        query.use { cursor ->
+        query?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
             val dateTakenColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
+            val dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
+            val dateAddedColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
-                val dateTaken = cursor.getLong(dateTakenColumn)
 
-                // 날짜를 "yyyy-MM-dd" 형식으로 변환
-                val date = SimpleDateFormat("MM월 dd일", Locale.getDefault()).format(Date(dateTaken))
+                // 가능한 모든 날짜 필드 확인
+                val dateTaken = cursor.getLong(dateTakenColumn)
+                val dateModified = cursor.getLong(dateModifiedColumn) * 1000 // 초 단위 → 밀리초
+                val dateAdded = cursor.getLong(dateAddedColumn) * 1000 // 초 단위 → 밀리초
+
+                // DATE_TAKEN, DATE_MODIFIED, DATE_ADDED 중 가장 최신 값을 사용
+                val date = when {
+                    dateTaken > 0 -> dateTaken
+                    dateModified > 0 -> dateModified
+                    dateAdded > 0 -> dateAdded
+                    else -> 0L
+                }
+
+                // 날짜가 유효하지 않은 경우 건너뛰기
+                if (date == 0L) continue
+
+                val fullDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(date))
+                val formattedDate = SimpleDateFormat("MM월 dd일", Locale.getDefault()).format(Date(date))
+                val year = fullDate.split("-")[0] // 연도 추출
 
                 // 이미지 URI 생성
                 val imageUri = ContentUris.withAppendedId(
@@ -133,11 +144,9 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                 ).toString()
 
                 // 날짜별로 그룹화
-                imagesByDate.getOrPut(date) { mutableListOf() }.add(imageUri)
-
-                //태그생성
-                tagsByDate[date] = generateTagsForDate(date)}
-
+                imagesByDate.getOrPut("$year-$formattedDate") { mutableListOf() }.add(imageUri)
+                tagsByDate["$year-$formattedDate"] = generateTagsForDate(formattedDate)
+            }
         }
 
         // 데이터 확인
@@ -146,8 +155,9 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         } else {
             Log.d("TagBoardFragment", "No images found in MediaStore")
         }
-
     }
+
+
 
     private fun setupRecyclerView(
         imagesByDate: Map<String, List<String>>,
@@ -254,12 +264,10 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         }
     }
 
-
-
     private fun updateYear(selectedYear: String) {
         binding.tvYear.text = selectedYear
         Log.d("TagBoardFragment", "Selected Year: $selectedYear")
-        // 선택한 연도에 따라 데이터 필터링 로직 추가 가능
+        filterImagesByYear(selectedYear) // 선택된 연도로 필터링
     }
 
     private fun getAvailableYears(): List<String> {
@@ -283,11 +291,29 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
             while (cursor.moveToNext()) {
                 val dateTaken = cursor.getLong(dateTakenColumn)
                 val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(Date(dateTaken))
-                yearSet.add(year)
+
+                // "1970" 제외
+                if (year != "1970") {
+                    yearSet.add(year)
+                }
             }
         }
 
         return yearSet.sortedDescending() // 내림차순 정렬
+    }
+
+    private fun filterImagesByYear(selectedYear: String) {
+        // imagesByDate에서 해당 연도에 맞는 데이터만 필터링
+        val filteredImages = imagesByDate.filter { (date, _) ->
+            date.startsWith(selectedYear) // 연도로 시작하는 데이터 필터링
+        }
+
+        val filteredTags = tagsByDate.filter { (date, _) ->
+            date.startsWith(selectedYear)
+        }
+
+        // RecyclerView 업데이트
+        setupRecyclerView(filteredImages, filteredTags)
     }
 
 
