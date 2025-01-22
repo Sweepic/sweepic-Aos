@@ -1,13 +1,12 @@
-package com.umc.sweepic.presentation.record
+package com.umc.sweepic.presentation.record.TagBord
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.umc.sweepic.R
 
 class ImgGroupRVA(
@@ -49,12 +48,8 @@ class ImgGroupRVA(
             chipRecyclerView.adapter = ChipAdapter(tags)
 
 
-            // 이미지 RecyclerView 설정
-            recyclerView.layoutManager = LinearLayoutManager(
-                itemView.context,
-                LinearLayoutManager.HORIZONTAL,
-                false
-            )
+            // 이미지 GridLayoutManager
+            recyclerView.layoutManager = GridLayoutManager(itemView.context, 5)
             recyclerView.adapter = ImgAdapter(images)
         }
     }

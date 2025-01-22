@@ -2,6 +2,9 @@ package com.umc.sweepic.presentation.record
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.umc.sweepic.presentation.record.History.HistoryFragment
+import com.umc.sweepic.presentation.record.Memo.MemoFragment
+import com.umc.sweepic.presentation.record.TagBord.TagBoardFragment
 
 class RecordVpAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
     override fun getItemCount(): Int = 3

@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation.record
+package com.umc.sweepic.presentation.record.TagBord
 
 
 import android.view.LayoutInflater
@@ -12,6 +12,10 @@ import com.umc.sweepic.R
 class ImgAdapter(private val images: List<String>) :
     RecyclerView.Adapter<ImgAdapter.ImageViewHolder>() {
 
+        inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val imageView: ImageView = itemView.findViewById(R.id.imageView)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_img, parent, false)
@@ -19,17 +23,11 @@ class ImgAdapter(private val images: List<String>) :
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val uri = images[position]
+        val imageUri = images[position]
         Glide.with(holder.itemView.context)
-            .load(uri)
-            .placeholder(R.drawable.ic_ex_image) // 기본 이미지 설정
-            .error(R.drawable.ic_ex_image) // 에러 이미지 설정
+            .load(imageUri)
             .into(holder.imageView)
     }
 
     override fun getItemCount(): Int = images.size
-
-    class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.imageView)
-    }
 }
