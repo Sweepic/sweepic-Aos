@@ -19,23 +19,36 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sweepic"
         tools:targetApi="31">
+
+        <!-- 스플래쉬 화면-->
         <activity
-            android:name=".presentation.MainActivity"
+            android:name=".presentation.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.sweep.SweepActivity"
+
+        <!-- MainActivity -->
+        <activity
+            android:name=".presentation.MainActivity"
+            android:exported="true" />
+
+        <!-- SweepActivity -->
+        <activity
+            android:name=".presentation.sweep.SweepActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".presentation.sweep.MoveActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- MoveActivity -->
+        <activity
+            android:name=".presentation.sweep.MoveActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>

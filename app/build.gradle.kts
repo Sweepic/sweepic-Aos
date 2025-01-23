@@ -30,11 +30,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         viewBinding = true
@@ -99,6 +99,9 @@ dependencies {
 
     // Paging3
     implementation ("androidx.paging:paging-runtime:3.3.2")
+
+    //splash 화면 구성
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
 
 }
