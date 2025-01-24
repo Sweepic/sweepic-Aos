@@ -97,4 +97,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    // Paging3
+    implementation ("androidx.paging:paging-runtime:3.3.2")
+
+    // Exif interface
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
+
 }

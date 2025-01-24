@@ -1,3 +1,5 @@
+- closed #issue number
+
 ## *⛳️ Work Description*
 - task1
 - task2
