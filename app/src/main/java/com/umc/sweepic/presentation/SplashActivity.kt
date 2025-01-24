@@ -12,9 +12,9 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // 일정 시간 후 MainActivity로 이동
+        // 일정 시간 후 LoginActivity로 이동
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, LoginActivity::class.java))
             finish() // SplashActivity 종료
         }, 2000) // 2초 동안 스플래시 화면 표시
     }
