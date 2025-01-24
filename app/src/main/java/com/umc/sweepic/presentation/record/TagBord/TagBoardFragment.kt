@@ -105,8 +105,11 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
             projection,
             null,
             null,
-            sortOrder
+            null
         )
+
+        val combinedList = mutableListOf<Triple<Long, String, String>>() // (timestamp, dateKey, imageUri)
+
 
         query?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
@@ -122,19 +125,14 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                 val dateModified = cursor.getLong(dateModifiedColumn) * 1000 // 초 단위 → 밀리초
                 val dateAdded = cursor.getLong(dateAddedColumn) * 1000 // 초 단위 → 밀리초
 
-                // DATE_TAKEN, DATE_MODIFIED, DATE_ADDED 중 가장 최신 값을 사용
-                val date = when {
-                    dateTaken > 0 -> dateTaken
-                    dateModified > 0 -> dateModified
-                    dateAdded > 0 -> dateAdded
-                    else -> 0L
-                }
+                // 가장 최신 값을 사용
+                val timestamp = maxOf(dateTaken, dateModified, dateAdded)
 
                 // 날짜가 유효하지 않은 경우 건너뛰기
-                if (date == 0L) continue
+                if (timestamp == 0L) continue
 
-                val fullDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(date))
-                val formattedDate = SimpleDateFormat("MM월 dd일", Locale.getDefault()).format(Date(date))
+                val fullDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(timestamp))
+                val formattedDate = SimpleDateFormat("MM월 dd일", Locale.getDefault()).format(Date(timestamp))
                 val year = fullDate.split("-")[0] // 연도 추출
 
                 // 이미지 URI 생성
@@ -143,13 +141,21 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                     id
                 ).toString()
 
-                // 날짜별로 그룹화
-                imagesByDate.getOrPut("$year-$formattedDate") { mutableListOf() }.add(imageUri)
-                tagsByDate["$year-$formattedDate"] = generateTagsForDate(formattedDate)
+                // 날짜별 데이터 추가
+                combinedList.add(Triple(timestamp, "$year-$formattedDate", imageUri))
             }
         }
 
-        // 데이터 확인
+        // 데이터 정렬: 내림차순
+        val sortedList = combinedList.sortedByDescending { it.first }
+
+        // 데이터를 그룹화하여 imagesByDate에 저장
+        sortedList.forEach { (_, dateKey, imageUri) ->
+            imagesByDate.getOrPut(dateKey) { mutableListOf() }.add(imageUri)
+            tagsByDate[dateKey] = generateTagsForDate(dateKey)
+        }
+
+        // RecyclerView에 정렬된 데이터 적용
         if (imagesByDate.isNotEmpty()) {
             setupRecyclerView(imagesByDate, tagsByDate)
         } else {
