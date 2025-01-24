@@ -32,9 +32,9 @@ class ChallengeFragment: BaseFragment<FragmentChallengeBinding>(R.layout.fragmen
 
     override fun initView() {
 
-        // ic_mypage 클릭 이벤트
-        binding.layoutTop.findViewById<ImageView>(R.id.iv_mypage).setOnClickListener {
-            findNavController().navigate(R.id.action_challenge_to_mypage)
+        // iv_mypage 클릭 이벤트
+        binding.ivMypage.setOnClickListener {
+            findNavController().navigate(R.id.action_challengeFragment_to_myPageFragment)
         }
 
         setupViewPagerAndTabs()
@@ -46,7 +46,7 @@ class ChallengeFragment: BaseFragment<FragmentChallengeBinding>(R.layout.fragmen
 
         binding.vpChallenge.isNestedScrollingEnabled = false
         binding.vpChallenge.getChildAt(0).setOnTouchListener { _, _ -> true }
-        
+
         TabLayoutMediator(binding.tabLayout, binding.vpChallenge) { tab, position ->
             tab.text = when (position) {
                 0 -> "새로운 챌린지"

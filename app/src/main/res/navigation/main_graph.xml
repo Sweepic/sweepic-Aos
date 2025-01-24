@@ -9,7 +9,12 @@
         android:id="@+id/challengeFragment"
         android:name="com.umc.sweepic.presentation.challenge.ChallengeFragment"
         android:label="ChallengeFragment"
-        tools:layout="@layout/fragment_challenge"/>
+        tools:layout="@layout/fragment_challenge">
+        <action
+            android:id="@+id/action_challengeFragment_to_myPageFragment"
+            app:destination="@id/myPageFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/recordFragment"
         android:name="com.umc.sweepic.presentation.record.history.HistoryFragment"
@@ -21,5 +26,11 @@
         android:name="com.umc.sweepic.presentation.record.history.HistoryTagFragment"
         android:label="HistoryTagFragment"
         tools:layout="@layout/fragment_history_tag" />
+
+    <fragment
+        android:id="@+id/myPageFragment"
+        android:name="com.umc.sweepic.presentation.mypage.MyPageFragment"
+        android:label="MyPageFragment"
+        tools:layout="@layout/fragment_my_page"/>
 
 </navigation>

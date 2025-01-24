@@ -17,7 +17,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private lateinit var navController: NavController
 
     override fun initView() {
-        initNavigator()
+        setupNavigator()
         setupBottomNavigation()
         observeDestinationChange()
     }
@@ -26,10 +26,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     }
 
-    private fun initNavigator() {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-        binding.mainBnv.setupWithNavController(navController)
+    private fun setupNavigator() {
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+
+        if (navHostFragment != null) {
+            navController = navHostFragment.navController
+            binding.mainBnv.setupWithNavController(navController)
+        } else {
+            throw IllegalStateException("NavHostFragment is null")
+        }
     }
     private fun setupBottomNavigation() {
         binding.mainBnv.setOnItemSelectedListener { menuItem ->
@@ -59,11 +65,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     private fun observeDestinationChange() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            // 특정 Fragment ID에서 BottomNavigationView 숨기기
-            if (destination.id == R.id.fragment_mypage) {
-                binding.mainBnv.visibility = android.view.View.GONE
-            } else {
-                binding.mainBnv.visibility = android.view.View.VISIBLE
+            when (destination.id) {
+                R.id.myPageFragment -> hideNavigationBar()
+                else -> showNavigationBar()
             }
         }
     }

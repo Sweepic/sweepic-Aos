@@ -221,20 +221,7 @@
             android:textSize="14sp"
             android:background="@color/white"
             app:tabIndicatorFullWidth="true"
-            app:tabRippleColor="@color/Transparency">
-
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_new_challenge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="새로운 챌린지" />
-
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_active_challenge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="도전 중인 챌린지" />
-        </com.google.android.material.tabs.TabLayout>
+            app:tabRippleColor="@color/Transparency"/>
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/vp_challenge"
