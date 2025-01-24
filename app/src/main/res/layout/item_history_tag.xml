@@ -26,24 +26,24 @@
         app:layout_constraintTop_toBottomOf="@id/tv_record_month">
 
 
-    <ImageView
-        android:id="@+id/tv_tag_place"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_tag_place"
-        app:layout_constraintStart_toStartOf="parent"/>
+        <ImageView
+            android:id="@+id/tv_tag_place"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_tag_place"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-    <TextView
-        android:id="@+id/tv_tag_place_ds"
-        android:text="에 총 12번 방문했어요"
-        android:textColor="#222222"
-        android:textSize="14sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@id/tv_tag_place"
-        app:layout_constraintTop_toBottomOf="@id/tv_record_month"
-        android:layout_marginStart="4sp"
-        />
+        <TextView
+            android:id="@+id/tv_tag_place_ds"
+            android:text="에 총 12번 방문했어요"
+            android:textColor="#222222"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/tv_tag_place"
+            app:layout_constraintTop_toBottomOf="@id/tv_record_month"
+            android:layout_marginStart="4sp"
+            />
     </LinearLayout>
 
     <!--만난사람 태그-->
@@ -110,4 +110,3 @@
         android:background="#D3D3D3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

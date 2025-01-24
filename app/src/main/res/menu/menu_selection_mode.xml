@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/delete_photo"
+        android:title="사진 삭제" />
+    <item
+        android:id="@+id/move_photo"
+        android:title="사진 이동" />
+    <item
+        android:id="@+id/cancel_selection"
+        android:title="취소" />
+</menu>

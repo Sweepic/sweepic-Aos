@@ -10,7 +10,6 @@ import com.umc.sweepic.R
 class HistoryTagAdapter(private val data: List<String>) :
     RecyclerView.Adapter<HistoryTagAdapter.HistoryTagViewHolder>() {
 
-    // ViewHolder 설정
     class HistoryTagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val monthTextView: TextView = itemView.findViewById(R.id.tv_record_month)
     }

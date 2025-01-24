@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/white" /> <!-- 다이얼로그 배경색 -->
+    <corners android:radius="16dp" /> <!-- 모서리 둥글기 -->
+    <padding
+        android:left="16dp"
+        android:top="16dp"
+        android:right="16dp"
+        android:bottom="16dp" /> <!-- 다이얼로그 내부 여백 -->
+</shape>
