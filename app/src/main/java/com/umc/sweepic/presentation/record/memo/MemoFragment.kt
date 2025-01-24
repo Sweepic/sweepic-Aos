@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.databinding.FragmentMemoBinding
+import com.umc.sweepic.R
 
 class MemoFragment : Fragment() {
     private var _binding: FragmentMemoBinding? = null

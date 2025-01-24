@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.umc.sweepic"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.umc.sweepic"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -97,5 +98,11 @@ dependencies {
     // Coroutines Dependency
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Paging3
+    implementation ("androidx.paging:paging-runtime:3.3.2")
+
+    // Exif interface
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 
 }
