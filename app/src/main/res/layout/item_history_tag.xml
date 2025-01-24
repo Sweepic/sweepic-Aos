@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:layout_marginTop="16dp"
+        android:id="@+id/tv_record_month"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="12월"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--방문 장소 태그-->
+    <LinearLayout
+        android:id="@+id/tv_place"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_record_month">
+
+
+    <ImageView
+        android:id="@+id/tv_tag_place"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_tag_place"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_tag_place_ds"
+        android:text="에 총 12번 방문했어요"
+        android:textColor="#222222"
+        android:textSize="14sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/tv_tag_place"
+        app:layout_constraintTop_toBottomOf="@id/tv_record_month"
+        android:layout_marginStart="4sp"
+        />
+    </LinearLayout>
+
+    <!--만난사람 태그-->
+    <LinearLayout
+        android:id="@+id/tv_people"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tv_place"
+        android:layout_marginTop="16dp">
+        <ImageView
+            android:id="@+id/tv_tag_people"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_tag_people"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/tv_tag_people_ds"
+            android:text="와 총 8번 만났어요"
+            android:textColor="#222222"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/tv_tag_place"
+            app:layout_constraintTop_toBottomOf="@id/tv_record_month"
+            android:layout_marginStart="4sp"
+            />
+    </LinearLayout>
+
+    <!--먹은 음식 태그-->
+    <LinearLayout
+        android:id="@+id/tv_food"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+
+        app:layout_constraintTop_toBottomOf="@id/tv_people">
+        <ImageView
+            android:id="@+id/tv_tag_food"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_tag_food"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/tv_tag_food_ds"
+            android:text="를 총 15번 먹었어요"
+            android:layout_width="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#222222"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/tv_tag_place"
+            app:layout_constraintTop_toBottomOf="@id/tv_people"
+            android:layout_marginStart="4sp"
+            />
+
+    </LinearLayout>
+
+    <View
+        app:layout_constraintTop_toBottomOf="@id/tv_food"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="#D3D3D3" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
