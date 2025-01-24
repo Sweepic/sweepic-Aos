@@ -93,30 +93,6 @@
             app:layout_constraintTop_toBottomOf="@+id/iv_sweep_move"
             app:layout_constraintStart_toStartOf="@+id/iv_sweep_move"/>
 
-<!--        <TextView-->
-<!--            android:id="@+id/tv_sweep_12_hour"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            style="@style/TextAppearance.Sweepic.Content.Light"-->
-<!--            android:text="오후"-->
-<!--            android:textColor="@color/sw_gray2"-->
-<!--            android:layout_marginStart="3dp"-->
-<!--            android:layout_marginTop="-2dp"-->
-<!--            app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"-->
-<!--            app:layout_constraintBottom_toBottomOf="@+id/tv_sweep_date"-->
-<!--            app:layout_constraintStart_toEndOf="@+id/tv_sweep_date"/>-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/tv_sweep_time"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            style="@style/TextAppearance.Sweepic.Content.Light"-->
-<!--            android:textColor="@color/sw_gray2"-->
-<!--            android:text="00:00"-->
-<!--            android:layout_marginStart="3dp"-->
-<!--            app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"-->
-<!--            app:layout_constraintStart_toEndOf="@+id/tv_sweep_12_hour"/>-->
-
         <TextView
             android:id="@+id/tv_sweep_total_count"
             android:layout_width="wrap_content"
@@ -149,18 +125,6 @@
             app:layout_constraintTop_toTopOf="@+id/tv_sweep_date"
             app:layout_constraintEnd_toStartOf="@+id/tv_sweep_divide_count"/>
 
-<!--        <ImageView-->
-<!--            android:id="@+id/iv_sweep_main_img"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:src="@drawable/ic_ex_image"-->
-<!--            android:layout_marginTop="10dp"-->
-<!--            android:layout_marginHorizontal="18dp"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/tv_sweep_date"-->
-<!--            app:layout_constraintBottom_toTopOf="@id/sv_sweep_ai_tag"/>-->
-
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/vp_sweep_main_img"
             android:layout_width="0dp"
@@ -171,6 +135,33 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_sweep_date"
             app:layout_constraintBottom_toTopOf="@id/sv_sweep_ai_tag" />
+
+        <!-- 왼쪽 터치 영역 -->
+        <View
+            android:id="@+id/view_left_touch"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:layout_gravity="start"
+            android:layout_marginEnd="200dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/vp_sweep_main_img"
+            app:layout_constraintBottom_toBottomOf="@id/vp_sweep_main_img"
+            app:layout_constraintEnd_toStartOf="@id/view_right_touch" />
+
+        <!-- 오른쪽 터치 영역 -->
+        <View
+            android:id="@+id/view_right_touch"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:layout_gravity="end"
+            app:layout_constraintStart_toEndOf="@id/view_left_touch"
+            app:layout_constraintTop_toTopOf="@id/vp_sweep_main_img"
+            app:layout_constraintBottom_toBottomOf="@id/vp_sweep_main_img"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <HorizontalScrollView
             android:id="@+id/sv_sweep_ai_tag"
@@ -209,19 +200,6 @@
                     app:layout_constraintStart_toStartOf="@id/switch_sweep_ai_btn"
                     app:layout_constraintTop_toTopOf="@id/switch_sweep_ai_btn"
                     app:layout_constraintBottom_toBottomOf="@id/switch_sweep_ai_btn" />
-
-<!--                <TextView-->
-<!--                    android:id="@+id/tv_sweep_ai_off"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="AI"-->
-<!--                    style="@style/TextAppearance.Sweepic.Content.Light"-->
-<!--                    android:textColor="@color/black"-->
-<!--                    android:visibility="visible"-->
-<!--                    android:layout_marginEnd="8dp"-->
-<!--                    app:layout_constraintEnd_toEndOf="@id/switch_sweep_ai_btn"-->
-<!--                    app:layout_constraintTop_toTopOf="@id/switch_sweep_ai_btn"-->
-<!--                    app:layout_constraintBottom_toBottomOf="@id/switch_sweep_ai_btn" />-->
 
                 <TextView
                     android:id="@+id/tv_sweep_location_tag"

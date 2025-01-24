@@ -100,5 +100,7 @@ dependencies {
     // Paging3
     implementation ("androidx.paging:paging-runtime:3.3.2")
 
+    // Exif interface
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 
 }

@@ -1,5 +1,9 @@
 package com.umc.sweepic.presentation.sweep.dialog
 
+import android.app.Dialog
+import android.os.Bundle
+import android.view.ViewGroup
+import android.view.WindowManager
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.DialogInputTagBinding
 import com.umc.sweepic.presentation.base.BaseDialogFragment
@@ -37,5 +41,14 @@ class SweepTagDialog(
     override fun initObserver() {
 
     }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // 커스텀 다이얼로그 스타일 적용
+        setStyle(STYLE_NORMAL, R.style.MyDialogStyle)
+    }
+
+    override fun getTheme(): Int = R.style.MyDialogStyle
 
 }

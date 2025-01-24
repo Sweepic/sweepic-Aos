@@ -1,6 +1,5 @@
 package com.umc.sweepic.presentation.sweep.adapter
 
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +19,7 @@ class SweepVPA(
 
     override fun onBindViewHolder(holder: SweepViewHolder, position: Int) {
         holder.bind(images[position])
+        holder.itemView.tag = "view_pager_$position" // 뷰에 고유 태그 설정
     }
 
     override fun getItemCount(): Int = images.size
