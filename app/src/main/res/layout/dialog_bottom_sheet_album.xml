@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_sheet_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp">
+
+    <!-- 기존 앨범 추가하기 터치 구역 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/sw_gray1" />
+
+    <TextView
+        android:id="@+id/tv_add_existing_album"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="기존 앨범 추가하기"
+        android:textSize="18dp"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.Sweepic.Content.Light"
+        android:layout_marginStart="15dp"
+        android:text="안드로이드의 기존 앨범을 불러옵니다."
+        android:textColor="@color/sw_gray2"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/sw_gray1" />
+
+    <!-- 새 앨범 만들기 터치 구역 -->
+    <TextView
+        android:id="@+id/tv_create_new_album"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textSize="18dp"
+        android:text="새 앨범 만들기"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.Sweepic.Content.Light"
+        android:layout_marginStart="15dp"
+        android:text="안드로이드에 새로운 앨범을 생성합니다."
+        android:textColor="@color/sw_gray2"/>
+
+    <!-- 구분선 (선택사항) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/sw_gray1" />
+
+    <!-- 취소 터치 구역 -->
+    <TextView
+        android:id="@+id/tv_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="취소"
+        android:textColor="@color/sw_gray2"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+</LinearLayout>
