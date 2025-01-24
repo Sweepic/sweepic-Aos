@@ -3,8 +3,10 @@
     <style name="Base.Theme.Sweepic" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:statusBarColor">#FFFFFF</item>
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
     </style>
+
+
 
     <style name="Theme.Sweepic" parent="Base.Theme.Sweepic" />
 </resources>
