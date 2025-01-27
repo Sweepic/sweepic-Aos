@@ -1,10 +1,12 @@
 package com.umc.sweepic.presentation.sweep
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.RecoverableSecurityException
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -23,17 +25,24 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
+import com.umc.sweepic.domain.model.sweep.AlbumList
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
 import com.umc.sweepic.presentation.MainActivity
 import com.umc.sweepic.presentation.base.BaseActivity
+import com.umc.sweepic.presentation.sweep.adapter.AlbumListRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepVPA
+import com.umc.sweepic.presentation.sweep.dialog.AlbumSelectDialog
+import com.umc.sweepic.presentation.sweep.dialog.CreateAlbumDialog
 import com.umc.sweepic.presentation.sweep.dialog.SweepTagDialog
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -44,8 +53,10 @@ import kotlin.math.abs
 class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep) {
     private lateinit var adapter: SweepTagRVA
     private lateinit var pagerAdapter: SweepVPA
+    private lateinit var albumAdapter: AlbumListRVA
     private val moveViewModel: MoveViewModel by viewModels()
     private val viewModel: TrashViewModel by viewModels()
+    private val albumViewModel: AlbumViewModel by viewModels()
     private val currentImages = mutableListOf<Gallery>()
     private lateinit var deletePermissionLauncher: ActivityResultLauncher<IntentSenderRequest>
     private val approvedUriSet = mutableSetOf<Uri>()
@@ -53,21 +64,38 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private var pendingTrashPosition: Int? = null
     private var pendingAllImages: List<Gallery>? = null
     private lateinit var updateTrashCount: () -> Unit // 리스너를 외부로 선언
+    private val addedAlbums = mutableListOf<AlbumList>() // 현재 RecyclerView에 표시 중인 앨범 목록
     private var locationTag: String? = null // 장소 태그를 저장할 변수
     private var peopleTag: String? = null // 사람 태그를 저장할 변수
     private var foodTag: String? = null // 음식 태그를 저장할 변수
     private var etcTag: String? = null // 기타 태그를 저장할 변수
+
+    private val gson = Gson()
+    private val sharedPreferences by lazy {
+        getSharedPreferences("SweepPrefs", Context.MODE_PRIVATE)
+    }
+    private val requiredPermissions: Array<String> by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+    }
+
     override fun initObserver() {
 
     }
 
     override fun initView() {
+        requestPermissionsAndLoadImages()
         setupSwitchToggle()
         setupButtons()
         initializeViewPager()
         setupBackPressHandler()
         setupFolderContainerClick()
         setupTrashCountObserver()
+        setupAlbumRecyclerView()
+        setupAddFolderContainer()
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -135,6 +163,28 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
+    private fun requestPermissionsAndLoadImages() {
+        if (hasAllPermissions()) {
+            initializeViewPager() // 권한이 있다면 ViewPager 초기화
+        } else {
+            // 권한 요청
+            registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { permissions ->
+                if (permissions.all { it.value }) {
+                    initializeViewPager() // 권한이 승인되면 ViewPager 초기화
+                } else {
+                    Toast.makeText(this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                    finish() // 권한이 거부되면 액티비티 종료
+                }
+            }.launch(requiredPermissions)
+        }
+    }
+
+    private fun hasAllPermissions() = requiredPermissions.all {
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+    }
+
     private fun initializeViewPager() {
         val selectedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
         val loadedImages = moveViewModel.loadAllImagesDesc()
@@ -185,8 +235,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             val currentPosition = binding.vpSweepMainImg.currentItem
             if (currentPosition > 0) {
                 binding.vpSweepMainImg.setCurrentItem(currentPosition - 1, true)
-            } else {
-                Toast.makeText(this, "첫 번째 페이지입니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -194,8 +242,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             val currentPosition = binding.vpSweepMainImg.currentItem
             if (currentPosition < currentImages.size - 1) {
                 binding.vpSweepMainImg.setCurrentItem(currentPosition + 1, true)
-            } else {
-                Toast.makeText(this, "마지막 페이지입니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -451,8 +497,36 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         val tvCreateNew: TextView = view.findViewById(R.id.tv_create_new_album)
         val tvCancel: TextView = view.findViewById(R.id.tv_cancel)
 
-        tvAddExisting.setOnClickListener { bottomSheetDialog.dismiss() }
-        tvCreateNew.setOnClickListener { bottomSheetDialog.dismiss() }
+        tvAddExisting.setOnClickListener {
+            bottomSheetDialog.dismiss()
+
+            // 앨범 목록 다이얼로그 호출
+            AlbumSelectDialog(
+                addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
+                onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
+                    // 새로 선택된 앨범 추가
+                    val newAlbums = selectedAlbums.filter { album ->
+                        addedAlbums.none { it.id == album.id }
+                    }
+                    addedAlbums.addAll(newAlbums)
+
+                    // 선택 해제된 앨범 제거
+                    addedAlbums.removeAll(deselectedAlbums)
+
+                    // RecyclerView 업데이트
+                    albumAdapter.submitList(addedAlbums.toList())
+
+                    // 변경된 데이터를 SharedPreferences에 저장
+                    saveAlbums()
+                }
+            ).show(supportFragmentManager, "AlbumSelectDialog")
+        }
+        tvCreateNew.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            CreateAlbumDialog { albumName ->
+                addNewAlbum(albumName) // 새 앨범 추가
+            }.show(supportFragmentManager, "CreateAlbumDialog")
+        }
         tvCancel.setOnClickListener { bottomSheetDialog.dismiss() }
 
         bottomSheetDialog.show()
@@ -484,6 +558,85 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
         // 초기 상태 업데이트
         updateTrashCount()
+    }
+
+    private fun setupAlbumRecyclerView() {
+        albumAdapter = AlbumListRVA { album ->
+            showToast("${album.name} 클릭됨")
+        }
+        // 저장된 데이터를 복원
+        restoreAlbums()
+
+        binding.rvSweepSaveToAlbum.apply {
+            layoutManager = LinearLayoutManager(this@SweepActivity, LinearLayoutManager.HORIZONTAL, false)
+            adapter = albumAdapter
+        }
+    }
+
+    private fun saveAlbums() {
+        val albumJson = gson.toJson(addedAlbums)
+        sharedPreferences.edit().putString("AddedAlbums", albumJson).apply()
+    }
+
+    private fun restoreAlbums() {
+        val albumJson = sharedPreferences.getString("AddedAlbums", null)
+        if (!albumJson.isNullOrEmpty()) {
+            val albumType = object : TypeToken<List<AlbumList>>() {}.type
+            val restoredAlbums: List<AlbumList> = gson.fromJson(albumJson, albumType)
+            addedAlbums.clear()
+            addedAlbums.addAll(restoredAlbums)
+            albumAdapter.submitList(addedAlbums.toList())
+        }
+    }
+
+
+    private fun setupAddFolderContainer() {
+        binding.layoutSweepAddFolderContainer.setOnClickListener {
+            showAlbumBottomSheet() // 바텀시트 다이얼로그 호출
+        }
+    }
+
+    private fun addNewAlbum(albumName: String) {
+        // 경로 확인
+        val albumPath = "Pictures/$albumName"
+        val projection = arrayOf(MediaStore.Images.Media.RELATIVE_PATH)
+        val selection = "${MediaStore.Images.Media.RELATIVE_PATH} = ?"
+        val selectionArgs = arrayOf(albumPath)
+
+        // 해당 경로에 파일이 존재하는지 확인
+        val cursor = contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )
+
+        val albumExists = cursor?.use { it.count > 0 } ?: false
+
+        if (!albumExists) {
+            // Placeholder 이미지 생성
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, "PlaceholderImage_${System.currentTimeMillis()}.jpg")
+                put(MediaStore.Images.Media.RELATIVE_PATH, albumPath)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            }
+
+            val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            if (uri != null) {
+                albumViewModel.loadAlbums() // 앨범 목록 새로 로드
+                showToast("새 앨범 '$albumName'이(가) 추가되었습니다.")
+            } else {
+                showToast("앨범 추가에 실패했습니다.")
+            }
+        } else {
+            showToast("이미 존재하는 앨범입니다.")
+        }
+    }
+
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     // 태그 관련 코드 정리
