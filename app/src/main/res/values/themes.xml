@@ -1,7 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Sweepic" parent="Theme.Material3.Light.NoActionBar">
-        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:statusBarColor">@color/appbar</item>
+        <item name="android:windowLightStatusBar">true</item>
+
         <!-- Customize your light theme here. -->
 
     </style>
