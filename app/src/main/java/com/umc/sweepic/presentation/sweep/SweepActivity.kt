@@ -16,6 +16,7 @@ import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -26,6 +27,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -38,11 +40,15 @@ import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
 import com.umc.sweepic.presentation.MainActivity
 import com.umc.sweepic.presentation.base.BaseActivity
+import com.umc.sweepic.presentation.record.memo.MemoFolder
 import com.umc.sweepic.presentation.sweep.adapter.AlbumListRVA
+import com.umc.sweepic.presentation.sweep.adapter.MemoFolderList
+import com.umc.sweepic.presentation.sweep.adapter.SweepMemoFolderRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepVPA
 import com.umc.sweepic.presentation.sweep.dialog.AlbumSelectDialog
 import com.umc.sweepic.presentation.sweep.dialog.CreateAlbumDialog
+import com.umc.sweepic.presentation.sweep.dialog.CreateFolderDialog
 import com.umc.sweepic.presentation.sweep.dialog.SweepTagDialog
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -92,10 +98,9 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         setupButtons()
         initializeViewPager()
         setupBackPressHandler()
-        setupFolderContainerClick()
         setupTrashCountObserver()
         setupAlbumRecyclerView()
-        setupAddFolderContainer()
+        setupClickListeners()
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -482,52 +487,202 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
-    private fun setupFolderContainerClick() {
-        binding.layoutSweepAddFolderContainer.setOnClickListener {
-            showAlbumBottomSheet()
-        }
-    }
+//    private fun setupFolderContainerClick() {
+//        binding.layoutSweepAddFolderContainer.setOnClickListener {
+//            showAlbumBottomSheet()
+//        }
+//    }
+//
+//    private fun showAlbumBottomSheet() {
+//        val bottomSheetDialog = BottomSheetDialog(this)
+//        val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_album, null)
+//        bottomSheetDialog.setContentView(view)
+//
+//        val tvAddExisting: TextView = view.findViewById(R.id.tv_add_existing_album)
+//        val tvCreateNew: TextView = view.findViewById(R.id.tv_create_new_album)
+//        val tvCancel: TextView = view.findViewById(R.id.tv_cancel)
+//
+//        tvAddExisting.setOnClickListener {
+//            bottomSheetDialog.dismiss()
+//
+//            // 앨범 목록 다이얼로그 호출
+//            AlbumSelectDialog(
+//                addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
+//                onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
+//                    // 새로 선택된 앨범 추가
+//                    val newAlbums = selectedAlbums.filter { album ->
+//                        addedAlbums.none { it.id == album.id }
+//                    }
+//                    addedAlbums.addAll(newAlbums)
+//
+//                    // 선택 해제된 앨범 제거
+//                    addedAlbums.removeAll(deselectedAlbums)
+//
+//                    // RecyclerView 업데이트
+//                    albumAdapter.submitList(addedAlbums.toList())
+//
+//                    // 변경된 데이터를 SharedPreferences에 저장
+//                    saveAlbums()
+//                }
+//            ).show(supportFragmentManager, "AlbumSelectDialog")
+//        }
+//        tvCreateNew.setOnClickListener {
+//            bottomSheetDialog.dismiss()
+//            CreateAlbumDialog { albumName ->
+//                addNewAlbum(albumName) // 새 앨범 추가
+//            }.show(supportFragmentManager, "CreateAlbumDialog")
+//        }
+//        tvCancel.setOnClickListener { bottomSheetDialog.dismiss() }
+//
+//        bottomSheetDialog.show()
+//    }
 
-    private fun showAlbumBottomSheet() {
+    private fun showCustomBottomSheetDialog(
+        titleExisting: String,
+        titleExistingEx: String,
+        titleNew: String,
+        titleNewEx: String,
+        onExistingClick: () -> Unit,
+        onNewClick: () -> Unit
+    ) {
         val bottomSheetDialog = BottomSheetDialog(this)
         val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_album, null)
         bottomSheetDialog.setContentView(view)
 
         val tvAddExisting: TextView = view.findViewById(R.id.tv_add_existing_album)
+        val tvAddExistingEx: TextView = view.findViewById(R.id.tv_add_existing_album_ex)
         val tvCreateNew: TextView = view.findViewById(R.id.tv_create_new_album)
+        val tvCreateNewEx: TextView = view.findViewById(R.id.tv_create_new_album_ex)
         val tvCancel: TextView = view.findViewById(R.id.tv_cancel)
 
+        // 텍스트 설정
+        tvAddExisting.text = titleExisting
+        tvAddExistingEx.text = titleExistingEx
+        tvCreateNew.text = titleNew
+        tvCreateNewEx.text = titleNewEx
+
+        // 클릭 동작 설정
         tvAddExisting.setOnClickListener {
             bottomSheetDialog.dismiss()
-
-            // 앨범 목록 다이얼로그 호출
-            AlbumSelectDialog(
-                addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
-                onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
-                    // 새로 선택된 앨범 추가
-                    val newAlbums = selectedAlbums.filter { album ->
-                        addedAlbums.none { it.id == album.id }
-                    }
-                    addedAlbums.addAll(newAlbums)
-
-                    // 선택 해제된 앨범 제거
-                    addedAlbums.removeAll(deselectedAlbums)
-
-                    // RecyclerView 업데이트
-                    albumAdapter.submitList(addedAlbums.toList())
-
-                    // 변경된 데이터를 SharedPreferences에 저장
-                    saveAlbums()
-                }
-            ).show(supportFragmentManager, "AlbumSelectDialog")
+            onExistingClick()
         }
         tvCreateNew.setOnClickListener {
             bottomSheetDialog.dismiss()
-            CreateAlbumDialog { albumName ->
-                addNewAlbum(albumName) // 새 앨범 추가
-            }.show(supportFragmentManager, "CreateAlbumDialog")
+            onNewClick()
         }
         tvCancel.setOnClickListener { bottomSheetDialog.dismiss() }
+
+        bottomSheetDialog.show()
+    }
+
+    private fun setupClickListeners() {
+        // layoutSweepAddFolderContainer 클릭
+        binding.layoutSweepAddFolderContainer.setOnClickListener {
+            showCustomBottomSheetDialog(
+                titleExisting = "기존 앨범 추가하기",
+                titleExistingEx = "안드로이드의 기존 앨범을 불러옵니다.",
+                titleNew = "새 앨범 만들기",
+                titleNewEx = "안드로이드에 새로운 앨범을 생성합니다.",
+                onExistingClick = {
+                    // 기존 앨범 선택 동작
+                    AlbumSelectDialog(
+                        addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
+                        onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
+                            // 새로 선택된 앨범 추가
+                            val newAlbums = selectedAlbums.filter { album ->
+                                addedAlbums.none { it.id == album.id }
+                            }
+                            addedAlbums.addAll(newAlbums)
+
+                            // 선택 해제된 앨범 제거
+                            addedAlbums.removeAll(deselectedAlbums)
+
+                            // RecyclerView 업데이트
+                            albumAdapter.submitList(addedAlbums.toList())
+
+                            // 변경된 데이터를 SharedPreferences에 저장
+                            saveAlbums()
+                        }
+                    ).show(supportFragmentManager, "AlbumSelectDialog")
+                },
+                onNewClick = {
+                    // 새 앨범 만들기 동작
+                    CreateAlbumDialog { albumName ->
+                        addNewAlbum(albumName) // 새 앨범 추가
+                    }.show(supportFragmentManager, "CreateAlbumDialog")
+                }
+            )
+        }
+
+        // ivSweepMemo 클릭
+        binding.ivSweepMemo.setOnClickListener {
+            showCustomBottomSheetDialog(
+                titleExisting = "텍스트로 저장하기",
+                titleExistingEx = "사진 속 텍스트만 보관 후, 기존 사진첩에서 삭제합니다.",
+                titleNew = "사진으로 저장하기",
+                titleNewEx = "사진을 앱 메모장에 저장 후, 기존 사진첩에서 삭제합니다.",
+                onExistingClick = {
+                    // 기존 메모 선택 동작
+                    showMemoBottomSheetDialog()
+                },
+                onNewClick = {
+                    // 새 메모 작성 동작
+                    showToast("사진으로 메모 작성")
+                }
+            )
+        }
+    }
+
+    private fun showMemoBottomSheetDialog() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_memo, null)
+        bottomSheetDialog.setContentView(view)
+
+        // 폴더 추가 클릭 리스너
+        val layoutMemoAddFolder: LinearLayout = view.findViewById(R.id.layout_memo_add_folder)
+        layoutMemoAddFolder.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            // CreateFolderDialog 호출
+            CreateFolderDialog(
+                title = "새 폴더 추가하기",
+                explanation = "폴더를 만들고 사진을 저장합니다.",
+                confirmText = "추가 후 저장",
+                hint = "추가할 폴더 이름을 입력해주세요.",
+                onFolderCreated = { folderName ->
+                    showToast("$folderName 폴더가 생성되었습니다.")
+                    // 폴더 생성 후 추가 로직 처리 (ex. RecyclerView 갱신)
+                }
+            ).show(supportFragmentManager, "CreateFolderDialog")
+        }
+
+        // 취소 클릭 리스너
+        val tvMemoCancel: TextView = view.findViewById(R.id.tv_memo_cancel)
+        tvMemoCancel.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        // RecyclerView 설정
+        val recyclerView: RecyclerView = view.findViewById(R.id.rv_add_memo_folder_list)
+        val adapter = SweepMemoFolderRVA { folder ->
+            // 선택한 폴더 처리 동작
+            showToast("${folder.name} 선택됨")
+        }
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // 폴더 데이터 설정 (임시 데이터)
+        val dummyFolders = listOf(
+            MemoFolderList("폴더 1"),
+            MemoFolderList("폴더 2"),
+            MemoFolderList("폴더 3"),
+            MemoFolderList("폴더 3"),
+            MemoFolderList("폴더 3"),
+            MemoFolderList("폴더 3"),
+            MemoFolderList("폴더 3"),
+            MemoFolderList("폴더 3"),
+            MemoFolderList("폴더 3"),
+        )
+        adapter.submitList(dummyFolders)
 
         bottomSheetDialog.show()
     }
@@ -586,13 +741,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             addedAlbums.clear()
             addedAlbums.addAll(restoredAlbums)
             albumAdapter.submitList(addedAlbums.toList())
-        }
-    }
-
-
-    private fun setupAddFolderContainer() {
-        binding.layoutSweepAddFolderContainer.setOnClickListener {
-            showAlbumBottomSheet() // 바텀시트 다이얼로그 호출
         }
     }
 
