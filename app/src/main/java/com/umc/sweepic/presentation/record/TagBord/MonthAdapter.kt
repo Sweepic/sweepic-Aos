@@ -17,24 +17,28 @@ class MonthAdapter(
     inner class MonthViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val monthTextView: TextView = itemView.findViewById(R.id.monthTextView)
 
-        fun bind(month: String, isSelected: Boolean) {
+        fun bind(month: String) {
             // 월 텍스트 설정
             monthTextView.text = month
 
-            // 선택 상태에 따라 텍스트 색상 및 스타일 변경
-            if (isSelected) {
-                monthTextView.setTextColor(itemView.context.getColor(R.color.sweepic))
+            // 선택된 월에 따라 텍스트 스타일 변경
+            if (adapterPosition == selectedPosition) {
+                monthTextView.setTextColor(itemView.context.getColor(R.color.sweepic)) // 강조 색상
                 monthTextView.setTypeface(null, android.graphics.Typeface.BOLD) // 굵은 글씨
             } else {
-                monthTextView.setTextColor(itemView.context.getColor(R.color.gray_line))
+                monthTextView.setTextColor(itemView.context.getColor(R.color.gray_line)) // 기본 색상
                 monthTextView.setTypeface(null, android.graphics.Typeface.NORMAL) // 일반 글씨
             }
 
             // 클릭 이벤트 설정
             itemView.setOnClickListener {
-                onMonthSelected(month) // 클릭된 월 전달
-                selectedPosition = adapterPosition // 선택된 위치 업데이트
-                notifyDataSetChanged() // RecyclerView 갱신
+                if (selectedPosition != adapterPosition) { // 선택된 위치가 변경된 경우만 갱신
+                    val previousPosition = selectedPosition
+                    selectedPosition = adapterPosition
+                    notifyItemChanged(previousPosition) // 이전 선택된 항목 갱신
+                    notifyItemChanged(selectedPosition) // 현재 선택된 항목 갱신
+                    onMonthSelected(month) // 선택된 월 전달
+                }
             }
         }
     }
@@ -47,7 +51,7 @@ class MonthAdapter(
     }
 
     override fun onBindViewHolder(holder: MonthViewHolder, position: Int) {
-        holder.bind(months[position], position == selectedPosition)
+        holder.bind(months[position])
     }
 
     override fun getItemCount(): Int = months.size

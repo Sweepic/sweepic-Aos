@@ -35,6 +35,9 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
     private val imagesByDate = mutableMapOf<String, MutableList<String>>()
     private val tagsByDate = mutableMapOf<String, List<String>>()
 
+    private var selectedYear: String? = null
+    private var selectedMonth: String? = null
+
 
     override fun initObserver() {
         // 필요하면 데이터 관찰 추가
@@ -77,6 +80,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         monthAdapter = MonthAdapter(months) { selectedMonth ->
             // 월 선택 시 로직 처리
             Log.d("TagBoardFragment", "Selected month: $selectedMonth")
+            onMonthSelected(selectedMonth)
         }
 
         binding.rcMonth.apply {
@@ -178,7 +182,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
 
 
     private fun generateTagsForDate(date: String): List<String> {
-        return listOf("#Tag1", "#Tag2", "#Tag3") // 예제 태그
+        return listOf("#잠실", "#지은", "#인하대학교") // 예제 태그
     }
 
     override fun onRequestPermissionsResult(
@@ -270,11 +274,49 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         }
     }
 
-    private fun updateYear(selectedYear: String) {
-        binding.tvYear.text = selectedYear
-        Log.d("TagBoardFragment", "Selected Year: $selectedYear")
-        filterImagesByYear(selectedYear) // 선택된 연도로 필터링
+    private fun updateYear(year: String) {
+        selectedYear = year
+        binding.tvYear.text = year
+        filterImagesByYearAndMonth(selectedYear, selectedMonth)
     }
+
+    private fun onMonthSelected(month: String) {
+        selectedMonth = month.padStart(2, '0')
+        filterImagesByYearAndMonth(selectedYear, selectedMonth)
+    }
+
+    private fun filterImagesByYearAndMonth(year: String?, month: String?) {
+        val formattedMonth = month?.padStart(2, '0') // "1" → "01", "6" → "06"
+
+        // 이미지 및 태그 데이터 필터링
+        val filteredImages = imagesByDate.filter { (dateKey, _) ->
+            val parts = dateKey.split("-") // 예: "2024-06월 15일"
+            if (parts.size < 2) return@filter false // 예외 방지
+
+            val dateYear = parts[0] // "2024"
+            val dateMonth = parts[1].split("월")[0].trim().padStart(2, '0') // "06"
+
+            (year == null || dateYear == year) && (formattedMonth == null || dateMonth == formattedMonth)
+        }
+
+        val filteredTags = tagsByDate.filter { (dateKey, _) ->
+            val parts = dateKey.split("-")
+            if (parts.size < 2) return@filter false // 예외 방지
+
+            val dateYear = parts[0]
+            val dateMonth = parts[1].split("월")[0].trim().padStart(2, '0')
+
+            (year == null || dateYear == year) && (formattedMonth == null || dateMonth == formattedMonth)
+        }
+
+        Log.d("TagBoardFragment", "필터링된 연도: $year, 월: $month")
+        Log.d("TagBoardFragment", "필터링된 이미지 개수: ${filteredImages.size}")
+        Log.d("TagBoardFragment", "필터링된 태그 개수: ${filteredTags.size}")
+
+        // RecyclerView 업데이트
+        setupRecyclerView(filteredImages, filteredTags)
+    }
+
 
     private fun getAvailableYears(): List<String> {
         val projection = arrayOf(
