@@ -55,4 +55,9 @@ class MonthAdapter(
     }
 
     override fun getItemCount(): Int = months.size
+
+    fun clearSelection() {
+        selectedPosition = -1
+        notifyDataSetChanged()
+    }
 }

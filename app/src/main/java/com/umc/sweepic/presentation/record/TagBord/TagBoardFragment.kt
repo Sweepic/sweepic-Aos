@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.net.Uri
+import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
@@ -18,6 +19,8 @@ import android.widget.PopupMenu
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentTagBoardBinding
@@ -173,7 +176,25 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         imagesByDate: Map<String, List<String>>,
         tagsByDate: Map<String, List<String>>
     ) {
-        rvAdapter = ImgGroupRVA(imagesByDate, tagsByDate)
+        rvAdapter = ImgGroupRVA(imagesByDate, tagsByDate) { date ->
+            val bundle = Bundle().apply {
+                putString("date", date)
+            }
+
+            // 부모 Fragment (`recordFragment`)의 `NavController` 가져오기
+            val parentNavController = requireActivity()
+                .supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment) // 네비게이션 호스트 Fragment 찾기
+                ?.let { it as? NavHostFragment } // NavHostFragment로 변환
+                ?.navController
+
+            if (parentNavController != null) {
+                Log.d("TagBoardFragment", "Navigating to detailImgFragment with date: $date")
+                parentNavController.navigate(R.id.action_recordFragment_to_detailImgFragment, bundle)
+            } else {
+                Log.e("TagBoardFragment", "NavController is null, cannot navigate")
+            }
+        }
 
         // 태그보드 RecyclerView 설정
         binding.rcTagboard.layoutManager = LinearLayoutManager(requireContext())
@@ -276,7 +297,9 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
 
     private fun updateYear(year: String) {
         selectedYear = year
+        selectedMonth = null
         binding.tvYear.text = year
+        monthAdapter.clearSelection()
         filterImagesByYearAndMonth(selectedYear, selectedMonth)
     }
 
@@ -364,10 +387,10 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         setupRecyclerView(filteredImages, filteredTags)
     }
 
-
     companion object {
         fun newInstance(): TagBoardFragment {
             return TagBoardFragment()
         }
     }
+
 }
