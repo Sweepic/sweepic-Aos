@@ -20,6 +20,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.Sweepic"
         tools:targetApi="31">
         <activity

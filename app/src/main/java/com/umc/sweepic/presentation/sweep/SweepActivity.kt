@@ -29,7 +29,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -40,20 +39,19 @@ import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
 import com.umc.sweepic.presentation.MainActivity
 import com.umc.sweepic.presentation.base.BaseActivity
-import com.umc.sweepic.presentation.record.memo.MemoFolder
 import com.umc.sweepic.presentation.sweep.adapter.AlbumListRVA
-import com.umc.sweepic.presentation.sweep.adapter.MemoFolderList
 import com.umc.sweepic.presentation.sweep.adapter.SweepMemoFolderRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepVPA
 import com.umc.sweepic.presentation.sweep.dialog.AlbumSelectDialog
 import com.umc.sweepic.presentation.sweep.dialog.CreateAlbumDialog
 import com.umc.sweepic.presentation.sweep.dialog.CreateFolderDialog
+import com.umc.sweepic.presentation.sweep.dialog.QuitChallengeDialog
 import com.umc.sweepic.presentation.sweep.dialog.SweepTagDialog
+import com.umc.sweepic.util.extension.setOnSingleClickListener
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.math.abs
 
 @AndroidEntryPoint
 class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep) {
@@ -61,7 +59,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private lateinit var pagerAdapter: SweepVPA
     private lateinit var albumAdapter: AlbumListRVA
     private val moveViewModel: MoveViewModel by viewModels()
-    private val viewModel: TrashViewModel by viewModels()
+    private val viewModel: SweepViewModel by viewModels()
     private val albumViewModel: AlbumViewModel by viewModels()
     private val currentImages = mutableListOf<Gallery>()
     private lateinit var deletePermissionLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -101,6 +99,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         setupTrashCountObserver()
         setupAlbumRecyclerView()
         setupClickListeners()
+        setupQuitButton()
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -487,56 +486,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
-//    private fun setupFolderContainerClick() {
-//        binding.layoutSweepAddFolderContainer.setOnClickListener {
-//            showAlbumBottomSheet()
-//        }
-//    }
-//
-//    private fun showAlbumBottomSheet() {
-//        val bottomSheetDialog = BottomSheetDialog(this)
-//        val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_album, null)
-//        bottomSheetDialog.setContentView(view)
-//
-//        val tvAddExisting: TextView = view.findViewById(R.id.tv_add_existing_album)
-//        val tvCreateNew: TextView = view.findViewById(R.id.tv_create_new_album)
-//        val tvCancel: TextView = view.findViewById(R.id.tv_cancel)
-//
-//        tvAddExisting.setOnClickListener {
-//            bottomSheetDialog.dismiss()
-//
-//            // 앨범 목록 다이얼로그 호출
-//            AlbumSelectDialog(
-//                addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
-//                onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
-//                    // 새로 선택된 앨범 추가
-//                    val newAlbums = selectedAlbums.filter { album ->
-//                        addedAlbums.none { it.id == album.id }
-//                    }
-//                    addedAlbums.addAll(newAlbums)
-//
-//                    // 선택 해제된 앨범 제거
-//                    addedAlbums.removeAll(deselectedAlbums)
-//
-//                    // RecyclerView 업데이트
-//                    albumAdapter.submitList(addedAlbums.toList())
-//
-//                    // 변경된 데이터를 SharedPreferences에 저장
-//                    saveAlbums()
-//                }
-//            ).show(supportFragmentManager, "AlbumSelectDialog")
-//        }
-//        tvCreateNew.setOnClickListener {
-//            bottomSheetDialog.dismiss()
-//            CreateAlbumDialog { albumName ->
-//                addNewAlbum(albumName) // 새 앨범 추가
-//            }.show(supportFragmentManager, "CreateAlbumDialog")
-//        }
-//        tvCancel.setOnClickListener { bottomSheetDialog.dismiss() }
-//
-//        bottomSheetDialog.show()
-//    }
-
     private fun showCustomBottomSheetDialog(
         titleExisting: String,
         titleExistingEx: String,
@@ -665,24 +614,18 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         val recyclerView: RecyclerView = view.findViewById(R.id.rv_add_memo_folder_list)
         val adapter = SweepMemoFolderRVA { folder ->
             // 선택한 폴더 처리 동작
-            showToast("${folder.name} 선택됨")
+            showToast("${folder.folderName} 선택됨")
         }
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 폴더 데이터 설정 (임시 데이터)
-        val dummyFolders = listOf(
-            MemoFolderList("폴더 1"),
-            MemoFolderList("폴더 2"),
-            MemoFolderList("폴더 3"),
-            MemoFolderList("폴더 3"),
-            MemoFolderList("폴더 3"),
-            MemoFolderList("폴더 3"),
-            MemoFolderList("폴더 3"),
-            MemoFolderList("폴더 3"),
-            MemoFolderList("폴더 3"),
-        )
-        adapter.submitList(dummyFolders)
+        // 🔥 ViewModel의 데이터를 관찰하여 RecyclerView 업데이트
+        viewModel.folderList.observe(this) { folderList ->
+            adapter.submitList(folderList)
+        }
+
+        // 🔥 API 호출하여 폴더 목록 가져오기
+        viewModel.fetchFolderList()
 
         bottomSheetDialog.show()
     }
@@ -782,10 +725,42 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
-
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
+    private fun setupQuitButton() {
+        binding.tvSweepQuit.setOnSingleClickListener {
+            showQuitConfirmationDialog()
+        }
+    }
+
+    private fun showQuitConfirmationDialog() {
+        val trashCount = TrashRepository.getAllTrashed().size
+
+        if (trashCount == 0) {
+            // trashCount가 0일 경우 Activity 종료
+            finish()
+            return
+        }
+
+        // trashCount가 0이 아닐 경우 다이얼로그 표시
+        QuitChallengeDialog(
+            title = "휴지통 속 ${trashCount}장의 사진을\n비우고 챌린지를 그만할까요?",
+            explanation = "휴지통을 비우고 다음에 다시 도전할 수 있어요!",
+            confirmText = "그만하기",
+            cancelText = "계속하기",
+            onConfirm = {
+                finish() // 현재 Activity 종료
+            },
+            onCancel = {
+                // 추가 동작 필요 시 작성
+                showToast("계속하기를 선택했습니다.")
+            }
+        ).show(supportFragmentManager, "QuitChallengeDialog")
+    }
+
+
 
     // 태그 관련 코드 정리
     private fun setupTags() {

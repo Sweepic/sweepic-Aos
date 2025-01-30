@@ -19,6 +19,7 @@
             style="@style/TextAppearance.Sweepic.Content"
             android:textSize="17sp"
             android:textColor="@color/sw_bk"
+            android:gravity="center"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

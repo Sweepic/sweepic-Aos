@@ -6,10 +6,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.databinding.ItemAddMemoFolderBinding
+import com.umc.sweepic.domain.model.response.sweep.SweepMemoListModel
 
 class SweepMemoFolderRVA(
-    private val onFolderClick: (MemoFolderList) -> Unit
-) : ListAdapter<MemoFolderList, SweepMemoFolderRVA.MemoFolderViewHolder>(DiffCallback()) {
+    private val onFolderClick: (SweepMemoListModel.MemoFolderModel) -> Unit
+) : ListAdapter<SweepMemoListModel.MemoFolderModel, SweepMemoFolderRVA.MemoFolderViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoFolderViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -25,23 +26,22 @@ class SweepMemoFolderRVA(
         private val binding: ItemAddMemoFolderBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(folder: MemoFolderList) {
-            binding.tvAddMemoFolderName.text = folder.name
+        fun bind(folder: SweepMemoListModel.MemoFolderModel) {
+            binding.tvAddMemoFolderName.text = folder.folderName
             binding.root.setOnClickListener {
                 onFolderClick(folder)
             }
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<MemoFolderList>() {
-        override fun areItemsTheSame(oldItem: MemoFolderList, newItem: MemoFolderList): Boolean {
-            return oldItem.name == newItem.name
+    class DiffCallback : DiffUtil.ItemCallback<SweepMemoListModel.MemoFolderModel>() {
+        override fun areItemsTheSame(oldItem: SweepMemoListModel.MemoFolderModel, newItem: SweepMemoListModel.MemoFolderModel): Boolean {
+            return oldItem.folderId == newItem.folderId
         }
 
-        override fun areContentsTheSame(oldItem: MemoFolderList, newItem: MemoFolderList): Boolean {
+        override fun areContentsTheSame(oldItem: SweepMemoListModel.MemoFolderModel, newItem: SweepMemoListModel.MemoFolderModel): Boolean {
             return oldItem == newItem
         }
     }
 }
-data class MemoFolderList(val name: String)
 
