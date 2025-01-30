@@ -11,7 +11,7 @@
         android:id="@+id/tv_onboarding_step1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Step 2"
+        android:text="Step 4"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/tv_onboarding_step2"
@@ -38,7 +38,7 @@
         android:id="@+id/tv_onboarding_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="김지형님,\nSweepic은 사진 정리를 위해\n사진 접근 권한을 요청합니다.\n'모두 허용'을 선택하시면\n원활한 서비스 이용이 가능합니다."
+        android:text="김지형님,\n실시간으로 사진이 대량 추가되거나\n새로운 챌린지가 생긴 경우\n알림을 보낼게요! "
         app:layout_constraintTop_toBottomOf="@id/tv_onboarding_step1"
         app:layout_constraintStart_toStartOf="parent"
         android:textColor="@color/sw_bk"
@@ -47,20 +47,6 @@
         android:textStyle="bold"
         android:layout_marginStart="16dp"/>
 
-    <TextView
-        android:id="@+id/tvPermissionError"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="사진 접근 권한이 필요합니다."
-        android:textSize="12sp"
-        android:textColor="@color/error"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_title"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="10dp" />
-
-    <!-- 다음 버튼 -->
     <TextView
         android:id="@+id/btn_onboarding_next"
         android:layout_width="match_parent"
@@ -73,5 +59,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

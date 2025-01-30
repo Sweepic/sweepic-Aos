@@ -34,8 +34,8 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/ic_kakao"
-        android:layout_marginStart="95dp"
-        app:layout_constraintStart_toStartOf="@id/kakaoLoginLayout"
+        app:layout_constraintEnd_toStartOf="@id/tv_login_kakao"
+        android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="@id/kakaoLoginLayout"
         app:layout_constraintBottom_toBottomOf="@id/kakaoLoginLayout"/>
 
@@ -46,10 +46,10 @@
         android:text="카카오로 시작하기"
         android:textColor="@color/sw_bk"
         android:textSize="14sp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintStart_toEndOf="@id/iv_login_kakao"
+        app:layout_constraintStart_toStartOf="@id/kakaoLoginLayout"
         app:layout_constraintTop_toTopOf="@id/kakaoLoginLayout"
         app:layout_constraintBottom_toBottomOf="@id/kakaoLoginLayout"
+        app:layout_constraintEnd_toEndOf="@id/kakaoLoginLayout"
         android:textStyle="bold" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -72,8 +72,8 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_naver"
-            android:layout_marginStart="95dp"
-            app:layout_constraintStart_toStartOf="@id/naverLoginLayout"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@id/tv_login_naver"
             app:layout_constraintTop_toTopOf="@id/naverLoginLayout"
             app:layout_constraintBottom_toBottomOf="@id/naverLoginLayout"/>
 
@@ -86,7 +86,8 @@
             android:text="네이버로 시작하기"
             android:textColor="@color/sw_bk"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/iv_login_naver"
+            app:layout_constraintStart_toStartOf="@id/naverLoginLayout"
+            app:layout_constraintEnd_toEndOf="@id/naverLoginLayout"
             app:layout_constraintTop_toTopOf="@id/naverLoginLayout"
             app:layout_constraintBottom_toBottomOf="@id/naverLoginLayout"
             android:textStyle="bold" />
@@ -111,8 +112,8 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_google"
-            android:layout_marginStart="101.5dp"
-            app:layout_constraintStart_toStartOf="@id/googleLoginLayout"
+            app:layout_constraintEnd_toStartOf="@id/tv_login_google"
+            android:layout_marginEnd="8dp"
             app:layout_constraintTop_toTopOf="@id/googleLoginLayout"
             app:layout_constraintBottom_toBottomOf="@id/googleLoginLayout"/>
 
@@ -125,7 +126,8 @@
             android:gravity="center"
             android:textColor="@color/sw_bk"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/iv_login_google"
+            app:layout_constraintStart_toStartOf="@id/googleLoginLayout"
+            app:layout_constraintEnd_toEndOf="@id/googleLoginLayout"
             app:layout_constraintTop_toTopOf="@id/googleLoginLayout"
             app:layout_constraintBottom_toBottomOf="@id/googleLoginLayout"
             android:textStyle="bold" />

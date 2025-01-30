@@ -11,7 +11,7 @@
         android:id="@+id/tv_onboarding_step1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Step 1"
+        android:text="Step 3"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/tv_onboarding_step2"
@@ -33,12 +33,12 @@
         android:textSize="13sp" />
 
 
-    <!--스텝1 타이틀 문구-->
+    <!--스텝3 타이틀 문구-->
     <TextView
         android:id="@+id/tv_onboarding_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="환영합니다!\n이름을 설정해주세요!"
+        android:text="김지형님,\n사진을 몇 장까지 정리하고 싶으세요?"
         app:layout_constraintTop_toBottomOf="@id/tv_onboarding_step1"
         app:layout_constraintStart_toStartOf="parent"
         android:textColor="@color/sw_bk"
@@ -47,12 +47,12 @@
         android:textStyle="bold"
         android:layout_marginStart="16dp"/>
 
-    <!--이름 작성 칸-->
+    <!--목표 장수 설정 칸-->
     <TextView
-        android:id="@+id/tv_onboarding_name"
+        android:id="@+id/tv_onboarding_targetnum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="이름"
+        android:text="목표 장수 설정"
         android:textColor="@color/sw_gray2"
         android:textSize="13sp"
         android:layout_marginStart="16dp"
@@ -60,63 +60,45 @@
         app:layout_constraintTop_toBottomOf="@id/tv_onboarding_title"
         android:layout_marginTop="20dp" />
 
-    <FrameLayout
-        android:id="@+id/namelayout"
+
+    <EditText
+        android:id="@+id/et_onboarding_targetnum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_targetnum"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_name">
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/sw_gray2"
+        android:maxLength="15"
+        android:textSize="16sp"
+        android:hint="숫자만 입력할 수 있습니다."
+        android:layout_marginTop="10dp"
+        />
 
-        <EditText
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:id="@+id/et_onboarding_name"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:backgroundTint="@color/sw_gray2"
-            android:padding="12dp"
-            android:textSize="16sp"
-            android:maxLength="15"
-            android:inputType="text" />
+    <ImageView
+        android:id="@+id/ic_error"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/et_onboarding_targetnum"
+        android:layout_marginBottom="20dp"
+        android:layout_width="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:src="@drawable/ic_error">
 
-        <!-- 글자수 표시 -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp">
+    </ImageView>
 
-            <!-- 글자 수 카운트 -->
-            <TextView
-                android:id="@+id/tv_name_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0/10"
-                android:textSize="13sp"
-                android:textColor="@color/sw_gray2"
-                android:layout_marginEnd="10dp" />
-
-            <ImageView
-                android:id="@+id/ic_error"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_error"
-                android:visibility="gone"/>
-
-        </LinearLayout>
-
-    </FrameLayout>
 
     <TextView
-        android:id="@+id/tv_name_error"
+        android:id="@+id/tv_number_error"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="13sp"
         android:textColor="#FF4A4A"
         android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@id/namelayout"
+        app:layout_constraintTop_toBottomOf="@id/et_onboarding_targetnum"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp" />
