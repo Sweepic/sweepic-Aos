@@ -14,6 +14,23 @@
         android:id="@+id/recordFragment"
         android:name="com.umc.sweepic.presentation.record.RecordFragment"
         android:label="RecordFragment"
-        tools:layout="@layout/fragment_record"/>
+        tools:layout="@layout/fragment_record">
+
+        <action
+            android:id="@+id/action_recordFragment_to_detailImgFragment"
+            app:destination="@id/detailImgFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/tagBoardFragment"
+        android:name="com.umc.sweepic.presentation.record.TagBord.TagBoardFragment"
+        android:label="TagBoardFragment"
+        tools:layout="@layout/fragment_tag_board">
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailImgFragment"
+        android:name="com.umc.sweepic.presentation.record.TagBord.DetailImgFragment"
+        android:label="DetailImgFragment"
+        tools:layout="@layout/fragment_detail_img"/>
 
 </navigation>

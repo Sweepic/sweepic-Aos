@@ -16,7 +16,6 @@
             android:layout_marginTop="20dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
             android:background="@drawable/shape_rect_5_black_line">
 
             <EditText
@@ -53,8 +52,7 @@
             android:layout_weight="1"
             android:scrollbars="vertical"
             android:clipToPadding="false"
-            tools:listitem="@layout/item_img_group"
-            android:padding="16dp"/>
+            tools:listitem="@layout/item_img_group"/>
 
         <!-- 연도 및 월 바 -->
         <androidx.constraintlayout.widget.ConstraintLayout
