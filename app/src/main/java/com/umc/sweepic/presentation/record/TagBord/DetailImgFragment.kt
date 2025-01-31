@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
@@ -32,19 +33,23 @@ class DetailImgFragment : Fragment(R.layout.fragment_detail_img) {
 
         // 전달받은 데이터 가져오기
         date = arguments?.getString("date")
-        Log.d("DetailImgFragment", "Received date: $date")
         images = arguments?.getStringArrayList("images") ?: emptyList()
         tags = arguments?.getStringArrayList("tags") ?: emptyList()
 
         // 날짜 표시
         binding.tvDate.text = date
+
         // 태그 RecyclerView 설정
         binding.rcChip.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rcChip.adapter = ChipAdapter(tags ?: emptyList())
+        binding.rcChip.adapter = ChipAdapter(tags ?: emptyList(), isDetail = true)
 
         // ViewPager2 어댑터 설정 (이미지 슬라이드)
         binding.viewPager.adapter = DetailImgPagerAdapter(images ?: emptyList())
 
+        // btn_back 클릭 시 뒤로 가기 기능 추가
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         // RecyclerView 설정
         setupRecyclerViews()

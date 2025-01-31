@@ -6,11 +6,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.umc.sweepic.R
 
-class ChipAdapter(private val chipList: List<String>) :
+class ChipAdapter(private val chipList: List<String>, private val isDetail: Boolean) :
     RecyclerView.Adapter<ChipAdapter.ChipViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChipViewHolder {
-        val chip = LayoutInflater.from(parent.context).inflate(R.layout.item_chip, parent, false) as Chip
+        val layoutId = if (isDetail) R.layout.item_detail_chip else R.layout.item_chip
+        val chip = LayoutInflater.from(parent.context).inflate(layoutId, parent, false) as Chip
         return ChipViewHolder(chip)
     }
 

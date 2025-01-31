@@ -52,14 +52,14 @@ class ImgGroupRVA(
                 LinearLayoutManager.HORIZONTAL,
                 false
             )
-            chipRecyclerView.adapter = ChipAdapter(tags)
+            chipRecyclerView.adapter = ChipAdapter(tags, isDetail = false)
 
             // 이미지 RecyclerView 설정
             val spanCount = calculateSpanCount(itemView.context, 64)
             recyclerView.layoutManager = GridLayoutManager(itemView.context, spanCount)
             recyclerView.adapter = ImgAdapter(images)
 
-            // ✅ btn_next 클릭 시 DetailImgFragment 이동
+            // btn_next 클릭 시 DetailImgFragment 이동
             btnNext.setOnClickListener {
                 Log.d("ImgGroupRVA", "btn_next clicked, navigating with date: $date")
                 onItemClick(date, images, tags)
