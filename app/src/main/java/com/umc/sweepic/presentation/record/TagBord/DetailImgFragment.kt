@@ -38,6 +38,13 @@ class DetailImgFragment : Fragment(R.layout.fragment_detail_img) {
 
         // 날짜 표시
         binding.tvDate.text = date
+        // 태그 RecyclerView 설정
+        binding.rcChip.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rcChip.adapter = ChipAdapter(tags ?: emptyList())
+
+        // ViewPager2 어댑터 설정 (이미지 슬라이드)
+        binding.viewPager.adapter = DetailImgPagerAdapter(images ?: emptyList())
+
 
         // RecyclerView 설정
         setupRecyclerViews()

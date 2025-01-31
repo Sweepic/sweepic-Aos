@@ -58,31 +58,43 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rc_img"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginHorizontal="16dp"
             app:layout_constraintTop_toBottomOf="@id/layout_toolbar"
-            app:layout_constraintBottom_toTopOf="@id/rc_chip"
+            app:layout_constraintBottom_toTopOf="@id/chip"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:listitem="@layout/item_img" />
+            android:padding="16dp"
+            android:layout_marginTop="20dp"/>
 
         <!-- 태그 그룹 -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rc_chip"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/chip"
+            android:background="@color/sw_gray_lightly"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="4dp"
-            app:singleLine="false"
+            android:layout_height="52dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:listitem="@layout/item_chip" />
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rc_chip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                app:singleLine="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:listitem="@layout/item_chip"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

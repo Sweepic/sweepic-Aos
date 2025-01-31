@@ -15,7 +15,7 @@ import com.umc.sweepic.R
 class ImgGroupRVA(
     private val data: Map<String, List<String>>,
     private val tagsByDate: Map<String, List<String>>,
-    private val onItemClick: (String) -> Unit) :
+    private val onItemClick: (String, List<String>, List<String>) -> Unit) :
     RecyclerView.Adapter<ImgGroupRVA.GroupViewHolder>() {
 
     private val groupedData = data.entries.toList()
@@ -42,7 +42,7 @@ class ImgGroupRVA(
         private val recyclerView: RecyclerView = itemView.findViewById(R.id.rc_img)
         private val btnNext: ImageView = itemView.findViewById(R.id.btn_next)
 
-        fun bind(date: String, images: List<String>, tags: List<String>, onItemClick: (String) -> Unit) {
+        fun bind(date: String, images: List<String>, tags: List<String>, onItemClick: (String, List<String>, List<String>) -> Unit) {
             // 날짜 설정
             dateTextView.text = date
 
@@ -62,7 +62,7 @@ class ImgGroupRVA(
             // ✅ btn_next 클릭 시 DetailImgFragment 이동
             btnNext.setOnClickListener {
                 Log.d("ImgGroupRVA", "btn_next clicked, navigating with date: $date")
-                onItemClick(date)
+                onItemClick(date, images, tags)
             }
         }
 

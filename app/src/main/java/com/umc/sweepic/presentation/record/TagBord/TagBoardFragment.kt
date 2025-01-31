@@ -176,9 +176,11 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         imagesByDate: Map<String, List<String>>,
         tagsByDate: Map<String, List<String>>
     ) {
-        rvAdapter = ImgGroupRVA(imagesByDate, tagsByDate) { date ->
+        rvAdapter = ImgGroupRVA(imagesByDate, tagsByDate) { date, images, tags ->
             val bundle = Bundle().apply {
                 putString("date", date)
+                putStringArrayList("images", ArrayList(images))
+                putStringArrayList("tags", ArrayList(tags))
             }
 
             // 부모 Fragment (`recordFragment`)의 `NavController` 가져오기
