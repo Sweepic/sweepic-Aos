@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation.challenge
+package com.umc.sweepic.presentation.challenge.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
 import com.umc.sweepic.domain.model.Challenge

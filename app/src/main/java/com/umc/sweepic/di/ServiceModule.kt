@@ -1,5 +1,6 @@
 package com.umc.sweepic.di
 
+import com.umc.sweepic.data.service.ChallengeService
 import com.umc.sweepic.data.service.TestService
 import dagger.Module
 import dagger.Provides
@@ -21,6 +22,10 @@ object ServiceModule {
         return retrofit.buildService()
     }
 
-
+    @Provides
+    @Singleton
+    fun provideChallengeService(retrofit: Retrofit): ChallengeService {
+        return retrofit.buildService()
+    }
 
 }

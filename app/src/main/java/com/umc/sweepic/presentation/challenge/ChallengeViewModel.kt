@@ -4,10 +4,22 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.umc.sweepic.R
 import com.umc.sweepic.domain.model.Challenge
+import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel
+import com.umc.sweepic.domain.model.response.challenge.CreateLocationLogicTestResponseModel
+import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ChallengeViewModel : ViewModel() {
+@HiltViewModel
+class ChallengeViewModel @Inject constructor(
+    private val repository: ChallengeRepository) : ViewModel(){
+
+    private val _locationTestResponse = MutableLiveData<CreateLocationLogicTestResponseModel?>()
+    val locationTestResponse: LiveData<CreateLocationLogicTestResponseModel?> get() = _locationTestResponse
 
     private val _newChallenges = MutableLiveData<List<Challenge>>()
     val newChallenges: LiveData<List<Challenge>> get() = _newChallenges
@@ -38,5 +50,29 @@ class ChallengeViewModel : ViewModel() {
 
         _newChallenges.value = currentNewChallenges
         _inProgressChallenges.value = currentInProgressChallenges
+    }
+
+    fun fetchChallengeLocationLogicTestChallengeCreate(request: CreateLocationLogicTestRequestModel?) {
+        if (request == null) {
+            Log.e("ChallengeViewModel", "API 요청 실패: request가 null입니다.")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                Log.d("ChallengeViewModel", "API 호출 시작: $request")
+                repository.fetchChallengeLocationLogicTestChallengeCreate(request)
+                    .onSuccess { response ->
+                        _locationTestResponse.value = response
+                        Log.d("ChallengeViewModel", "API 요청 성공: $response")
+                    }
+                    .onFailure { exception ->
+                        _locationTestResponse.value = null
+                        Log.e("ChallengeViewModel", "API 요청 실패", exception)
+                    }
+            } catch (e: Exception) {
+                Log.e("ChallengeViewModel", "API 호출 중 예외 발생", e)
+            }
+        }
     }
 }

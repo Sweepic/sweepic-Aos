@@ -3,7 +3,9 @@ package com.umc.sweepic.di
 import android.content.ContentResolver
 import android.content.Context
 import com.umc.sweepic.data.datasource.GalleryDataSource
+import com.umc.sweepic.data.datasource.challenge.ChallengeDataSource
 import com.umc.sweepic.data.datasourceImpl.sweep.GalleryDataSourceImpl
+import com.umc.sweepic.data.datasourceImpl.challenge.ChallengeDataSourceImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,4 +25,9 @@ object DataSourceModule {
     @Singleton
     fun provideGalleryDataSource(galleryDataSourceImpl: GalleryDataSourceImpl): GalleryDataSource =
         galleryDataSourceImpl
+
+    @Provides
+    @Singleton
+    fun provideChallengeDataSource(challengeDataSourceImpl: ChallengeDataSourceImpl): ChallengeDataSource =
+        challengeDataSourceImpl
 }

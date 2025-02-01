@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
+import com.umc.sweepic.presentation.challenge.adapter.ChallengeAdapter
 
 class InProgressChallengeFragment : Fragment() {
 
