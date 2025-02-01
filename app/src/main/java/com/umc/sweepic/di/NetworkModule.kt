@@ -1,8 +1,10 @@
 package com.umc.sweepic.di
 
+import android.content.SharedPreferences
 import com.umc.sweepic.SweepicApplication
 import com.umc.sweepic.R
 import com.google.gson.GsonBuilder
+import com.umc.sweepic.util.network.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,12 +39,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun providesOkHttpClient(
+        authInterceptor: AuthInterceptor // 인터셉터 주입
     ): OkHttpClient {
         val interceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
         return OkHttpClient.Builder().apply {
-
+            addInterceptor(authInterceptor) // ✅ 인증 인터셉터 추가
             addInterceptor(interceptor)
             connectTimeout(5, TimeUnit.SECONDS)
             readTimeout(5, TimeUnit.SECONDS)
@@ -62,4 +65,9 @@ object NetworkModule {
             .client(client)
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideAuthInterceptor(sharedPreferences: SharedPreferences): AuthInterceptor =
+        AuthInterceptor(sharedPreferences)
 }

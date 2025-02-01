@@ -4,12 +4,12 @@ import com.umc.sweepic.data.dto.request.CreateTextFolderRequestDto
 import java.io.Serializable
 
 data class CreateTextFolderRequestModel(
-    val base64Image: String,
-    val userId: Long,
-    val folderName: String
+    val base64_image: String,
+    val user_id: Long,
+    val folder_name: String
 ): Serializable {
     fun toCreateTextFolderRequestDto() =
         CreateTextFolderRequestDto(
-            base64Image, userId, folderName
+            base64_image, user_id, folder_name
         )
 }

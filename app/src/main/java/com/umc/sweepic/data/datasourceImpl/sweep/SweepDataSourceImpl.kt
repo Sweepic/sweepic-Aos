@@ -5,6 +5,7 @@ import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.request.CreateTextFolderRequestDto
 import com.umc.sweepic.data.dto.response.sweep.CreateImageFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateTextFolderResponseDto
+import com.umc.sweepic.data.dto.response.sweep.SaveImageMemoResponseDto
 import com.umc.sweepic.data.dto.response.sweep.SweepMemoListResponseDto
 import com.umc.sweepic.data.service.SweepService
 import okhttp3.MultipartBody
@@ -25,4 +26,11 @@ class SweepDataSourceImpl @Inject constructor(
         image: MultipartBody.Part,
     ): BaseResponse<CreateImageFolderResponseDto> =
         sweepService.fetchSweepCreateImageFolder(folderName, image)
+
+    override suspend fun fetchSweepSaveImageMemo(
+        folderId: Long,
+        image: MultipartBody.Part,
+    ): BaseResponse<SaveImageMemoResponseDto> =
+        sweepService.fetchSweepSaveImageMemo(folderId, image)
+
 }

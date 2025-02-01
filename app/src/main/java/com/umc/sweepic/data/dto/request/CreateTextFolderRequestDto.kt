@@ -1,7 +1,7 @@
 package com.umc.sweepic.data.dto.request
 
 data class CreateTextFolderRequestDto(
-    val base64Image: String,
-    val userId: Long,
-    val folderName: String
+    val base64_image: String,
+    val user_id: Long,
+    val folder_name: String
 )
