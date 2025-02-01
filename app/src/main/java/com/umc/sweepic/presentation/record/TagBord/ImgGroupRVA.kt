@@ -13,17 +13,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
 
 class ImgGroupRVA(
-    private val data: Map<String, List<String>>,
+    private var data: Map<String, List<String>>,
     private val tagsByDate: Map<String, List<String>>,
-    private val onItemClick: (String, List<String>, List<String>) -> Unit) :
-    RecyclerView.Adapter<ImgGroupRVA.GroupViewHolder>() {
+    private val onItemClick: (String, List<String>, List<String>) -> Unit,
+    private val onTagClick: (String) -> Unit
+) : RecyclerView.Adapter<ImgGroupRVA.GroupViewHolder>() {
 
     private val groupedData = data.entries.toList()
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_img_group, parent, false)
-        return GroupViewHolder(view)
+        return GroupViewHolder(view,onTagClick)
     }
 
     override fun onBindViewHolder(holder: GroupViewHolder, position: Int) {
@@ -31,18 +32,27 @@ class ImgGroupRVA(
         val formattedDate = date.split("-")[1] // "yyyy-MM월 dd일" 형식에서 MM월 dd일 추출
         val tags = tagsByDate[date] ?: emptyList()
 
-        holder.bind(formattedDate, images, tags, onItemClick)
+        holder.bind(formattedDate, images.distinct(), tags, onItemClick)
     }
 
     override fun getItemCount(): Int = groupedData.size
 
-    class GroupViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    fun updateData(newData: Map<String, List<String>>) {
+        data = newData // ✅ 기존 데이터를 변경하지 않고 새로운 데이터만 적용
+        notifyDataSetChanged() // ✅ UI 갱신
+    }
+
+    class GroupViewHolder(itemView: View, private val onTagClick: (String) -> Unit) : RecyclerView.ViewHolder(itemView) {
         private val dateTextView: TextView = itemView.findViewById(R.id.tv_date)
         private val chipRecyclerView: RecyclerView = itemView.findViewById(R.id.rc_chip)
         private val recyclerView: RecyclerView = itemView.findViewById(R.id.rc_img)
         private val btnNext: ImageView = itemView.findViewById(R.id.btn_next)
 
-        fun bind(date: String, images: List<String>, tags: List<String>, onItemClick: (String, List<String>, List<String>) -> Unit) {
+        fun bind(date: String,
+                 images: List<String>,
+                 tags: List<String>,
+                 onItemClick: (String, List<String>, List<String>) -> Unit
+        ) {
             // 날짜 설정
             dateTextView.text = date
 
@@ -52,7 +62,8 @@ class ImgGroupRVA(
                 LinearLayoutManager.HORIZONTAL,
                 false
             )
-            chipRecyclerView.adapter = ChipAdapter(tags, isDetail = false)
+
+            chipRecyclerView.adapter = ChipAdapter(tags, isDetail = false, onTagClick)
 
             // 이미지 RecyclerView 설정
             val spanCount = calculateSpanCount(itemView.context, 64)

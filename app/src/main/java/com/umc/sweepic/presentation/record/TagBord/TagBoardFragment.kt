@@ -176,27 +176,32 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         imagesByDate: Map<String, List<String>>,
         tagsByDate: Map<String, List<String>>
     ) {
-        rvAdapter = ImgGroupRVA(imagesByDate, tagsByDate) { date, images, tags ->
-            val bundle = Bundle().apply {
-                putString("date", date)
-                putStringArrayList("images", ArrayList(images))
-                putStringArrayList("tags", ArrayList(tags))
-            }
-
-            // 부모 Fragment (`recordFragment`)의 `NavController` 가져오기
-            val parentNavController = requireActivity()
-                .supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment) // 네비게이션 호스트 Fragment 찾기
-                ?.let { it as? NavHostFragment } // NavHostFragment로 변환
-                ?.navController
-
-            if (parentNavController != null) {
-                Log.d("TagBoardFragment", "Navigating to detailImgFragment with date: $date")
-                parentNavController.navigate(R.id.action_recordFragment_to_detailImgFragment, bundle)
-            } else {
-                Log.e("TagBoardFragment", "NavController is null, cannot navigate")
-            }
+        val distinctImagesByDate = imagesByDate.mapValues { (_, images) ->
+            images.distinct() // ✅ 중복 제거
         }
+
+        rvAdapter = ImgGroupRVA(
+            distinctImagesByDate,
+            tagsByDate,
+            { date, images, tags ->
+                val bundle = Bundle().apply {
+                    putString("date", date)
+                    putStringArrayList("images", ArrayList(images))
+                    putStringArrayList("tags", ArrayList(tags))
+                }
+
+                val parentNavController = requireActivity()
+                    .supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment)
+                    ?.let { it as? NavHostFragment }
+                    ?.navController
+
+                parentNavController?.navigate(R.id.action_recordFragment_to_detailImgFragment, bundle)
+            },
+            { selectedTag ->
+                onTagClicked(selectedTag)
+            }
+        )
 
         // 태그보드 RecyclerView 설정
         binding.rcTagboard.layoutManager = LinearLayoutManager(requireContext())
@@ -375,19 +380,24 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         return yearSet.sortedDescending() // 내림차순 정렬
     }
 
-    private fun filterImagesByYear(selectedYear: String) {
-        // imagesByDate에서 해당 연도에 맞는 데이터만 필터링
-        val filteredImages = imagesByDate.filter { (date, _) ->
-            date.startsWith(selectedYear) // 연도로 시작하는 데이터 필터링
+    private fun onTagClicked(selectedTag: String) {
+        Log.d("TagBoardFragment", "Clicked tag: $selectedTag")
+
+        val filteredImages = imagesByDate
+            .filterKeys { dateKey -> tagsByDate[dateKey]?.contains(selectedTag) == true }
+            .values.flatten()
+            .distinct() // ✅ 중복 방지
+
+        Log.d("TagBoardFragment", "Filtered images count: ${filteredImages.size}")
+
+        val bundle = Bundle().apply {
+            putString("selectedTag", selectedTag)
+            putStringArrayList("filteredImages", ArrayList(filteredImages))
         }
 
-        val filteredTags = tagsByDate.filter { (date, _) ->
-            date.startsWith(selectedYear)
-        }
-
-        // RecyclerView 업데이트
-        setupRecyclerView(filteredImages, filteredTags)
+        findNavController().navigate(R.id.action_recordFragment_to_tagImgFragment, bundle)
     }
+
 
     companion object {
         fun newInstance(): TagBoardFragment {
