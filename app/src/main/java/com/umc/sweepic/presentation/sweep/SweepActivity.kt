@@ -59,6 +59,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -74,6 +75,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private var pendingDeleteUri: Uri? = null
     private var pendingDeletePosition: Int? = null
     private val pendingTrashGalleries: MutableList<Gallery> = mutableListOf()
+    private var selectedUri: Uri? = null
 //    private val approvedUriSet = mutableSetOf<Uri>()
 //    private var pendingTrashImage: Gallery? = null
 //    private var pendingTrashPosition: Int? = null
@@ -116,9 +118,38 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             // 만약 첫 로딩 시점이라면 페이지 정보 갱신
             if (currentImages.isNotEmpty()) {
                 binding.vpSweepMainImg.post {
-                    val newPage = currentPage.coerceAtMost(currentImages.size - 1) // 🔥 기존 페이지 유지
-                    binding.vpSweepMainImg.setCurrentItem(newPage, false)
-                    updatePageInfo(newPage)
+                    selectedUri?.let { uri ->
+                        // currentImages 리스트에서 uri와 일치하는 항목의 인덱스 찾기
+                        val index = currentImages.indexOfFirst { it.uri.toString() == uri.toString() }
+                        if (index != -1) {
+                            binding.vpSweepMainImg.setCurrentItem(index, false)
+                            updatePageInfo(index)
+                        } else {
+                            // 만약 리스트에 없는 경우, 새 Gallery 객체를 생성해서 리스트의 맨 앞에 추가
+                            val newGallery = Gallery(
+                                uri = uri,
+                                name = "",
+                                fullName = "",
+                                mimeType = "image/jpeg",
+                                addedDate = Date(System.currentTimeMillis()),
+                                folder = "",
+                                size = 0L,
+                                width = 0,
+                                height = 0
+                            )
+                            currentImages.add(0, newGallery)
+                            pagerAdapter.notifyDataSetChanged()
+                            binding.vpSweepMainImg.setCurrentItem(0, false)
+                            updatePageInfo(0)
+                        }
+                        // 한 번 적용한 후에는 selectedUri 초기화
+                        selectedUri = null
+                    } ?: run {
+                        // 만약 전달된 URI가 없다면 기존 currentPage 유지
+                        val newPage = binding.vpSweepMainImg.currentItem.coerceAtMost(currentImages.size - 1)
+                        binding.vpSweepMainImg.setCurrentItem(newPage, false)
+                        updatePageInfo(newPage)
+                    }
                 }
             } else {
                 displayNoImagesState()
@@ -142,14 +173,13 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     override fun onResume() {
         super.onResume()
 
-        // 🔥 현재 페이지 번호 저장 (뷰페이저의 현재 위치)
-        val currentPage = binding.vpSweepMainImg.currentItem
-
-        viewModel.loadImages() // 🔥 최신 이미지 로드
-
-        binding.vpSweepMainImg.post {
-            if (currentPage in currentImages.indices) {
-                binding.vpSweepMainImg.setCurrentItem(currentPage, false) // 🔥 기존 위치 복원
+        if (selectedUri == null) {
+            val currentPage = binding.vpSweepMainImg.currentItem
+            viewModel.loadImages() // 최신 이미지 로드
+            binding.vpSweepMainImg.post {
+                if (currentPage in currentImages.indices) {
+                    binding.vpSweepMainImg.setCurrentItem(currentPage, false)
+                }
             }
         }
     }
@@ -177,6 +207,11 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             }
             pendingDeleteUri = null
             pendingDeletePosition = null
+        }
+
+        val passedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
+        if (!passedUriString.isNullOrEmpty()) {
+            selectedUri = Uri.parse(passedUriString)
         }
 
     }
