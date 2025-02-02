@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation.record.TagBord
+package com.umc.sweepic.presentation.record.tagboard
 
 import android.os.Bundle
 import android.util.Log

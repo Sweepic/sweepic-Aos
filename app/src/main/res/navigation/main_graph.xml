@@ -9,7 +9,13 @@
         android:id="@+id/challengeFragment"
         android:name="com.umc.sweepic.presentation.challenge.ChallengeFragment"
         android:label="ChallengeFragment"
-        tools:layout="@layout/fragment_challenge"/>
+        tools:layout="@layout/fragment_challenge">
+
+        <action
+            android:id="@+id/action_challengeFragment_to_myPageFragment"
+            app:destination="@id/myPageFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/recordFragment"
         android:name="com.umc.sweepic.presentation.record.RecordFragment"
@@ -26,21 +32,27 @@
     </fragment>
 
     <fragment
+        android:id="@+id/myPageFragment"
+        android:name="com.umc.sweepic.presentation.mypage.MyPageFragment"
+        android:label="MyPageFragment"
+        tools:layout="@layout/fragment_my_page"/>
+
+    <fragment
         android:id="@+id/tagBoardFragment"
-        android:name="com.umc.sweepic.presentation.record.TagBord.TagBoardFragment"
+        android:name="com.umc.sweepic.presentation.record.tagboard.TagBoardFragment"
         android:label="TagBoardFragment"
         tools:layout="@layout/fragment_tag_board">
     </fragment>
 
     <fragment
         android:id="@+id/detailImgFragment"
-        android:name="com.umc.sweepic.presentation.record.TagBord.DetailImgFragment"
+        android:name="com.umc.sweepic.presentation.record.tagboard.DetailImgFragment"
         android:label="DetailImgFragment"
         tools:layout="@layout/fragment_detail_img"/>
 
     <fragment
         android:id="@+id/tagImgFragment"
-        android:name="com.umc.sweepic.presentation.record.TagBord.TagImgFragment"
+        android:name="com.umc.sweepic.presentation.record.tagboard.TagImgFragment"
         android:label="TagImgFragment"
         tools:layout="@layout/fragment_tag_img" />
 

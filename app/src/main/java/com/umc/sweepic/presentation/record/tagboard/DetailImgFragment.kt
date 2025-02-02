@@ -1,13 +1,11 @@
-package com.umc.sweepic.presentation.record.TagBord
+package com.umc.sweepic.presentation.record.tagboard
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentDetailImgBinding

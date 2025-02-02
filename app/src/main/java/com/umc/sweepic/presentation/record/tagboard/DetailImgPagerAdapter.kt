@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation.record.TagBord
+package com.umc.sweepic.presentation.record.tagboard
 
 import android.view.LayoutInflater
 import android.view.View

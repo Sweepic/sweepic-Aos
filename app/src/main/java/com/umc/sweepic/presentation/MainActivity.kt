@@ -3,6 +3,7 @@ package com.umc.sweepic.presentation
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController

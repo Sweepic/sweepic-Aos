@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation.record.TagBord
+package com.umc.sweepic.presentation.record.tagboard
 
 import android.Manifest
 import android.app.AlertDialog
@@ -15,7 +15,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.PopupMenu
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat

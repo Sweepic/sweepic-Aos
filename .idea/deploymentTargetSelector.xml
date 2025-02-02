@@ -8,7 +8,6 @@
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=/Users/eoul/.android/avd/Pixel_8_API_34.avd" />
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\oxo_0\.android\avd\Pixel_2_API_29.avd" />
             </handle>
           </Target>
         </DropdownSelection>
