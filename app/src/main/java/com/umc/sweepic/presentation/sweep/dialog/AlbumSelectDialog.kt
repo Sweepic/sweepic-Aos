@@ -59,8 +59,10 @@ class AlbumSelectDialog(
 
         // ViewModel을 통해 앨범 목록 로드
         albumViewModel.albums.observe(viewLifecycleOwner) { albumList ->
-            // 초기 선택 상태 설정
-            selectedAlbums.addAll(albumList.filter { addedAlbums.contains(it) })
+            // addedAlbums와 id를 비교하여 초기 선택 상태 설정
+            selectedAlbums.addAll(albumList.filter { album ->
+                addedAlbums.any { it.id == album.id }
+            })
             adapter.setSelectedAlbums(selectedAlbums)
             adapter.submitList(albumList)
         }
