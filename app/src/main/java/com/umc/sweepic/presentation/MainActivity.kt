@@ -2,6 +2,7 @@ package com.umc.sweepic.presentation
 
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -14,19 +15,27 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private lateinit var navController: NavController
+
     override fun initView() {
-        initNavigator()
+        setupNavigator()
         setupBottomNavigation()
+        observeDestinationChange()
     }
 
     override fun initObserver() {
 
     }
 
-    private fun initNavigator() {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-        binding.mainBnv.setupWithNavController(navController)
+    private fun setupNavigator() {
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+
+        if (navHostFragment != null) {
+            navController = navHostFragment.navController
+            binding.mainBnv.setupWithNavController(navController)
+        } else {
+            throw IllegalStateException("NavHostFragment is null")
+        }
     }
     private fun setupBottomNavigation() {
         binding.mainBnv.setOnItemSelectedListener { menuItem ->
@@ -52,5 +61,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         fun newIntent(context: Context): Intent {
             return Intent(context, MainActivity::class.java)
         }
+    }
+
+    private fun observeDestinationChange() {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.myPageFragment -> hideNavigationBar()
+                else -> showNavigationBar()
+            }
+        }
+    }
+
+    // Navigation Bar 숨기기
+    fun hideNavigationBar() {
+        findViewById<View>(R.id.main_bnv)?.visibility = View.GONE
+    }
+
+    // Navigation Bar 표시
+    fun showNavigationBar() {
+        findViewById<View>(R.id.main_bnv)?.visibility = View.VISIBLE
     }
 }

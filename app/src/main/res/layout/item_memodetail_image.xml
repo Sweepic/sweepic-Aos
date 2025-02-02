@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="324dp"
+        android:layout_height="324dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/img_memo_imagelist"
+        android:id="@+id/iv_memoDetail_image"
+        android:layout_margin="4dp" />
+
+    <View
+
+        android:id="@+id/overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#80000000"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/iv_memoDetail_image"
+        app:layout_constraintBottom_toBottomOf="@id/iv_memoDetail_image"
+        app:layout_constraintStart_toStartOf="@id/iv_memoDetail_image"
+        app:layout_constraintEnd_toEndOf="@id/iv_memoDetail_image" />
+
+    <ImageView
+        android:id="@+id/iv_check_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_checked"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/iv_memoDetail_image"
+        app:layout_constraintBottom_toBottomOf="@id/iv_memoDetail_image"
+        app:layout_constraintStart_toStartOf="@id/iv_memoDetail_image"
+        app:layout_constraintEnd_toEndOf="@id/iv_memoDetail_image" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

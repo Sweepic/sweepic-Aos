@@ -23,6 +23,7 @@
         android:textAppearance="?attr/textAppearanceSubtitle1" />
 
     <TextView
+        android:id="@+id/tv_add_existing_album_ex"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextAppearance.Sweepic.Content.Light"
@@ -47,6 +48,7 @@
         android:textAppearance="?attr/textAppearanceSubtitle1" />
 
     <TextView
+        android:id="@+id/tv_create_new_album_ex"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextAppearance.Sweepic.Content.Light"

@@ -1,0 +1,87 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="20dp"
+    android:background="@drawable/bg_item_list"
+    >
+
+    <!-- 폴더이름 -->
+    <TextView
+        android:id="@+id/tv_memo_folder_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="카테고리"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="23dp"
+        android:layout_marginBottom="49dp"
+        android:textColor="@color/sw_gray3"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 메모 저장 날짜, 메모장 내 사진 수, 메모장 내용 미리보기 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tv_memo_folder_title">
+
+        <!-- 메모 저장 날짜 -->
+        <TextView
+        android:id="@+id/tv_memo_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2024.12.22"
+        android:textColor="@color/sw_gray2"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/tv_memo_folder_title"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+       />
+
+    <!--메모장 내 사진 수-->
+    <TextView
+        android:id="@+id/tv_memo_photo_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="n장의 사진"
+        android:textStyle="bold"
+        android:textColor="@color/sw_gray2"
+        android:textSize="13sp"
+        app:layout_constraintStart_toEndOf="@id/tv_memo_date"
+        app:layout_constraintTop_toBottomOf="@id/tv_memo_folder_title"
+        android:layout_marginStart="5dp"/>
+
+    <!--메모 내용 미리보기-->
+    <TextView
+        android:id="@+id/tv_memo_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="메모 내용내용내용"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textStyle="bold"
+        android:textColor="@color/sw_gray2"
+        android:textSize="13sp"
+        app:layout_constraintStart_toEndOf="@id/tv_memo_photo_num"
+        app:layout_constraintTop_toBottomOf="@id/tv_memo_folder_title"
+        android:layout_marginStart="5dp" />
+    </LinearLayout>
+
+    <!-- 메모장 내 사진 미리보기(제일 위에 있는 사진) -->
+    <ImageView
+        android:id="@+id/memoImage"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginEnd="16dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_record_ex"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
