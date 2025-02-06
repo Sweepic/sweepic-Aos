@@ -18,7 +18,7 @@ class AuthInterceptor @Inject constructor(
             Log.w("AuthInterceptor", "쿠키 없음, 인증 없이 요청 보냄.")
             return chain.proceed(chain.request())
         }
-        val authRequest = chain.request().newBuilder().addHeader("Cookie", "connect.sid= ${spf.getString("cookie", "connect.sid=s%3ACni--i6VN30lnlMSCvt46gOEyx6NMl7H.nO6yvfpDYjPd7vJaKgxuQ2dAhhcJWDL2xr6rwWMQtZ8")}").build()
+        val authRequest = chain.request().newBuilder().addHeader("Cookie", "connect.sid= ${spf.getString("cookie", "")}").build()
         return chain.proceed(authRequest)
     }
 }
