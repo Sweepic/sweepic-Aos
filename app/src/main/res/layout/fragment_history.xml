@@ -12,41 +12,6 @@
         android:layout_height="match_parent"
         android:background="@color/white">
 
-        <!--최상단 탭-->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_record_history"
-            android:layout_width="match_parent"
-            android:layout_height="34dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="36dp"
-
-            app:tabRippleColor="@android:color/transparent"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/bg_record_toggle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tabSelectedTextColor="@color/sweepic"
-            app:tabTextColor="@color/sw_gray2"
-            app:tabIndicator="@null">
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="히스토리"/>
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="태그보드"/>
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="메모"/>
-
-        </com.google.android.material.tabs.TabLayout>
-
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -54,7 +19,7 @@
             android:layout_marginTop="16dp"
             android:fillViewport="true"
             android:overScrollMode="never"
-            app:layout_constraintTop_toBottomOf="@id/tab_record_history"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -63,7 +28,7 @@
                 android:id="@+id/layout_record_mainhistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/tab_record_history"
+                app:layout_constraintTop_toTopOf="parent"
                 >
                 <!--월별 태그 리스트-->
                 <!--월 타이틀-->

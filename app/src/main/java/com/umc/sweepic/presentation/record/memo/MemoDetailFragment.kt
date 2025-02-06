@@ -13,7 +13,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentMemoDetailBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MemoDetailFragment : Fragment() {
     private var _binding: FragmentMemoDetailBinding? = null
     private val binding get() = _binding!!
@@ -30,33 +32,44 @@ class MemoDetailFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 전달받은 데이터 가져오기
-        val memoFolder = arguments?.getParcelable<MemoFolder>("memoFolder")
+        // ✅ 전달받은 folderId 가져오기
+        val folderId = arguments?.getLong("folderId") ?: return
 
-        memoFolder?.let {
-            binding.tvMemoDetailFolderTitle.text = it.title
-            binding.tvMemoDetailFolderContent.text = it.content ?: null
+        // ✅ ViewModel에서 폴더 상세 데이터 가져오기
+        memoFolderViewModel.fetchMemoFolderDetails(folderId)
 
-            // 이미지 리사이클러뷰 설정
-            imageAdapter = MemoDetailImageAdapter(it.imageResIds)
-            binding.rvMemoDetailImages.layoutManager =
-                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-            binding.rvMemoDetailImages.adapter = imageAdapter
+        // ✅ RecyclerView 설정
+        imageAdapter = MemoDetailImageAdapter(emptyList())
+        binding.rvMemoDetailImages.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.rvMemoDetailImages.adapter = imageAdapter
+
+        // ✅ 데이터 변경 감지 및 UI 업데이트
+        memoFolderViewModel.memoFolderDetail.observe(viewLifecycleOwner) { memoDetail ->
+            memoDetail?.let {
+                binding.tvMemoDetailFolderTitle.text = it.folderName
+                binding.tvMemoDetailFolderContent.text = it.imageText ?: ""
+
+//                // 이미지 리스트 업데이트
+//                imageAdapter.updateData(it.images.map { image -> image.imageUrl })
+            }
         }
 
-        // 뒤로가기 버튼 누르면 전 화면으로 이동
+        // ✅ 뒤로 가기 버튼 설정
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        // 메뉴 버튼 누르면 팝업 메뉴
+        // ✅ 메뉴 버튼 클릭 시 팝업 메뉴 표시
         binding.btnMenu.setOnClickListener { view ->
             showPopupMenu(view)
         }
     }
+
 
     private fun showPopupMenu(view: View) {
         val popup = PopupMenu(requireContext(), view)

@@ -1,5 +1,6 @@
 package com.umc.sweepic.di
 
+import com.umc.sweepic.data.service.MemoService
 import com.umc.sweepic.data.service.TestService
 import dagger.Module
 import dagger.Provides
@@ -21,6 +22,9 @@ object ServiceModule {
         return retrofit.buildService()
     }
 
-
-
+    @Provides
+    @Singleton
+    fun provideMemoService(retrofit: Retrofit) : MemoService {
+        return retrofit.buildService()
+    }
 }

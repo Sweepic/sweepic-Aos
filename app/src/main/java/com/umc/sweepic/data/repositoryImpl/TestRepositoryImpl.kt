@@ -14,7 +14,7 @@ class TestRepositoryImpl @Inject constructor(
     private val testService: TestService
 ) : TestRepository {
     override suspend fun fetchTest(request: TestRequest): NetworkResult<TestModel> {
-        return handleApi({testService.fetchTest(request)}) {response: BaseResponse<TestResponse> -> response.data.toTestModel()} // mapper를 통해 api 결과를 TestModel로 매핑
+        return handleApi({testService.fetchTest(request)}) {response: BaseResponse<TestResponse> -> response.success.toTestModel()} // mapper를 통해 api 결과를 TestModel로 매핑
     }
 
 }

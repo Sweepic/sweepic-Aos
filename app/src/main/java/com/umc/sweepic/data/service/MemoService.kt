@@ -1,0 +1,23 @@
+package com.umc.sweepic.data.service
+
+import com.umc.sweepic.data.dto.BaseResponse
+import com.umc.sweepic.data.dto.response.MemoFolderDetailResponseDto
+import com.umc.sweepic.data.dto.response.RecordMemoListResponseDto
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+interface MemoService {
+    @GET("memo/list")
+    suspend fun recordMemoList(): BaseResponse<RecordMemoListResponseDto>
+
+    @GET("memo/search")
+    suspend fun searchMemos(
+        @Query("keyword") keyword:String
+    ): BaseResponse<RecordMemoListResponseDto>
+
+    @GET("memo/folders/{folderId}")
+    suspend fun fetchMemoFolderDetails(
+        @Path("folderId") folderId: Long
+    ): BaseResponse<MemoFolderDetailResponseDto>
+}
