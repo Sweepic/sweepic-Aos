@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- Step 단계-->
+    <TextView
+        android:id="@+id/tv_onboarding_step1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Step 1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tv_onboarding_step2"
+        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/sw_point"
+        android:layout_marginTop="66dp"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tv_onboarding_step2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="/4"
+        android:layout_marginTop="66dp"
+        app:layout_constraintStart_toEndOf="@id/tv_onboarding_step1"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textColor="@color/sw_gray2"
+        android:textSize="13sp" />
+
+
+    <!--스텝1 타이틀 문구-->
+    <TextView
+        android:id="@+id/tv_onboarding_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="환영합니다!\n이름을 설정해주세요!"
+        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_step1"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/sw_bk"
+        android:textSize="20sp"
+        android:layout_marginTop="11dp"
+        android:textStyle="bold"
+        android:layout_marginStart="16dp"/>
+
+    <!--이름 작성 칸-->
+    <TextView
+        android:id="@+id/tv_onboarding_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="이름"
+        android:textColor="@color/sw_gray2"
+        android:textSize="13sp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_title"
+        android:layout_marginTop="20dp" />
+
+    <FrameLayout
+        android:id="@+id/namelayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_name">
+
+        <EditText
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:id="@+id/et_onboarding_name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="@color/sw_gray2"
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:maxLength="15"
+            android:inputType="text" />
+
+        <!-- 글자수 표시 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp">
+
+            <!-- 글자 수 카운트 -->
+            <TextView
+                android:id="@+id/tv_name_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0/10"
+                android:textSize="13sp"
+                android:textColor="@color/sw_gray2"
+                android:layout_marginEnd="10dp" />
+
+            <ImageView
+                android:id="@+id/ic_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_error"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_name_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:textColor="#FF4A4A"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@id/namelayout"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/btn_onboarding_next"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/sw_gray_lightly"
+        android:text="다음"
+        android:gravity="center"
+        android:textSize="13sp"
+        android:textColor="#767676"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

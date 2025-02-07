@@ -2,7 +2,9 @@ package com.umc.sweepic.presentation.sweep
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.RecoverableSecurityException
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -10,12 +12,14 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -25,29 +29,40 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
+import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
 import com.umc.sweepic.domain.model.sweep.AlbumList
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
 import com.umc.sweepic.presentation.MainActivity
 import com.umc.sweepic.presentation.base.BaseActivity
 import com.umc.sweepic.presentation.sweep.adapter.AlbumListRVA
+import com.umc.sweepic.presentation.sweep.adapter.SweepMemoFolderRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepVPA
 import com.umc.sweepic.presentation.sweep.dialog.AlbumSelectDialog
 import com.umc.sweepic.presentation.sweep.dialog.CreateAlbumDialog
+import com.umc.sweepic.presentation.sweep.dialog.CreateFolderDialog
+import com.umc.sweepic.presentation.sweep.dialog.DeletedDialog
+import com.umc.sweepic.presentation.sweep.dialog.QuitChallengeDialog
 import com.umc.sweepic.presentation.sweep.dialog.SweepTagDialog
+import com.umc.sweepic.util.extension.setOnSingleClickListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
 
 @AndroidEntryPoint
 class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep) {
@@ -55,14 +70,21 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private lateinit var pagerAdapter: SweepVPA
     private lateinit var albumAdapter: AlbumListRVA
     private val moveViewModel: MoveViewModel by viewModels()
-    private val viewModel: TrashViewModel by viewModels()
+    private val viewModel: SweepViewModel by viewModels()
     private val albumViewModel: AlbumViewModel by viewModels()
     private val currentImages = mutableListOf<Gallery>()
     private lateinit var deletePermissionLauncher: ActivityResultLauncher<IntentSenderRequest>
-    private val approvedUriSet = mutableSetOf<Uri>()
-    private var pendingTrashImage: Gallery? = null
-    private var pendingTrashPosition: Int? = null
-    private var pendingAllImages: List<Gallery>? = null
+    private lateinit var updatePermissionLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private var pendingDeleteUri: Uri? = null
+    private var pendingDeletePosition: Int? = null
+    private val pendingTrashGalleries: MutableList<Gallery> = mutableListOf()
+    private var selectedUri: Uri? = null
+    private var pendingUpdateUri: Uri? = null
+    private var pendingUpdatePath: String? = null
+//    private val approvedUriSet = mutableSetOf<Uri>()
+//    private var pendingTrashImage: Gallery? = null
+//    private var pendingTrashPosition: Int? = null
+//    private var pendingAllImages: List<Gallery>? = null
     private lateinit var updateTrashCount: () -> Unit // 리스너를 외부로 선언
     private val addedAlbums = mutableListOf<AlbumList>() // 현재 RecyclerView에 표시 중인 앨범 목록
     private var locationTag: String? = null // 장소 태그를 저장할 변수
@@ -83,72 +105,186 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     }
 
     override fun initObserver() {
+        // 여기서 ViewModel의 LiveData를 관찰
+        viewModel.imagesLiveData.observe(this) { newImages ->
+            val currentPage = binding.vpSweepMainImg.currentItem // 🔥 현재 페이지 저장
 
+            // 여기서 뷰페이저 어댑터를 업데이트
+            currentImages.clear()
+            currentImages.addAll(newImages)
+
+            // 처음 초기화 시점에 어댑터가 없다면 initViewPager()에서 생성
+            if (::pagerAdapter.isInitialized) {
+                pagerAdapter.notifyDataSetChanged()
+            }
+            // 총 개수 등 UI 업데이트
+            binding.tvSweepTotalCount.text = currentImages.size.toString()
+
+            // 만약 첫 로딩 시점이라면 페이지 정보 갱신
+            if (currentImages.isNotEmpty()) {
+                binding.vpSweepMainImg.post {
+                    selectedUri?.let { uri ->
+                        // currentImages 리스트에서 uri와 일치하는 항목의 인덱스 찾기
+                        val index = currentImages.indexOfFirst { it.uri.toString() == uri.toString() }
+                        if (index != -1) {
+                            binding.vpSweepMainImg.setCurrentItem(index, false)
+                            updatePageInfo(index)
+                        } else {
+                            // 만약 리스트에 없는 경우, 새 Gallery 객체를 생성해서 리스트의 맨 앞에 추가
+                            val newGallery = Gallery(
+                                uri = uri,
+                                name = "",
+                                fullName = "",
+                                mimeType = "image/jpeg",
+                                addedDate = Date(System.currentTimeMillis()),
+                                folder = "",
+                                size = 0L,
+                                width = 0,
+                                height = 0
+                            )
+                            currentImages.add(0, newGallery)
+                            pagerAdapter.notifyDataSetChanged()
+                            binding.vpSweepMainImg.setCurrentItem(0, false)
+                            updatePageInfo(0)
+                        }
+                        // 한 번 적용한 후에는 selectedUri 초기화
+                        selectedUri = null
+                    } ?: run {
+                        // 만약 전달된 URI가 없다면 기존 currentPage 유지
+                        val newPage = binding.vpSweepMainImg.currentItem.coerceAtMost(currentImages.size - 1)
+                        binding.vpSweepMainImg.setCurrentItem(newPage, false)
+                        updatePageInfo(newPage)
+                    }
+                }
+            } else {
+                displayNoImagesState()
+            }
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun initView() {
         requestPermissionsAndLoadImages()
         setupSwitchToggle()
         setupButtons()
         initializeViewPager()
         setupBackPressHandler()
-        setupFolderContainerClick()
         setupTrashCountObserver()
         setupAlbumRecyclerView()
-        setupAddFolderContainer()
+        setupClickListeners()
+        setupQuitButton()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (selectedUri == null) {
+            val currentPage = binding.vpSweepMainImg.currentItem
+            viewModel.loadImages() // 최신 이미지 로드
+            binding.vpSweepMainImg.post {
+                if (currentPage in currentImages.indices) {
+                    binding.vpSweepMainImg.setCurrentItem(currentPage, false)
+                }
+            }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1) 삭제 권한 승인 런처 등록
+        // (예) onCreate 안에서 launcher 초기화
         deletePermissionLauncher = registerForActivityResult(
             ActivityResultContracts.StartIntentSenderForResult()
         ) { result ->
-            if (result.resultCode == RESULT_OK) {
-                Toast.makeText(this, "삭제 권한이 승인되었습니다.", Toast.LENGTH_SHORT).show()
-
-                // 승인 후, 보관해둔 image/position으로 다시 시도
-                val image = pendingTrashImage
-                val position = pendingTrashPosition
-                if (image != null && position != null) {
-                    tryDeleteOrRequestPermission(image, position)
+            if (result.resultCode == Activity.RESULT_OK) {
+                // 만약 휴지통 삭제 대기 목록이 있다면 재시도
+                if (pendingTrashGalleries.isNotEmpty()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        retryPendingTrashDeletions()
+                    }
+                } else if (pendingDeleteUri != null && pendingDeletePosition != null) {
+                    // swipe 삭제 관련 재시도
+                    doDeleteImage(pendingDeleteUri!!, pendingDeletePosition!!)
                 }
-                pendingTrashImage = null
-                pendingTrashPosition = null
-
             } else {
-                Toast.makeText(this, "삭제 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "이미지 삭제 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
             }
+            pendingDeleteUri = null
+            pendingDeletePosition = null
         }
 
-        // 2) (선택) 초기 권한 요청: 이미지 목록 불러와서 권한 체크
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val allImages = moveViewModel.loadAllImagesDesc()
-            requestPermissionsForAllImages(allImages)
+        val passedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
+        if (!passedUriString.isNullOrEmpty()) {
+            selectedUri = Uri.parse(passedUriString)
+        }
+
+        updatePermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // 승인됨 → 다시 시도
+                val uri = pendingUpdateUri
+                val path = pendingUpdatePath
+
+                if (uri != null && path != null) {
+                    tryMoveImageToAlbum(uri, path) // 아래에서 재시도 로직
+                }
+            } else {
+                // 거부됨
+                Toast.makeText(this, "앨범 이동 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            // 사용 후 변수 초기화
+            pendingUpdateUri = null
+            pendingUpdatePath = null
+        }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun retryPendingTrashDeletions() {
+        var successfulDeletions = 0
+        val iterator = pendingTrashGalleries.iterator()
+        while (iterator.hasNext()) {
+            val gallery = iterator.next()
+            try {
+                deleteImageToMediaStoreTrash(gallery)
+                iterator.remove()  // 삭제 성공 시 목록에서 제거
+                successfulDeletions++
+            } catch (e: RecoverableSecurityException) {
+                Log.e("SweepActivity", "재시도 중 권한 요청 실패: ${gallery.uri}", e)
+                // 만약 여전히 예외가 발생하면 해당 이미지는 그대로 둡니다.
+            } catch (e: Exception) {
+                Log.e("SweepActivity", "재시도 중 삭제 실패: ${gallery.uri}", e)
+            }
+        }
+        if (successfulDeletions > 0) {
+            // 삭제 완료 후 삭제 완료 다이얼로그 표시 (원하는 경우)
+            DeletedDialog(
+                message = "사진이 지워졌습니다!",
+                warning = "지워진 사진들은 30일 이내에 '휴지통'에서 다시 복구할 수 있습니다.",
+                onOkClicked = { finish() }
+            ).show(supportFragmentManager, "TrashDeletedDialog")
         }
     }
 
-    override fun onResume() {
-        super.onResume()
 
-        // ViewPager와 어댑터 초기화 상태 확인
-        if (!::pagerAdapter.isInitialized) {
-            initializeViewPager() // 초기화가 안 되어 있으면 초기화
-        }
-
-        // 데이터를 다시 로드
-        val updatedImages = moveViewModel.loadAllImagesDesc()
-
-        // 데이터가 변경되었을 경우만 갱신
-        if (currentImages != updatedImages) {
-            currentImages.clear()
-            currentImages.addAll(updatedImages)
-
-            // ViewPager 갱신
-            pagerAdapter.notifyDataSetChanged()
-            binding.tvSweepTotalCount.text = currentImages.size.toString()
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun doDeleteImage(uri: Uri, position: Int) {
+        try {
+            val rows = contentResolver.delete(uri, null, null)
+            if (rows > 0) {
+                currentImages.removeAt(position)
+                pagerAdapter.notifyDataSetChanged()
+            }
+        } catch (e: RecoverableSecurityException) {
+            // 승인 요청
+            pendingDeleteUri = uri
+            pendingDeletePosition = position
+            val intentSender = e.userAction.actionIntent.intentSender
+            deletePermissionLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -164,18 +300,19 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     }
 
     private fun requestPermissionsAndLoadImages() {
+        // 기존과 동일 (권한 체크)
         if (hasAllPermissions()) {
-            initializeViewPager() // 권한이 있다면 ViewPager 초기화
+            // 권한이 있다면 ViewModel에 이미지 로드를 요청
+            viewModel.loadImages()
         } else {
-            // 권한 요청
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
                 if (permissions.all { it.value }) {
-                    initializeViewPager() // 권한이 승인되면 ViewPager 초기화
+                    viewModel.loadImages()
                 } else {
                     Toast.makeText(this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
-                    finish() // 권한이 거부되면 액티비티 종료
+                    finish()
                 }
             }.launch(requiredPermissions)
         }
@@ -185,48 +322,63 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun initializeViewPager() {
-        val selectedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
-        val loadedImages = moveViewModel.loadAllImagesDesc()
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun requestDeletePermission(e: RecoverableSecurityException) {
+        val intentSender = e.userAction.actionIntent.intentSender
+        val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
+        deletePermissionLauncher.launch(intentSenderRequest)
+    }
 
-        if (loadedImages.isEmpty()) {
-            displayNoImagesState()
-            return
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun deleteImageToMediaStoreTrash(gallery: Gallery) {
+        try {
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.IS_TRASHED, 1)
+            }
+            val rowsUpdated = contentResolver.update(gallery.uri, values, null, null)
+            if (rowsUpdated > 0) {
+                TrashRepository.removeFromTrash(gallery)
+                Log.d("SweepActivity", "Image moved to MediaStore trash: ${gallery.uri}")
+            } else {
+                Log.e("SweepActivity", "Failed to move image to MediaStore trash: ${gallery.uri}")
+            }
+        } catch (e: RecoverableSecurityException) {
+            throw e  // 호출자에서 처리하도록 전달
+        } catch (e: Exception) {
+            Log.e("SweepActivity", "Error deleting image: ${gallery.uri}", e)
         }
+    }
 
-        // currentImages에 로드된 이미지를 담는다
-        currentImages.clear()
-        currentImages.addAll(loadedImages)
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun deleteImagesWithPermission(images: List<Gallery>) {
+        pendingTrashGalleries.clear()  // 대기열 초기화
+        images.forEach { gallery ->
+            try {
+                deleteImageToMediaStoreTrash(gallery)
+            } catch (e: RecoverableSecurityException) {
+                pendingTrashGalleries.add(gallery)  // 삭제 실패한 이미지를 대기열에 추가
+                requestDeletePermission(e)
+            }
+        }
+    }
 
-        // ViewPager 어댑터 설정 (currentImages 사용!)
+    private fun initializeViewPager() {
+        // 기존 이미지 리스트를 기반으로 어댑터 생성
         pagerAdapter = SweepVPA(currentImages)
         binding.vpSweepMainImg.adapter = pagerAdapter
 
-        // 초기 페이지 인덱스 찾기
-        var selectedIndex = 0
-        if (!selectedUriString.isNullOrEmpty()) {
-            val foundIndex = currentImages.indexOfFirst { it.uri.toString() == selectedUriString }
-            if (foundIndex >= 0) selectedIndex = foundIndex
-        }
-
-        // ViewPager 초기 위치 & UI 갱신
-        binding.vpSweepMainImg.setCurrentItem(selectedIndex, false)
-        updatePageInfo(selectedIndex)
-        binding.tvSweepTotalCount.text = currentImages.size.toString()
-
-        // 스와이프 제스처: 위로 스와이프 → 삭제
+        // 초기 위치, 스와이프 제스처, 터치 네비게이션 등 설정
         setupSwipeToTrashGesture()
-
-        // 좌우 터치로 이전/다음 페이지
         setupTouchNavigation()
 
-        // 페이지 변경 콜백
-        binding.vpSweepMainImg.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                updatePageInfo(position)
+        binding.vpSweepMainImg.registerOnPageChangeCallback(
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    updatePageInfo(position)
+                }
             }
-        })
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -313,102 +465,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             ?.start()
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun tryDeleteOrRequestPermission(image: Gallery, position: Int) {
-        val contentUri = image.uri
-
-        // 이미 승인된 URI인지 체크
-        if (approvedUriSet.contains(contentUri)) {
-            doTrashAndAnimate(position)
-            return
-        }
-
-        try {
-            doTrash(contentUri)    // MediaStore IS_TRASHED = 1
-            approvedUriSet.add(contentUri)
-            doTrashAndAnimate(position)
-        } catch (e: RecoverableSecurityException) {
-            // 아직 권한이 없음 -> 승인 요청
-            pendingTrashImage = image
-            pendingTrashPosition = position
-            requestDeletePermission(e, contentUri)
-        } catch (e: Exception) {
-            Log.e("SweepActivity", "Trash failed for uri=$contentUri", e)
-            Toast.makeText(this, "휴지통 이동 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun doTrashAndAnimate(position: Int) {
-        // 현재 position에 해당하는 View(태그 기반) 찾아서 애니메이션
-        val viewPagerItemView = binding.vpSweepMainImg.findViewWithTag<View>("view_pager_$position")
-
-        // 애니메이션 종료 후 currentImages remove -> 어댑터 갱신
-        viewPagerItemView?.animate()
-            ?.translationY(-binding.vpSweepMainImg.height.toFloat())
-            ?.setDuration(300)
-            ?.withEndAction {
-                // 1) currentImages 에서 제거
-                if (position in currentImages.indices) {
-                    currentImages.removeAt(position)
-                }
-
-                // 2) 어댑터 재설정
-                pagerAdapter = SweepVPA(currentImages)
-                binding.vpSweepMainImg.adapter = pagerAdapter
-
-                // 3) 전체 개수 갱신
-                binding.tvSweepTotalCount.text = currentImages.size.toString()
-
-                // 4) 다음 위치로 이동
-                if (currentImages.isNotEmpty()) {
-                    val nextPos = position.coerceAtMost(currentImages.size - 1)
-                    binding.vpSweepMainImg.setCurrentItem(nextPos, false)
-                    updatePageInfo(nextPos)
-                } else {
-                    displayNoImagesState()
-                }
-            }
-            ?.start()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun doTrash(uri: Uri) {
-        val values = ContentValues().apply {
-            put(MediaStore.MediaColumns.IS_TRASHED, 1)
-        }
-        val rows = contentResolver.update(uri, values, null, null)
-        Log.d("SweepActivity", "doTrash(): rowsUpdated=$rows, uri=$uri")
-
-        if (rows <= 0) {
-            throw Exception("Failed to update IS_TRASHED for $uri")
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun requestDeletePermission(e: RecoverableSecurityException, uri: Uri) {
-        val intentSender = e.userAction.actionIntent.intentSender
-        val request = IntentSenderRequest.Builder(intentSender).build()
-        deletePermissionLauncher.launch(request)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun requestPermissionsForAllImages(images: List<Gallery>) {
-        images.forEach { image ->
-            try {
-                val alreadyPersisted = contentResolver.persistedUriPermissions.any { it.uri == image.uri }
-                if (!alreadyPersisted) {
-                    Log.d("SweepActivity", "Permission not available for: ${image.uri}")
-                    // 필요하다면 SAF 로 폴더 단위 권한 요청 고려
-                } else {
-                    approvedUriSet.add(image.uri)
-                    Log.d("SweepActivity", "Permission already granted for: ${image.uri}")
-                }
-            } catch (se: SecurityException) {
-                Log.e("SweepActivity", "Failed to request permission for: ${image.uri}", se)
-            }
-        }
-    }
-
     private fun displayNoImagesState() {
         binding.tvSweepTotalCount.text = "0"
         binding.tvSweepCount.text = "0"
@@ -482,54 +538,380 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
-    private fun setupFolderContainerClick() {
-        binding.layoutSweepAddFolderContainer.setOnClickListener {
-            showAlbumBottomSheet()
-        }
-    }
-
-    private fun showAlbumBottomSheet() {
+    private fun showCustomBottomSheetDialog(
+        titleExisting: String,
+        titleExistingEx: String,
+        titleNew: String,
+        titleNewEx: String,
+        onExistingClick: () -> Unit,
+        onNewClick: () -> Unit
+    ) {
         val bottomSheetDialog = BottomSheetDialog(this)
         val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_album, null)
         bottomSheetDialog.setContentView(view)
 
         val tvAddExisting: TextView = view.findViewById(R.id.tv_add_existing_album)
+        val tvAddExistingEx: TextView = view.findViewById(R.id.tv_add_existing_album_ex)
         val tvCreateNew: TextView = view.findViewById(R.id.tv_create_new_album)
+        val tvCreateNewEx: TextView = view.findViewById(R.id.tv_create_new_album_ex)
         val tvCancel: TextView = view.findViewById(R.id.tv_cancel)
 
+        // 텍스트 설정
+        tvAddExisting.text = titleExisting
+        tvAddExistingEx.text = titleExistingEx
+        tvCreateNew.text = titleNew
+        tvCreateNewEx.text = titleNewEx
+
+        // 클릭 동작 설정
         tvAddExisting.setOnClickListener {
             bottomSheetDialog.dismiss()
-
-            // 앨범 목록 다이얼로그 호출
-            AlbumSelectDialog(
-                addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
-                onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
-                    // 새로 선택된 앨범 추가
-                    val newAlbums = selectedAlbums.filter { album ->
-                        addedAlbums.none { it.id == album.id }
-                    }
-                    addedAlbums.addAll(newAlbums)
-
-                    // 선택 해제된 앨범 제거
-                    addedAlbums.removeAll(deselectedAlbums)
-
-                    // RecyclerView 업데이트
-                    albumAdapter.submitList(addedAlbums.toList())
-
-                    // 변경된 데이터를 SharedPreferences에 저장
-                    saveAlbums()
-                }
-            ).show(supportFragmentManager, "AlbumSelectDialog")
+            onExistingClick()
         }
         tvCreateNew.setOnClickListener {
             bottomSheetDialog.dismiss()
-            CreateAlbumDialog { albumName ->
-                addNewAlbum(albumName) // 새 앨범 추가
-            }.show(supportFragmentManager, "CreateAlbumDialog")
+            onNewClick()
         }
         tvCancel.setOnClickListener { bottomSheetDialog.dismiss() }
 
         bottomSheetDialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun setupClickListeners() {
+        // layoutSweepAddFolderContainer 클릭
+        binding.layoutSweepAddFolderContainer.setOnClickListener {
+            showCustomBottomSheetDialog(
+                titleExisting = "기존 앨범 추가하기",
+                titleExistingEx = "안드로이드의 기존 앨범을 불러옵니다.",
+                titleNew = "새 앨범 만들기",
+                titleNewEx = "안드로이드에 새로운 앨범을 생성합니다.",
+                onExistingClick = {
+                    // 기존 앨범 선택 동작
+                    AlbumSelectDialog(
+                        addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
+                        onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
+                            // 현재 addedAlbums를 복제하여 작업
+                            val updatedAlbums = addedAlbums.toMutableList()
+
+                            // 새로 선택된 앨범 추가 (중복 방지)
+                            selectedAlbums.forEach { album ->
+                                if (updatedAlbums.none { it.id == album.id } ) {
+                                    updatedAlbums.add(album)
+                                }
+                            }
+                            // 해제된 앨범 제거 (ID 기준으로 제거)
+                            updatedAlbums.removeAll { album ->
+                                deselectedAlbums.any { it.id == album.id }
+                            }
+                            // in-memory 리스트와 adapter 업데이트
+                            addedAlbums.clear()
+                            addedAlbums.addAll(updatedAlbums)
+                            albumAdapter.submitList(updatedAlbums.toList())
+
+                            // 변경된 리스트를 SharedPreferences에 동기적으로 저장 (commit 사용)
+                            sharedPreferences.edit().putString("AddedAlbums", gson.toJson(updatedAlbums)).commit()
+                        }
+                    ).show(supportFragmentManager, "AlbumSelectDialog")
+                },
+                onNewClick = {
+                    // 새 앨범 만들기 동작
+                    CreateAlbumDialog { albumName ->
+                        addNewAlbum(albumName) // 새 앨범 추가
+                    }.show(supportFragmentManager, "CreateAlbumDialog")
+                }
+            )
+        }
+
+        // ivSweepMemo 클릭
+        binding.ivSweepMemo.setOnClickListener {
+            showCustomBottomSheetDialog(
+                titleExisting = "텍스트로 저장하기",
+                titleExistingEx = "사진 속 텍스트만 보관 후, 기존 사진첩에서 삭제합니다.",
+                titleNew = "사진으로 저장하기",
+                titleNewEx = "사진을 앱 메모장에 저장 후, 기존 사진첩에서 삭제합니다.",
+                onExistingClick = {
+                    // 텍스트로 저장 선택 동작
+                    showMemoTextBottomSheetDialog()
+                },
+                onNewClick = {
+                    // 사진으로 저장 선택 동작
+                    showMemoImageBottomSheetDialog()
+                }
+            )
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun showMemoTextBottomSheetDialog() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_memo, null)
+        bottomSheetDialog.setContentView(view)
+
+        // 폴더 추가 클릭 리스너
+        val layoutMemoAddFolder: LinearLayout = view.findViewById(R.id.layout_memo_add_folder)
+        layoutMemoAddFolder.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            // CreateFolderDialog 호출
+            CreateFolderDialog(
+                title = "새 폴더 추가하기",
+                explanation = "폴더를 만들고 사진을 저장합니다.",
+                confirmText = "추가 후 저장",
+                hint = "추가할 폴더 이름을 입력해주세요.",
+                onFolderCreated = { folderName ->
+                    createTextFolderAndDeleteImage(folderName)
+                }
+            ).show(supportFragmentManager, "CreateFolderDialog")
+        }
+
+        // 취소 클릭 리스너
+        val tvMemoCancel: TextView = view.findViewById(R.id.tv_memo_cancel)
+        tvMemoCancel.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        // RecyclerView 설정
+        val recyclerView: RecyclerView = view.findViewById(R.id.rv_add_memo_folder_list)
+        val adapter = SweepMemoFolderRVA { folder ->
+            // 선택한 폴더 처리 동작
+            showToast("${folder.folderName} 선택됨")
+        }
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // 🔥 ViewModel의 데이터를 관찰하여 RecyclerView 업데이트
+        viewModel.folderList.observe(this) { folderList ->
+            adapter.submitList(folderList)
+        }
+
+        // 🔥 API 호출하여 폴더 목록 가져오기
+        viewModel.fetchFolderList()
+
+        bottomSheetDialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun showMemoImageBottomSheetDialog() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet_memo, null)
+        bottomSheetDialog.setContentView(view)
+
+        // 폴더 추가 클릭 리스너
+        val layoutMemoAddFolder: LinearLayout = view.findViewById(R.id.layout_memo_add_folder)
+        layoutMemoAddFolder.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            // CreateFolderDialog 호출
+            CreateFolderDialog(
+                title = "새 폴더 추가하기",
+                explanation = "폴더를 만들고 사진을 저장합니다.",
+                confirmText = "추가 후 저장",
+                hint = "추가할 폴더 이름을 입력해주세요.",
+                onFolderCreated = { folderName ->
+                    createImageFolderAndDeleteImage(folderName)
+                }
+            ).show(supportFragmentManager, "CreateFolderDialog")
+        }
+
+        // 취소 클릭 리스너
+        val tvMemoCancel: TextView = view.findViewById(R.id.tv_memo_cancel)
+        tvMemoCancel.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        // RecyclerView 설정 – 폴더 목록 표시 및 선택 시 처리
+        val recyclerView: RecyclerView = view.findViewById(R.id.rv_add_memo_folder_list)
+        val adapter = SweepMemoFolderRVA { folder ->
+            // 폴더 선택 시 처리
+            bottomSheetDialog.dismiss()
+
+            // 현재 뷰페이저의 선택된 이미지 가져오기
+            val currentPosition = binding.vpSweepMainImg.currentItem
+            if (currentPosition !in currentImages.indices) {
+                Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return@SweepMemoFolderRVA
+            }
+            val currentImage = currentImages[currentPosition]
+            val imageUri = currentImage.uri
+
+            // 이미지 URI를 ByteArray로 변환 (Activity에 있는 헬퍼 함수 사용)
+            val imageByteArray = convertUriToByteArray(imageUri)
+            if (imageByteArray == null) {
+                Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
+                return@SweepMemoFolderRVA
+            }
+
+            // MultipartBody.Part 생성
+            val mediaType = "image/jpeg".toMediaTypeOrNull()
+            val imageRequestBody = imageByteArray.toRequestBody(mediaType)
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+
+            // ViewModel의 API 호출 (코루틴 내에서 실행)
+            lifecycleScope.launch {
+                viewModel.fetchSweepSaveImageMemo(folder.folderId, imagePart).onSuccess { response ->
+                    // API 호출 성공 시 현재 이미지 삭제
+                    deleteCurrentImage(currentPosition)
+                    Toast.makeText(
+                        this@SweepActivity,
+                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }.onFailure { e ->
+                    Toast.makeText(
+                        this@SweepActivity,
+                        "폴더 저장 실패: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // 🔥 ViewModel의 데이터를 관찰하여 RecyclerView 업데이트
+        viewModel.folderList.observe(this) { folderList ->
+            adapter.submitList(folderList)
+        }
+
+        // 🔥 API 호출하여 폴더 목록 가져오기
+        viewModel.fetchFolderList()
+
+        bottomSheetDialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun createTextFolderAndDeleteImage(folderName: String) {
+        // 1) 현재 뷰페이저의 이미지를 구한다 (ex. currentImages[currentPosition])
+        val currentPosition = binding.vpSweepMainImg.currentItem
+        if (currentPosition !in currentImages.indices) {
+            Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val currentImage = currentImages[currentPosition]
+        val imageUri = currentImage.uri
+
+        // 2) 이미지 -> Base64 변환
+        val base64Image = convertUriToBase64(imageUri)
+        if (base64Image == null) {
+            Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 3) API 요청 모델 생성
+        val requestModel = CreateTextFolderRequestModel(
+            base64_image = base64Image,
+            user_id = 12L, // 실제 유저 ID
+            folder_name = folderName
+        )
+
+        // 4) ViewModel (or Repository directly) 통해 API 호출
+        lifecycleScope.launch {
+            val result = viewModel.fetchSweepCreateTextFolder(requestModel)
+            result.onSuccess { response ->
+                // 성공 시 → 실제 파일 OS에서 삭제
+                deleteCurrentImage(currentPosition)
+                Toast.makeText(
+                    this@SweepActivity,
+                    "폴더 생성+텍스트 저장 성공: folderId=${response.folderId}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }.onFailure { e ->
+                Toast.makeText(
+                    this@SweepActivity,
+                    "폴더 생성 실패: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun createImageFolderAndDeleteImage(folderName: String) {
+        val currentPosition = binding.vpSweepMainImg.currentItem
+        if (currentPosition !in currentImages.indices) {
+            Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentImage = currentImages[currentPosition]
+        val imageUri = currentImage.uri
+
+        // 🛠 이미지 URI를 ByteArray로 변환
+        val imageByteArray = convertUriToByteArray(imageUri)
+        if (imageByteArray == null) {
+            Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        lifecycleScope.launch {
+            val result = viewModel.fetchSweepCreateImageFolder(folderName, imageByteArray)
+            result.onSuccess { response ->
+                // 🔥 성공 시 이미지 삭제 및 UI 업데이트
+                deleteCurrentImage(currentPosition)
+                Toast.makeText(
+                    this@SweepActivity,
+                    "사진이 폴더 ${response.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }.onFailure { e ->
+                Toast.makeText(
+                    this@SweepActivity,
+                    "폴더 생성 실패: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun convertUriToByteArray(uri: Uri): ByteArray? {
+        return try {
+            contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun deleteCurrentImage(position: Int) {
+        val img = currentImages[position]
+        val uri = img.uri
+
+        try {
+            // ① 실제 삭제 시도
+            val rowsDeleted = contentResolver.delete(uri, null, null)
+
+            // ② 성공하면? → 뷰페이저 목록에서도 제거
+            if (rowsDeleted > 0) {
+                currentImages.removeAt(position)
+                pagerAdapter.notifyDataSetChanged()
+            }
+
+        } catch (e: RecoverableSecurityException) {
+            // ③ 삭제 권한 없음 → 승인 요청
+            val intentSender = e.userAction.actionIntent.intentSender
+            pendingDeleteUri = uri           // 나중에 재시도 하기 위해 저장
+            pendingDeletePosition = position
+
+            // 런처로 권한 다이얼로그 표시
+            deletePermissionLauncher.launch(
+                IntentSenderRequest.Builder(intentSender).build()
+            )
+        } catch (e: Exception) {
+            // 그 밖의 오류 처리
+            e.printStackTrace()
+            Toast.makeText(this, "삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun convertUriToBase64(uri: Uri): String? {
+        return try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                val bytes = input.readBytes()
+                android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun setupBackPressHandler() {
@@ -560,16 +942,178 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         updateTrashCount()
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun setupAlbumRecyclerView() {
-        albumAdapter = AlbumListRVA { album ->
-            showToast("${album.name} 클릭됨")
-        }
-        // 저장된 데이터를 복원
-        restoreAlbums()
+        albumAdapter = AlbumListRVA { selectedAlbum ->
+            // 1) 현재 뷰페이저에서 어떤 이미지를 보고 있는지 확인
+            val currentPos = binding.vpSweepMainImg.currentItem
+            if (currentPos !in currentImages.indices) {
+                Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return@AlbumListRVA
+            }
 
+            val currentImage = currentImages[currentPos]
+            val currentUri = currentImage.uri
+
+            val realPath = selectedAlbum.relativePath?.removeSuffix("/") // 맨 뒤 슬래시 제거
+            if (realPath != null && realPath.startsWith("Download")) {
+                moveImageToDownloadSubfolder(
+                    originalUri = currentUri,
+                    fileName = currentImage.name,
+                    subFolderPath = realPath // ex. "Download" or "Download/MyFolder"
+                )
+            } else if (realPath != null) {
+                // Pictures/Camera, DCIM/Camera, ...
+                tryMoveImageToAlbum(currentUri, realPath)
+            } else {
+                // 혹은 fallback
+                Toast.makeText(this, "유효하지 않은 앨범 경로입니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        restoreAlbums()
         binding.rvSweepSaveToAlbum.apply {
             layoutManager = LinearLayoutManager(this@SweepActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = albumAdapter
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun tryMoveImageToAlbum(uri: Uri, newPath: String) {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.RELATIVE_PATH, newPath)
+            // 필요 시 DISPLAY_NAME, MIME_TYPE, DATE_MODIFIED 등도 함께 수정 가능
+            // put(MediaStore.Images.Media.DISPLAY_NAME, "새로운파일명.jpg")
+        }
+
+        try {
+            val rows = contentResolver.update(uri, contentValues, null, null)
+            if (rows > 0) {
+                // 이동 성공
+                Toast.makeText(this, "사진이 '$newPath' 로 이동 되었습니다.", Toast.LENGTH_SHORT).show()
+                viewModel.loadImages()
+            } else {
+                // rows == 0 → 이동 실패
+                Toast.makeText(this, "이동 실패", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: RecoverableSecurityException) {
+            // 여기서 사용자 동의(권한) 요청
+            pendingUpdateUri = uri
+            pendingUpdatePath = newPath
+
+            val intentSender = e.userAction.actionIntent.intentSender
+            updatePermissionLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "이동 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun moveImageToDownloadSubfolder(originalUri: Uri, fileName: String, subFolderPath: String) {
+        val resolver = contentResolver
+        try {
+            // 만약 subFolderPath = "Download/MyFolder" 라면?
+            // => 실제로 RELATIVE_PATH = Environment.DIRECTORY_DOWNLOADS + "/MyFolder"
+            val rest = subFolderPath.removePrefix("Download").removePrefix("/")
+            val finalDownloadPath = if (rest.isEmpty()) {
+                Environment.DIRECTORY_DOWNLOADS
+            } else {
+                Environment.DIRECTORY_DOWNLOADS + "/" + rest
+            }
+
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                put(MediaStore.Downloads.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Downloads.RELATIVE_PATH, finalDownloadPath)
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+
+            val downloadUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                ?: throw Exception("Download Insert Failed")
+
+            resolver.openInputStream(originalUri).use { input ->
+                resolver.openOutputStream(downloadUri).use { output ->
+                    if (input != null && output != null) {
+                        input.copyTo(output)
+                    } else {
+                        throw Exception("Stream is null")
+                    }
+                }
+            }
+
+            // 완료
+            val pendingOff = ContentValues().apply {
+                put(MediaStore.Downloads.IS_PENDING, 0)
+            }
+            resolver.update(downloadUri, pendingOff, null, null)
+
+            // 원본 삭제
+            val rowsDeleted = resolver.delete(originalUri, null, null)
+            if (rowsDeleted > 0) {
+                Toast.makeText(this, "'$fileName'이(가) $finalDownloadPath 폴더로 이동되었습니다.", Toast.LENGTH_SHORT).show()
+                viewModel.loadImages()
+            } else {
+                Toast.makeText(this, "다운로드는 되었지만 원본 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: RecoverableSecurityException) {
+            // 권한 재시도 로직
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Download 폴더 이동 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun moveImageToDownloadFolder(originalUri: Uri, fileName: String) {
+        val resolver = contentResolver
+        try {
+            // 1) Download 컬렉션에 새로 Insert
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)  // ex) "myphoto.jpg"
+                put(MediaStore.Downloads.MIME_TYPE, "image/jpeg") // 적절히
+                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+
+            val downloadUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                ?: throw Exception("Download Insert Failed")
+
+            // 2) 원본 → 새 파일로 copy
+            resolver.openInputStream(originalUri).use { input ->
+                resolver.openOutputStream(downloadUri).use { output ->
+                    if (input != null && output != null) {
+                        input.copyTo(output)
+                    } else {
+                        throw Exception("Stream is null")
+                    }
+                }
+            }
+
+            // 2.5) isPending = 0으로 업데이트 (다운로드 완료)
+            val pendingOff = ContentValues().apply {
+                put(MediaStore.Downloads.IS_PENDING, 0)
+            }
+            resolver.update(downloadUri, pendingOff, null, null)
+
+            // 3) 원본 이미지 삭제
+            val rowsDeleted = resolver.delete(originalUri, null, null)
+            if (rowsDeleted > 0) {
+                Toast.makeText(this, "'$fileName'이(가) 다운로드 폴더로 이동되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                // 삭제 실패 or 이미 권한 문제
+                Toast.makeText(this, "다운로드는 되었지만 원본 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: RecoverableSecurityException) {
+            // 원본 삭제시 발생할 수 있으므로, 휴지통 로직과 동일하게 승인 요청
+            // 필요하면 pendingDeleteUri, pendingDeletePosition 등에 담고
+            // 권한 요청 → 콜백에서 재시도
+            // ...
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Download 폴더 이동 오류: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -586,13 +1130,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             addedAlbums.clear()
             addedAlbums.addAll(restoredAlbums)
             albumAdapter.submitList(addedAlbums.toList())
-        }
-    }
-
-
-    private fun setupAddFolderContainer() {
-        binding.layoutSweepAddFolderContainer.setOnClickListener {
-            showAlbumBottomSheet() // 바텀시트 다이얼로그 호출
         }
     }
 
@@ -621,22 +1158,80 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 put(MediaStore.Images.Media.RELATIVE_PATH, albumPath)
                 put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
             }
-
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             if (uri != null) {
-                albumViewModel.loadAlbums() // 앨범 목록 새로 로드
                 showToast("새 앨범 '$albumName'이(가) 추가되었습니다.")
-            } else {
-                showToast("앨범 추가에 실패했습니다.")
+
+                // 1) 앨범 목록 다시 로드
+                albumViewModel.loadAlbums()
+
+                // 2) albumViewModel.albums 관찰 결과를 받은 뒤,
+                //    "albumName"과 동일한 앨범을 찾으면 addedAlbums 에 추가
+                //    (혹은 ID 비교를 위해 앨범이름 대신 absolutePath / id 등으로 찾을 수도 있음)
+                albumViewModel.albums.observe(this@SweepActivity) { albumList ->
+                    // "Pictures/$albumName"에 해당하는 앨범 찾기
+                    val newlyCreatedAlbum = albumList.find { it.name == albumName }
+                    // 만약 찾았다면 => addedAlbums 에 추가 + 중복 방지
+                    if (newlyCreatedAlbum != null && addedAlbums.none { it.id == newlyCreatedAlbum.id }) {
+                        addedAlbums.add(newlyCreatedAlbum)
+                        albumAdapter.submitList(addedAlbums.toList())
+                        // SharedPreferences 저장
+                        saveAlbums()
+                    }
+                }
             }
         } else {
             showToast("이미 존재하는 앨범입니다.")
         }
     }
 
-
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun setupQuitButton() {
+        binding.tvSweepQuit.setOnSingleClickListener {
+            showQuitConfirmationDialog()
+        }
+    }
+
+    private fun showQuitConfirmationDialog() {
+        val trashCount = TrashRepository.getAllTrashed().size
+
+        if (trashCount == 0) {
+            // trashCount가 0일 경우 Activity 종료
+            finish()
+            return
+        }
+
+        QuitChallengeDialog(
+            title = "휴지통 속 ${trashCount}장의 사진을\n비우고 정리를 그만할까요?",
+            explanation = "휴지통을 비우고 다음에 다시 도전할 수 있어요!",
+            confirmText = "그만하기",
+            cancelText = "계속하기",
+            onConfirm = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val allTrashed = TrashRepository.getAllTrashed()
+                    if (allTrashed.isNotEmpty()) {
+                        deleteImagesWithPermission(allTrashed)
+                        // 만약 예외 없이 모든 이미지가 삭제되었다면
+                        if (pendingTrashGalleries.isEmpty()) {
+                            DeletedDialog(
+                                message = "사진이 지워졌습니다!",
+                                warning = "지워진 사진들은 30일 이내에 '휴지통'에서 다시 복구할 수 있습니다.",
+                                onOkClicked = { finish() }
+                            ).show(supportFragmentManager, "TrashDeletedDialog")
+                        }
+                        // 만약 일부 이미지가 대기 상태(pendingTrashGalleries)에 남았다면,
+                        // 권한 요청 후 deletePermissionLauncher 콜백에서 retryPendingTrashDeletions()가 호출되어
+                        // 삭제 완료 후 DeletedDialog를 보여줍니다.
+                    }
+                }
+            },
+            onCancel = {
+                showToast("계속하기를 선택했습니다.")
+            }
+        ).show(supportFragmentManager, "QuitChallengeDialog")
     }
 
     // 태그 관련 코드 정리

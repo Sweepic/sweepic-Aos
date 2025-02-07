@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_sheet_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp">
+
+    <!-- 기존 앨범 추가하기 터치 구역 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/sw_gray1" />
+
+    <TextView
+        android:id="@+id/tv_memo_add_folder_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="폴더 선택하기"
+        android:textSize="18dp"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+    <TextView
+        android:id="@+id/tv_memo_add_folder_ex"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.Sweepic.Content.Light"
+        android:layout_marginStart="15dp"
+        android:text="저장할 폴더를 선택해주세요."
+        android:textColor="@color/sw_gray2" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/sw_gray1" />
+
+    <LinearLayout
+        android:id="@+id/layout_memo_add_folder"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:id="@+id/iv_memo_add_folder"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_memo"
+            app:tint="@color/sw_point"
+            android:layout_gravity="center"
+            android:layout_marginStart="15dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            style="@style/TextAppearance.Sweepic.Content"
+            android:text="폴더 추가하기"
+            android:textColor="@color/sw_point"
+            android:gravity="center"
+            android:layout_marginStart="10dp"/>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_add_memo_folder_list"
+        android:layout_width="match_parent"
+        android:layout_height="275dp"
+        tools:listitem="@layout/item_add_memo_folder"
+        android:overScrollMode="never"
+        android:orientation="vertical"/>
+
+    <!-- 구분선 (선택사항) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/sw_gray1" />
+
+    <!-- 취소 터치 구역 -->
+    <TextView
+        android:id="@+id/tv_memo_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="취소"
+        android:textColor="@color/sw_gray2"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+</LinearLayout>

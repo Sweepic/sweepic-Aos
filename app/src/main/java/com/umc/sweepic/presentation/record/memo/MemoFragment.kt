@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.databinding.FragmentMemoBinding
+import com.umc.sweepic.presentation.record.tagboard.TagBoardFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -89,5 +90,11 @@ class MemoFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        fun newInstance(): TagBoardFragment {
+            return TagBoardFragment()
+        }
     }
 }

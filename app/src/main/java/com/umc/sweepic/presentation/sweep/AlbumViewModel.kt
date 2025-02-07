@@ -29,7 +29,8 @@ class AlbumViewModel @Inject constructor(
             val projection = arrayOf(
                 MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
                 MediaStore.Images.Media.BUCKET_ID,
-                MediaStore.Images.Media._ID
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.RELATIVE_PATH // <-- 추가
             )
             val selection = "${MediaStore.Images.Media.MIME_TYPE} = ? OR ${MediaStore.Images.Media.MIME_TYPE} = ?"
             val selectionArgs = arrayOf("image/jpeg", "image/png")
@@ -49,16 +50,18 @@ class AlbumViewModel @Inject constructor(
                 val bucketNameColumn = it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
                 val bucketIdColumn = it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID)
                 val imageIdColumn = it.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                val relPathColumn = it.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
 
                 while (it.moveToNext()) {
                     val albumName = it.getString(bucketNameColumn)
                     val albumId = it.getString(bucketIdColumn)
                     val imageId = it.getLong(imageIdColumn)
                     val albumUri = ContentUris.withAppendedId(uri, imageId).toString()
+                    val relativePath = it.getString(relPathColumn)  // 대표 이미지의 경로
 
                     // 중복 체크: 고유 앨범 ID로 중복 제거
                     if (!albumMap.containsKey(albumId)) {
-                        albumMap[albumId] = AlbumList(name = albumName, id = albumId, uri = albumUri)
+                        albumMap[albumId] = AlbumList(name = albumName, id = albumId, uri = albumUri, relativePath = relativePath)
                     }
                 }
             }
