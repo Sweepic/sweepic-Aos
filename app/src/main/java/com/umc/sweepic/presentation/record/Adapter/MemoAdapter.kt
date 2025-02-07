@@ -38,14 +38,27 @@ class MemoAdapter(
         fun bind(memoFolder: MemoFolder) {
             binding.tvMemoFolderTitle.text = memoFolder.title
             binding.tvMemoDate.text = memoFolder.date
+
+
+            //사진 수 표시
             if (memoFolder.imageCount > 0) {
-                binding.tvMemoContent.text = "${memoFolder.imageCount}장의 사진"
-                binding.tvMemoContent.visibility = View.VISIBLE
+                binding.tvMemoPhotoNum.text = "${memoFolder.imageCount}장의 사진"
+                binding.tvMemoPhotoNum.visibility = View.VISIBLE
             } else {
-                binding.tvMemoContent.visibility = View.GONE // 🔹 사진 없으면 아예 안 보이게 설정
+                binding.tvMemoPhotoNum.visibility = View.GONE // 🔹 사진 없으면 아예 안 보이게 설정
             }
 
-            // ✅ 이미지가 있을 경우만 로드
+
+            //메모 내용 표시
+            if (!memoFolder.content.isNullOrEmpty()) {
+                binding.tvMemoContent.text = memoFolder.content
+                binding.tvMemoContent.visibility = View.VISIBLE
+            } else {
+                binding.tvMemoContent.visibility = View.GONE //
+            }
+
+
+            // 썸네일 이미지 표시 (이미지가 있을 경우만 로드하기)
             if (!memoFolder.imageUrl.isNullOrEmpty()) {
                 Glide.with(binding.root.context)
                     .load(memoFolder.imageUrl)
@@ -54,7 +67,6 @@ class MemoAdapter(
             } else {
                 binding.memoImage.visibility = View.GONE
             }
-
             binding.root.setOnClickListener { onItemClick(memoFolder) }
         }
     }

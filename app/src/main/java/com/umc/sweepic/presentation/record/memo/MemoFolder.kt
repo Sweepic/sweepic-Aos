@@ -19,7 +19,7 @@ data class MemoFolder(
                 id = folderId.toInt(),
                 title = folderName,
                 date = createdAt ?: "",
-                content = imageText,
+                content = imageText?.takeIf{it.isNotEmpty()},
                 imageUrl = firstImageUrl?.takeIf { it.isNotEmpty() },
                 imageCount = imageCount
             )

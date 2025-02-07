@@ -61,10 +61,39 @@ class MemoFolderViewModel @Inject constructor(
                     Log.d("MemoFolderViewModel", "검색 성공: ${data.data}")
                     _memoFolders.postValue(data.data.map { it.toMemoFolder() })
                 }
-                .onFailure { e->
+                .onFailure { e ->
                     Log.e("MemoFolderViewModel", "검색 API 실패: ${e.message}")
                     _memoFolders.postValue(emptyList())
                 }
         }
     }
-}
+
+    fun deleteMemoFolder(folderId: Long) {
+        viewModelScope.launch {
+            memoRepository.deleteMemoFolder(folderId)
+                .onSuccess {
+                    Log.d("MemoFolderViewModel", "폴더 삭제 성공: $folderId")
+                    fetchMemoFolders() // ✅ 삭제 후 목록 새로고침
+                }
+                .onFailure { e ->
+                    Log.e("MemoFolderViewModel", "폴더 삭제 실패: ${e.message}")
+                }
+        }
+    }
+
+//    fun deleteImages(folderId: Long, imageIds: List<Long>) {
+//        viewModelScope.launch {
+//            try {
+//                memoRepository.deleteImages(folderId, imageIds)
+//                    .onSuccess {
+//                        Log.d("MemoFolderViewModel", "사진 삭제 성공: $imageIds")
+//                        fetchMemoFolderDetails(folderId) // ✅ 삭제 후 UI 갱신
+//                    }
+//                    .onFailure { error ->
+//                        Log.e("MemoFolderViewModel", "사진 삭제 실패: ${error.message}")
+//                    }
+//            } catch (e: Exception) {
+//                Log.e("MemoFolderViewModel", "사진 삭제 중 오류 발생", e)
+//            }
+//        }
+    }
