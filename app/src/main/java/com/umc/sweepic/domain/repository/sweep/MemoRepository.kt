@@ -8,4 +8,5 @@ interface MemoRepository {
     suspend fun recordMemoList(): Result<RecordMemoListModel>
     suspend fun searchMemos(keyword: String) : Result<RecordMemoListModel>
     suspend fun fetchMemoFolderDetails(folderId: Long): Result<MemoFolderDetailModel>
+    suspend fun deleteMemoFolder(folderId: Long): Result<Unit>
 }

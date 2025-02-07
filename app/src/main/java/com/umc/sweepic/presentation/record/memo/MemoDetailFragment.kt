@@ -1,6 +1,7 @@
 package com.umc.sweepic.presentation.record.memo
 
 import MemoDetailImageAdapter
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.util.Log.*
@@ -123,9 +124,25 @@ class MemoDetailFragment : Fragment() {
         popup.show()
     }
 
-    //폴더 삭제 (미구현)
     private fun handleFolderDelete() {
+        val folderId = arguments?.getLong("folderId") ?: return
+        val folderName = binding.tvMemoDetailFolderTitle.text.toString() // ✅ 현재 폴더 이름 가져오기
+        showDeleteConfirmationDialog(folderId, folderName) // ✅ 폴더 이름 전달
+    }
 
+    // 폴더 삭제 다이얼로그 창
+    private fun showDeleteConfirmationDialog(folderId: Long, folderName: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("폴더 삭제")
+            .setMessage("[$folderName] 폴더를 정말 삭제하시겠어요?\n지금 폴더를 삭제하면 다시 복구할 수 없어요.")
+            .setPositiveButton("삭제") { _, _ ->
+                // ✅ 사용자가 '삭제' 버튼을 눌렀을 때 폴더 삭제 실행
+                memoFolderViewModel.deleteMemoFolder(folderId)
+                Toast.makeText(requireContext(), "폴더가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack() // 이전 화면으로 이동
+            }
+            .setNegativeButton("취소", null) // 취소 버튼 누르면 아무 동작 없음
+            .show()
     }
 
 

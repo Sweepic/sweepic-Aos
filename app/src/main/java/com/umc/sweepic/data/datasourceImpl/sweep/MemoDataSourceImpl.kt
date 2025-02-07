@@ -18,6 +18,10 @@ class MemoDataSourceImpl @Inject constructor(
 
     override suspend fun fetchMemoFolderDetails(folderId: Long): BaseResponse<MemoFolderDetailResponseDto>
     = memoService.fetchMemoFolderDetails(folderId)
+
+    override suspend fun deleteMemoFolder(folderId: Long): BaseResponse<Any> =
+        memoService.deleteMemoFolder(folderId)
+
     }
 
 

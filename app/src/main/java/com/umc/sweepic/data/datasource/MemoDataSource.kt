@@ -8,4 +8,5 @@ interface MemoDataSource {
     suspend fun recordMemoList(): BaseResponse<RecordMemoListResponseDto>
     suspend fun searchMemos(keyword: String): BaseResponse<RecordMemoListResponseDto>
     suspend fun fetchMemoFolderDetails(folderId: Long): BaseResponse<MemoFolderDetailResponseDto>
+    suspend fun deleteMemoFolder(folderId: Long): BaseResponse<Any>
 }
