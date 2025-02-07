@@ -38,7 +38,12 @@ class MemoAdapter(
         fun bind(memoFolder: MemoFolder) {
             binding.tvMemoFolderTitle.text = memoFolder.title
             binding.tvMemoDate.text = memoFolder.date
-            binding.tvMemoContent.text = memoFolder.content ?: ""
+            if (memoFolder.imageCount > 0) {
+                binding.tvMemoContent.text = "${memoFolder.imageCount}장의 사진"
+                binding.tvMemoContent.visibility = View.VISIBLE
+            } else {
+                binding.tvMemoContent.visibility = View.GONE // 🔹 사진 없으면 아예 안 보이게 설정
+            }
 
             // ✅ 이미지가 있을 경우만 로드
             if (!memoFolder.imageUrl.isNullOrEmpty()) {

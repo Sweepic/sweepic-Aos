@@ -2,6 +2,8 @@ package com.umc.sweepic.presentation.record.memo
 
 import MemoDetailImageAdapter
 import android.os.Bundle
+import android.util.Log
+import android.util.Log.*
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -36,35 +38,41 @@ class MemoDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ✅ 전달받은 folderId 가져오기
+        // 전달받은 폴더아이디 가져오기
         val folderId = arguments?.getLong("folderId") ?: return
 
-        // ✅ ViewModel에서 폴더 상세 데이터 가져오기
+        // 뷰모델에서 폴더 상세 데이터 가져오기
         memoFolderViewModel.fetchMemoFolderDetails(folderId)
 
-        // ✅ RecyclerView 설정
+        // RecyclerView 설정
         imageAdapter = MemoDetailImageAdapter(emptyList())
         binding.rvMemoDetailImages.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.rvMemoDetailImages.adapter = imageAdapter
 
-        // ✅ 데이터 변경 감지 및 UI 업데이트
+        // UI 변환
         memoFolderViewModel.memoFolderDetail.observe(viewLifecycleOwner) { memoDetail ->
-            memoDetail?.let {
-                binding.tvMemoDetailFolderTitle.text = it.folderName
-                binding.tvMemoDetailFolderContent.text = it.imageText ?: ""
+            if (memoDetail != null) {
+                binding.tvMemoDetailFolderTitle.text = memoDetail.folderName
+                binding.tvMemoDetailFolderContent.text = memoDetail.imageText?.takeIf { it.isNotEmpty() } ?: ""
 
-//                // 이미지 리스트 업데이트
-//                imageAdapter.updateData(it.images.map { image -> image.imageUrl })
+                // 이미지 리스트가 있으면 리사이클러뷰 업데이트
+                val imageUrls = memoDetail.images.mapNotNull { it.imageUrl }
+                if (imageUrls.isNotEmpty()) {
+                    imageAdapter.updateData(imageUrls)
+                    binding.rvMemoDetailImages.visibility = View.VISIBLE
+                } else {
+                    binding.rvMemoDetailImages.visibility = View.GONE
+                }
             }
         }
 
-        // ✅ 뒤로 가기 버튼 설정
+        // 뒤로 가기 버튼 설정
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        // ✅ 메뉴 버튼 클릭 시 팝업 메뉴 표시
+        // 메뉴 버튼 클릭 시 팝업 메뉴 표시
         binding.btnMenu.setOnClickListener { view ->
             showPopupMenu(view)
         }
@@ -141,23 +149,18 @@ class MemoDetailFragment : Fragment() {
             return
         }
 
-        memoFolderViewModel.memoFolders.value?.let { folders ->
-            val currentFolder = arguments?.getParcelable<MemoFolder>("memoFolder")
-            if (currentFolder != null) {
-                // 현재 폴더 제외하고 다이얼로그에 뜨게끔하기
-                val filteredFolders = folders.filter { it.id != currentFolder.id }
-                val folderSelectDialog = FolderSelectDialog(
-                    folders = filteredFolders,
-                    onMoveButtonClick = { selectedFolder ->
-                        movePhotosToFolder(selectedFolder)
-                    },
-                    onDialogDismiss = {
-                        resetToDefaultState()
-                    }
-                )
-                folderSelectDialog.show(parentFragmentManager, "FolderSelectDialog")
+        val currentFolderId = arguments?.getLong("folderId") ?: return // ✅ 현재 폴더 ID 가져오기
+
+        val folderSelectDialog = FolderSelectDialog(
+            currentFolderId = currentFolderId, // ✅ 현재 폴더 ID 전달
+            onMoveButtonClick = { selectedFolder ->
+                movePhotosToFolder(selectedFolder)
+            },
+            onDialogDismiss = {
+                resetToDefaultState()
             }
-        }
+        )
+        folderSelectDialog.show(parentFragmentManager, "FolderSelectDialog") // ✅ 실행
     }
 
 

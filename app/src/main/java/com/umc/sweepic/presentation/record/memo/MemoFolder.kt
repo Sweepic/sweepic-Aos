@@ -10,16 +10,18 @@ data class MemoFolder(
     val title: String,
     val date: String,
     val content: String?,
-    val imageUrl: String?
+    val imageUrl: String?,
+    val imageCount: Int
 ) : Parcelable {
     companion object {
         fun RecordMemoListModel.MemoFolderModel.toMemoFolder(): MemoFolder {
             return MemoFolder(
                 id = folderId.toInt(),
                 title = folderName,
-                date = createdAt,
+                date = createdAt ?: "",
                 content = imageText,
-                imageUrl = firstImageUrl.takeIf { it.isNotEmpty() }
+                imageUrl = firstImageUrl?.takeIf { it.isNotEmpty() },
+                imageCount = imageCount
             )
         }
     }

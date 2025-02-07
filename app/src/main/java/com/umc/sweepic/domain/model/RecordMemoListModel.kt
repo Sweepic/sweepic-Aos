@@ -8,8 +8,8 @@ data class RecordMemoListModel(
         val folderName: String,
         val imageText: String,
         val imageCount: Int,
-        val firstImageId: Long,
-        val firstImageUrl: String,
-        val createdAt: String
+        val firstImageId: Long?,
+        val firstImageUrl: String?,
+        val createdAt: String?
     )
 }

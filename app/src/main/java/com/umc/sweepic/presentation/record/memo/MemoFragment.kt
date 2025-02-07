@@ -1,6 +1,8 @@
 package com.umc.sweepic.presentation.record.memo
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -38,19 +40,50 @@ class MemoFragment : Fragment() {
         binding.rvMemoList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvMemoList.adapter = adapter
 
-        // ✅ ViewModel에서 데이터 받아오기
+        // ViewModel에서 데이터 받아오기
         viewModel.memoFolders.observe(viewLifecycleOwner) { memoFolders ->
-            Log.d("MemoFragment", "memoFolders 데이터 변경 감지: ${memoFolders.size}") // ✅ 데이터 개수 확인
             adapter.updateData(memoFolders)
         }
 
-        // ✅ API 데이터 불러오기
+        // API 데이터 불러오기
         viewModel.fetchMemoFolders()
+
+        setupSearch()
     }
 
     private fun navigateToDetail(memoFolder: MemoFolder) {
         val action = MemoFragmentDirections.actionMemoFragmentToMemodetailFragment(memoFolder.id.toLong())
         findNavController().navigate(action)
+    }
+
+    private fun setupSearch() {
+        binding.btnSearch.setOnClickListener {
+            val keyword = binding.etSearch.text.toString().trim()
+            if (keyword.isNotEmpty()) {
+                viewModel.searchMemoFolders(keyword)
+            } else {
+                viewModel.fetchMemoFolders()
+            }
+        }
+
+        //검색창 내 글자 사라지면 다시 원래 폴더 목록 불러오도록 하기
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            private var previousText: String = ""
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                previousText = s.toString() // 변경 전 텍스트 저장
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val currentText = s.toString().trim()
+
+                if (currentText.length < previousText.length || currentText.isEmpty()) {
+                    viewModel.fetchMemoFolders()
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     override fun onDestroyView() {

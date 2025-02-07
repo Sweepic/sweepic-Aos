@@ -1,5 +1,6 @@
 package com.umc.sweepic.data.repositoryImpl.sweep
 
+import android.util.Log
 import com.umc.sweepic.data.datasource.MemoDataSource
 import com.umc.sweepic.domain.model.MemoFolderDetailModel
 import com.umc.sweepic.domain.model.RecordMemoListModel
@@ -17,9 +18,11 @@ class MemoRepositoryImpl @Inject constructor(
 
     override suspend fun searchMemos(keyword: String): Result<RecordMemoListModel> =
         runCatching {
+            Log.d("MemoRepositoryImpl", "API 요청: searchMemo($keyword)")
             val response = memoDataSource.searchMemos(keyword)
+            Log.d("MemoRepositoryImpl", "API 응답: $response")
             response.success.toRecordMemoListModel()
-        }
+        }.onFailure {Log.e("MemoRepositoryImpl", "API 실패: ${it.message}")  }
 
     override suspend fun fetchMemoFolderDetails(folderId: Long): Result<MemoFolderDetailModel> =
         runCatching {

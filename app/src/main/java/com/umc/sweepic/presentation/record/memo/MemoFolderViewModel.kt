@@ -44,10 +44,26 @@ class MemoFolderViewModel @Inject constructor(
         viewModelScope.launch {
             memoRepository.fetchMemoFolderDetails(folderId)
                 .onSuccess { data ->
+                    Log.d("MemoFolderViewModel", "폴더 상세 조회 성공: $data")
                     _memoFolderDetail.postValue(data)
                 }
                 .onFailure {
+                    Log.e("MemoFolderViewModel", "폴더 상세 조회 실패: ${it.message}")
                     _memoFolderDetail.postValue(null)
+                }
+        }
+    }
+
+    fun searchMemoFolders(keyword: String) {
+        viewModelScope.launch {
+            memoRepository.searchMemos(keyword)
+                .onSuccess { data ->
+                    Log.d("MemoFolderViewModel", "검색 성공: ${data.data}")
+                    _memoFolders.postValue(data.data.map { it.toMemoFolder() })
+                }
+                .onFailure { e->
+                    Log.e("MemoFolderViewModel", "검색 API 실패: ${e.message}")
+                    _memoFolders.postValue(emptyList())
                 }
         }
     }
