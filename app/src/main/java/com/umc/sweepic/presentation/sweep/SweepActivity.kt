@@ -590,20 +590,26 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                     AlbumSelectDialog(
                         addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
                         onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
-                            // 새로 선택된 앨범 추가
-                            val newAlbums = selectedAlbums.filter { album ->
-                                addedAlbums.none { it.id == album.id }
+                            // 현재 addedAlbums를 복제하여 작업
+                            val updatedAlbums = addedAlbums.toMutableList()
+
+                            // 새로 선택된 앨범 추가 (중복 방지)
+                            selectedAlbums.forEach { album ->
+                                if (updatedAlbums.none { it.id == album.id } ) {
+                                    updatedAlbums.add(album)
+                                }
                             }
-                            addedAlbums.addAll(newAlbums)
+                            // 해제된 앨범 제거 (ID 기준으로 제거)
+                            updatedAlbums.removeAll { album ->
+                                deselectedAlbums.any { it.id == album.id }
+                            }
+                            // in-memory 리스트와 adapter 업데이트
+                            addedAlbums.clear()
+                            addedAlbums.addAll(updatedAlbums)
+                            albumAdapter.submitList(updatedAlbums.toList())
 
-                            // 선택 해제된 앨범 제거
-                            addedAlbums.removeAll(deselectedAlbums)
-
-                            // RecyclerView 업데이트
-                            albumAdapter.submitList(addedAlbums.toList())
-
-                            // 변경된 데이터를 SharedPreferences에 저장
-                            saveAlbums()
+                            // 변경된 리스트를 SharedPreferences에 동기적으로 저장 (commit 사용)
+                            sharedPreferences.edit().putString("AddedAlbums", gson.toJson(updatedAlbums)).commit()
                         }
                     ).show(supportFragmentManager, "AlbumSelectDialog")
                 },
