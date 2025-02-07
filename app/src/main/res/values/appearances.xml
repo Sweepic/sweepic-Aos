@@ -40,4 +40,13 @@
     <style name="TextAppearance.Sweepic.Warning">
         <item name="android:textColor">@color/warning</item>
     </style>
+
+    <style name="MyDialogStyle" parent="Theme.Material3.Light.Dialog">
+        <!-- 다이얼로그 배경 색상 설정 -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!-- 배경 디밍 활성화 -->
+        <item name="android:backgroundDimEnabled">true</item>
+        <!-- 배경 디밍 정도 설정 (0.0 ~ 1.0) -->
+        <item name="android:backgroundDimAmount">0.8</item>
+    </style>
 </resources>

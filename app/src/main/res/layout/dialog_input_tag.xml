@@ -9,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/shape_rect_26_white_fill">
+        android:background="@drawable/shape_rect_26_white_fill_gray_line">
 
         <TextView
             android:id="@+id/tv_sweep_input_location_title"

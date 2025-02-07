@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <!-- ViewModel 또는 필요한 데이터 바인딩 변수 선언 -->
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_top"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="8dp">
+
+            <!-- 뒤로가기 버튼 -->
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_back"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:contentDescription="뒤로가기 버튼"
+                android:layout_marginStart="16dp"/>
+
+            <!-- 타이틀 -->
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="타이틀"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_line"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_top"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/layout_top"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- 계정 정보 -->
+            <TextView
+                android:id="@+id/tv_account_info_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="계정 정보"
+                android:textSize="13sp"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:id="@+id/tv_account_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="dkfusu199@naver.com"
+                android:textSize="16sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_account_info_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="5dp" />
+
+            <ImageView
+                android:id="@+id/btn_next_account"
+                android:src="@drawable/btn_next"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:layout_constraintTop_toTopOf="@id/tv_account_info"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- 이름 -->
+            <TextView
+                android:id="@+id/tv_name_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="이름"
+                android:textSize="13sp"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintTop_toBottomOf="@id/tv_account_info"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="김지형"
+                android:textSize="16sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_name_label"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="8dp" />
+
+            <ImageView
+                android:id="@+id/btn_next_name"
+                android:src="@drawable/btn_next"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:layout_constraintTop_toTopOf="@id/tv_name"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- 목표 장수 설정 -->
+            <TextView
+                android:id="@+id/tv_goal_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="목표 장수 설정"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintTop_toBottomOf="@id/tv_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:id="@+id/tv_goal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="10,000장"
+                android:textSize="16sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_goal_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp" />
+
+            <ImageView
+                android:id="@+id/btn_next_goal"
+                android:src="@drawable/btn_next"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                app:layout_constraintTop_toTopOf="@id/tv_goal"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- 알림 설정 레이블 -->
+            <TextView
+                android:id="@+id/tv_notification_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="알림 설정"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintTop_toBottomOf="@id/tv_goal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="20dp" />
+
+            <!-- 전체 알림 활성화 -->
+            <TextView
+                android:id="@+id/tv_all_notifications"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="전체 알림 활성화"
+                android:textSize="16sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_notification_label"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="10dp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_all_notifications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/Transparency"
+                app:thumbTint="@drawable/sel_record_toggle_thumb"
+                app:trackTint="@drawable/sel_record_toggle_track"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_all_notifications"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_all_notifications"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/gray_line"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_all_notifications"
+                android:layout_marginTop="10dp"/>
+
+            <!-- 실시간 사진 추가 알림 -->
+            <TextView
+                android:id="@+id/tv_realtime_photo_notifications"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="실시간 사진 추가 알림"
+                android:textSize="16sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_all_notifications"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="21dp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_realtime_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/Transparency"
+                app:thumbTint="@drawable/sel_record_toggle_thumb"
+                app:trackTint="@drawable/sel_record_toggle_track"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_realtime_photo_notifications"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_realtime_photo_notifications" />
+
+            <!-- 챌린지 추천 알림 -->
+            <TextView
+                android:id="@+id/tv_challenge_recommendation_notifications"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="챌린지 추천 알림"
+                android:textSize="16sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_realtime_photo_notifications"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="10dp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_challenge_recommendation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/Transparency"
+                app:thumbTint="@drawable/sel_record_toggle_thumb"
+                app:trackTint="@drawable/sel_record_toggle_track"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_challenge_recommendation_notifications"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_challenge_recommendation_notifications" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 로그아웃 버튼 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_logout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="로그아웃"
+            android:background="@drawable/btn_logout"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="50dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

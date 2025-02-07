@@ -15,7 +15,7 @@ class MoveViewModel @Inject constructor(
     private val repository: GalleryRepository
 ) : ViewModel() {
     val galleryPager = Pager(
-        config = PagingConfig(pageSize = 50)
+        config = PagingConfig(pageSize = 10000)
     ) {
         repository.getGalleryImagePagingSource()
     }.flow.cachedIn(viewModelScope)
