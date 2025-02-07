@@ -105,4 +105,8 @@ dependencies {
     // Exif interface
     implementation("androidx.exifinterface:exifinterface:1.3.7")
 
+    //splash 화면 구성
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+
 }

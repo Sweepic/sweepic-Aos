@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- Step 단계-->
+    <TextView
+        android:id="@+id/tv_onboarding_step1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Step 2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tv_onboarding_step2"
+        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/sw_point"
+        android:layout_marginTop="66dp"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tv_onboarding_step2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="/4"
+        android:layout_marginTop="66dp"
+        app:layout_constraintStart_toEndOf="@id/tv_onboarding_step1"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textColor="@color/sw_gray2"
+        android:textSize="13sp" />
+
+
+    <!--스텝2 타이틀 문구-->
+    <TextView
+        android:id="@+id/tv_onboarding_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="김지형님,\nSweepic은 사진 정리를 위해\n사진 접근 권한을 요청합니다.\n'모두 허용'을 선택하시면\n원활한 서비스 이용이 가능합니다."
+        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_step1"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/sw_bk"
+        android:textSize="20sp"
+        android:layout_marginTop="11dp"
+        android:textStyle="bold"
+        android:layout_marginStart="16dp"/>
+
+    <TextView
+        android:id="@+id/tvPermissionError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="사진 접근 권한이 필요합니다."
+        android:textSize="12sp"
+        android:textColor="@color/error"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tv_onboarding_title"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp" />
+
+    <!-- 다음 버튼 -->
+    <TextView
+        android:id="@+id/btn_onboarding_next"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/sw_gray_lightly"
+        android:text="다음"
+        android:gravity="center"
+        android:textSize="13sp"
+        android:textColor="#767676"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

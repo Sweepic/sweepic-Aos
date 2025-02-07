@@ -28,4 +28,5 @@
     <color name="sw_bk">#222222</color>
     <color name="sweepic_point">#00B4D8</color>
     <color name="appbar">#FFFFFFFF</color>
+    <color name="error">#FF4A4A</color>
 </resources>
