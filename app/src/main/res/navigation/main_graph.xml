@@ -10,6 +10,7 @@
         android:name="com.umc.sweepic.presentation.challenge.ChallengeFragment"
         android:label="ChallengeFragment"
         tools:layout="@layout/fragment_challenge">
+
         <action
             android:id="@+id/action_challengeFragment_to_myPageFragment"
             app:destination="@id/myPageFragment" />
@@ -17,15 +18,18 @@
 
     <fragment
         android:id="@+id/recordFragment"
-        android:name="com.umc.sweepic.presentation.record.history.HistoryFragment"
-        android:label="HistoryFragment"
-        tools:layout="@layout/fragment_history"/>
+        android:name="com.umc.sweepic.presentation.record.RecordFragment"
+        android:label="RecordFragment"
+        tools:layout="@layout/fragment_record">
 
-    <fragment
-        android:id="@+id/historyTagFragment"
-        android:name="com.umc.sweepic.presentation.record.history.HistoryTagFragment"
-        android:label="HistoryTagFragment"
-        tools:layout="@layout/fragment_history_tag" />
+        <action
+            android:id="@+id/action_recordFragment_to_detailImgFragment"
+            app:destination="@id/detailImgFragment" />
+
+        <action
+            android:id="@+id/action_recordFragment_to_tagImgFragment"
+            app:destination="@id/tagImgFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/myPageFragment"
@@ -34,27 +38,22 @@
         tools:layout="@layout/fragment_my_page"/>
 
     <fragment
-        android:id="@+id/historyTagFragment"
-        android:name="com.umc.sweepic.presentation.record.history.HistoryTagFragment"
-        android:label="HistoryTagFragment"
-        tools:layout="@layout/fragment_history_tag" />
-
-    <fragment
-        android:id="@+id/memoFragment"
-        android:name="com.umc.sweepic.presentation.record.memo.MemoFragment"
-        android:label="MemoFragment" />
-
-    <fragment
-        android:id="@+id/memodetailFragment"
-        android:name="com.umc.sweepic.presentation.record.memo.MemoDetailFragment"
-        android:label="MemoDetailFragment" >
-        <argument
-            android:name="memoFolder"
-            app:argType="com.umc.sweepic.presentation.record.memo.MemoFolder" />
+        android:id="@+id/tagBoardFragment"
+        android:name="com.umc.sweepic.presentation.record.tagboard.TagBoardFragment"
+        android:label="TagBoardFragment"
+        tools:layout="@layout/fragment_tag_board">
     </fragment>
 
-    <action
-        android:id="@+id/action_memoFragment_to_memodetailFragment"
-        app:destination="@id/memodetailFragment" />
+    <fragment
+        android:id="@+id/detailImgFragment"
+        android:name="com.umc.sweepic.presentation.record.tagboard.DetailImgFragment"
+        android:label="DetailImgFragment"
+        tools:layout="@layout/fragment_detail_img"/>
+
+    <fragment
+        android:id="@+id/tagImgFragment"
+        android:name="com.umc.sweepic.presentation.record.tagboard.TagImgFragment"
+        android:label="TagImgFragment"
+        tools:layout="@layout/fragment_tag_img" />
 
 </navigation>
