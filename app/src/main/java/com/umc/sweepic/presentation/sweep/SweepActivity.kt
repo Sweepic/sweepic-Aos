@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.RecoverableSecurityException
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.GestureDetector
@@ -72,10 +74,13 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private val albumViewModel: AlbumViewModel by viewModels()
     private val currentImages = mutableListOf<Gallery>()
     private lateinit var deletePermissionLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private lateinit var updatePermissionLauncher: ActivityResultLauncher<IntentSenderRequest>
     private var pendingDeleteUri: Uri? = null
     private var pendingDeletePosition: Int? = null
     private val pendingTrashGalleries: MutableList<Gallery> = mutableListOf()
     private var selectedUri: Uri? = null
+    private var pendingUpdateUri: Uri? = null
+    private var pendingUpdatePath: String? = null
 //    private val approvedUriSet = mutableSetOf<Uri>()
 //    private var pendingTrashImage: Gallery? = null
 //    private var pendingTrashPosition: Int? = null
@@ -212,6 +217,26 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         val passedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
         if (!passedUriString.isNullOrEmpty()) {
             selectedUri = Uri.parse(passedUriString)
+        }
+
+        updatePermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // 승인됨 → 다시 시도
+                val uri = pendingUpdateUri
+                val path = pendingUpdatePath
+
+                if (uri != null && path != null) {
+                    tryMoveImageToAlbum(uri, path) // 아래에서 재시도 로직
+                }
+            } else {
+                // 거부됨
+                Toast.makeText(this, "앨범 이동 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            // 사용 후 변수 초기화
+            pendingUpdateUri = null
+            pendingUpdatePath = null
         }
 
     }
@@ -565,20 +590,26 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                     AlbumSelectDialog(
                         addedAlbums = addedAlbums.toList(), // 이미 추가된 앨범 전달
                         onAlbumsSelected = { selectedAlbums, deselectedAlbums ->
-                            // 새로 선택된 앨범 추가
-                            val newAlbums = selectedAlbums.filter { album ->
-                                addedAlbums.none { it.id == album.id }
+                            // 현재 addedAlbums를 복제하여 작업
+                            val updatedAlbums = addedAlbums.toMutableList()
+
+                            // 새로 선택된 앨범 추가 (중복 방지)
+                            selectedAlbums.forEach { album ->
+                                if (updatedAlbums.none { it.id == album.id } ) {
+                                    updatedAlbums.add(album)
+                                }
                             }
-                            addedAlbums.addAll(newAlbums)
+                            // 해제된 앨범 제거 (ID 기준으로 제거)
+                            updatedAlbums.removeAll { album ->
+                                deselectedAlbums.any { it.id == album.id }
+                            }
+                            // in-memory 리스트와 adapter 업데이트
+                            addedAlbums.clear()
+                            addedAlbums.addAll(updatedAlbums)
+                            albumAdapter.submitList(updatedAlbums.toList())
 
-                            // 선택 해제된 앨범 제거
-                            addedAlbums.removeAll(deselectedAlbums)
-
-                            // RecyclerView 업데이트
-                            albumAdapter.submitList(addedAlbums.toList())
-
-                            // 변경된 데이터를 SharedPreferences에 저장
-                            saveAlbums()
+                            // 변경된 리스트를 SharedPreferences에 동기적으로 저장 (commit 사용)
+                            sharedPreferences.edit().putString("AddedAlbums", gson.toJson(updatedAlbums)).commit()
                         }
                     ).show(supportFragmentManager, "AlbumSelectDialog")
                 },
@@ -911,16 +942,178 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         updateTrashCount()
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun setupAlbumRecyclerView() {
-        albumAdapter = AlbumListRVA { album ->
-            showToast("${album.name} 클릭됨")
-        }
-        // 저장된 데이터를 복원
-        restoreAlbums()
+        albumAdapter = AlbumListRVA { selectedAlbum ->
+            // 1) 현재 뷰페이저에서 어떤 이미지를 보고 있는지 확인
+            val currentPos = binding.vpSweepMainImg.currentItem
+            if (currentPos !in currentImages.indices) {
+                Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return@AlbumListRVA
+            }
 
+            val currentImage = currentImages[currentPos]
+            val currentUri = currentImage.uri
+
+            val realPath = selectedAlbum.relativePath?.removeSuffix("/") // 맨 뒤 슬래시 제거
+            if (realPath != null && realPath.startsWith("Download")) {
+                moveImageToDownloadSubfolder(
+                    originalUri = currentUri,
+                    fileName = currentImage.name,
+                    subFolderPath = realPath // ex. "Download" or "Download/MyFolder"
+                )
+            } else if (realPath != null) {
+                // Pictures/Camera, DCIM/Camera, ...
+                tryMoveImageToAlbum(currentUri, realPath)
+            } else {
+                // 혹은 fallback
+                Toast.makeText(this, "유효하지 않은 앨범 경로입니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        restoreAlbums()
         binding.rvSweepSaveToAlbum.apply {
             layoutManager = LinearLayoutManager(this@SweepActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = albumAdapter
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun tryMoveImageToAlbum(uri: Uri, newPath: String) {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.RELATIVE_PATH, newPath)
+            // 필요 시 DISPLAY_NAME, MIME_TYPE, DATE_MODIFIED 등도 함께 수정 가능
+            // put(MediaStore.Images.Media.DISPLAY_NAME, "새로운파일명.jpg")
+        }
+
+        try {
+            val rows = contentResolver.update(uri, contentValues, null, null)
+            if (rows > 0) {
+                // 이동 성공
+                Toast.makeText(this, "사진이 '$newPath' 로 이동 되었습니다.", Toast.LENGTH_SHORT).show()
+                viewModel.loadImages()
+            } else {
+                // rows == 0 → 이동 실패
+                Toast.makeText(this, "이동 실패", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: RecoverableSecurityException) {
+            // 여기서 사용자 동의(권한) 요청
+            pendingUpdateUri = uri
+            pendingUpdatePath = newPath
+
+            val intentSender = e.userAction.actionIntent.intentSender
+            updatePermissionLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "이동 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun moveImageToDownloadSubfolder(originalUri: Uri, fileName: String, subFolderPath: String) {
+        val resolver = contentResolver
+        try {
+            // 만약 subFolderPath = "Download/MyFolder" 라면?
+            // => 실제로 RELATIVE_PATH = Environment.DIRECTORY_DOWNLOADS + "/MyFolder"
+            val rest = subFolderPath.removePrefix("Download").removePrefix("/")
+            val finalDownloadPath = if (rest.isEmpty()) {
+                Environment.DIRECTORY_DOWNLOADS
+            } else {
+                Environment.DIRECTORY_DOWNLOADS + "/" + rest
+            }
+
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                put(MediaStore.Downloads.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Downloads.RELATIVE_PATH, finalDownloadPath)
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+
+            val downloadUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                ?: throw Exception("Download Insert Failed")
+
+            resolver.openInputStream(originalUri).use { input ->
+                resolver.openOutputStream(downloadUri).use { output ->
+                    if (input != null && output != null) {
+                        input.copyTo(output)
+                    } else {
+                        throw Exception("Stream is null")
+                    }
+                }
+            }
+
+            // 완료
+            val pendingOff = ContentValues().apply {
+                put(MediaStore.Downloads.IS_PENDING, 0)
+            }
+            resolver.update(downloadUri, pendingOff, null, null)
+
+            // 원본 삭제
+            val rowsDeleted = resolver.delete(originalUri, null, null)
+            if (rowsDeleted > 0) {
+                Toast.makeText(this, "'$fileName'이(가) $finalDownloadPath 폴더로 이동되었습니다.", Toast.LENGTH_SHORT).show()
+                viewModel.loadImages()
+            } else {
+                Toast.makeText(this, "다운로드는 되었지만 원본 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: RecoverableSecurityException) {
+            // 권한 재시도 로직
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Download 폴더 이동 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun moveImageToDownloadFolder(originalUri: Uri, fileName: String) {
+        val resolver = contentResolver
+        try {
+            // 1) Download 컬렉션에 새로 Insert
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)  // ex) "myphoto.jpg"
+                put(MediaStore.Downloads.MIME_TYPE, "image/jpeg") // 적절히
+                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+
+            val downloadUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                ?: throw Exception("Download Insert Failed")
+
+            // 2) 원본 → 새 파일로 copy
+            resolver.openInputStream(originalUri).use { input ->
+                resolver.openOutputStream(downloadUri).use { output ->
+                    if (input != null && output != null) {
+                        input.copyTo(output)
+                    } else {
+                        throw Exception("Stream is null")
+                    }
+                }
+            }
+
+            // 2.5) isPending = 0으로 업데이트 (다운로드 완료)
+            val pendingOff = ContentValues().apply {
+                put(MediaStore.Downloads.IS_PENDING, 0)
+            }
+            resolver.update(downloadUri, pendingOff, null, null)
+
+            // 3) 원본 이미지 삭제
+            val rowsDeleted = resolver.delete(originalUri, null, null)
+            if (rowsDeleted > 0) {
+                Toast.makeText(this, "'$fileName'이(가) 다운로드 폴더로 이동되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                // 삭제 실패 or 이미 권한 문제
+                Toast.makeText(this, "다운로드는 되었지만 원본 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: RecoverableSecurityException) {
+            // 원본 삭제시 발생할 수 있으므로, 휴지통 로직과 동일하게 승인 요청
+            // 필요하면 pendingDeleteUri, pendingDeletePosition 등에 담고
+            // 권한 요청 → 콜백에서 재시도
+            // ...
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Download 폴더 이동 오류: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -965,13 +1158,27 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 put(MediaStore.Images.Media.RELATIVE_PATH, albumPath)
                 put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
             }
-
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             if (uri != null) {
-                albumViewModel.loadAlbums() // 앨범 목록 새로 로드
                 showToast("새 앨범 '$albumName'이(가) 추가되었습니다.")
-            } else {
-                showToast("앨범 추가에 실패했습니다.")
+
+                // 1) 앨범 목록 다시 로드
+                albumViewModel.loadAlbums()
+
+                // 2) albumViewModel.albums 관찰 결과를 받은 뒤,
+                //    "albumName"과 동일한 앨범을 찾으면 addedAlbums 에 추가
+                //    (혹은 ID 비교를 위해 앨범이름 대신 absolutePath / id 등으로 찾을 수도 있음)
+                albumViewModel.albums.observe(this@SweepActivity) { albumList ->
+                    // "Pictures/$albumName"에 해당하는 앨범 찾기
+                    val newlyCreatedAlbum = albumList.find { it.name == albumName }
+                    // 만약 찾았다면 => addedAlbums 에 추가 + 중복 방지
+                    if (newlyCreatedAlbum != null && addedAlbums.none { it.id == newlyCreatedAlbum.id }) {
+                        addedAlbums.add(newlyCreatedAlbum)
+                        albumAdapter.submitList(addedAlbums.toList())
+                        // SharedPreferences 저장
+                        saveAlbums()
+                    }
+                }
             }
         } else {
             showToast("이미 존재하는 앨범입니다.")
@@ -998,7 +1205,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
 
         QuitChallengeDialog(
-            title = "휴지통 속 ${trashCount}장의 사진을\n비우고 챌린지를 그만할까요?",
+            title = "휴지통 속 ${trashCount}장의 사진을\n비우고 정리를 그만할까요?",
             explanation = "휴지통을 비우고 다음에 다시 도전할 수 있어요!",
             confirmText = "그만하기",
             cancelText = "계속하기",
