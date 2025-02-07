@@ -1,3 +1,4 @@
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -5,13 +6,12 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.umc.sweepic.R
-import android.widget.CheckBox
 
-class MemoDetailImageAdapter(private val images: List<Int>) :
+class MemoDetailImageAdapter(private var images: List<String>) :
     RecyclerView.Adapter<MemoDetailImageAdapter.ImageViewHolder>() {
 
-    private val selectedItems = mutableSetOf<Int>() // 선택된 사진의 위치를 저장
-    private var isSelectionMode = false // 선택 모드 상태 관리
+    private val selectedItems = mutableSetOf<Int>() // 선택된 사진의 위치 저장
+    private var isSelectionMode = false // 선택 모드 상태
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -20,11 +20,13 @@ class MemoDetailImageAdapter(private val images: List<Int>) :
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val imageRes = images[position]
+        val imageUrl = images[position]
+
+        Log.d("MemoDetailImageAdapter", "이미지 로드: $imageUrl") // ✅ 로드되는 이미지 확인
 
         // 이미지 로드
         Glide.with(holder.imageView.context)
-            .load(imageRes)
+            .load(imageUrl)
             .placeholder(R.drawable.img_record_ex)
             .into(holder.imageView)
 
@@ -35,7 +37,7 @@ class MemoDetailImageAdapter(private val images: List<Int>) :
 
         // 클릭 이벤트 (선택 모드에서만 작동)
         holder.itemView.setOnClickListener {
-            if (isSelectionMode) { // 선택 모드가 활성화된 경우에만 클릭 가능
+            if (isSelectionMode) { // 선택 모드 활성화 시 클릭 가능
                 if (selectedItems.contains(position)) {
                     selectedItems.remove(position)
                     holder.overlay.visibility = View.GONE
@@ -49,18 +51,23 @@ class MemoDetailImageAdapter(private val images: List<Int>) :
         }
     }
 
+    // ✅ 데이터 업데이트 (리스트 변경 가능하도록 `var images` 사용)
+    fun updateData(newImages: List<String>) {
+        Log.d("MemoDetailImageAdapter", "업데이트할 데이터: $newImages") // ✅ 로그 확인
+        images = newImages
+        notifyDataSetChanged() // ✅ UI 갱신
+    }
+
     override fun getItemCount(): Int = images.size
 
     // 선택된 항목 반환
-    fun getSelectedItems(): List<Int> {
-        return selectedItems.toList()
-    }
+    fun getSelectedItems(): List<Int> = selectedItems.toList()
 
     // 선택 모드 활성화/비활성화
     fun setSelectionMode(enabled: Boolean) {
         isSelectionMode = enabled
         if (!enabled) {
-            // 선택 모드 비활성화 시 모든 선택 상태 초기화
+            // 선택 모드 비활성화 시 선택 상태 초기화
             selectedItems.clear()
             notifyDataSetChanged()
         }

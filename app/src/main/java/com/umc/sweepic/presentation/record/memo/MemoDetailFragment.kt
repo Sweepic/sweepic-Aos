@@ -1,7 +1,10 @@
 package com.umc.sweepic.presentation.record.memo
 
 import MemoDetailImageAdapter
+import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
+import android.util.Log.*
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -13,7 +16,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentMemoDetailBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MemoDetailFragment : Fragment() {
     private var _binding: FragmentMemoDetailBinding? = null
     private val binding get() = _binding!!
@@ -30,33 +35,50 @@ class MemoDetailFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 전달받은 데이터 가져오기
-        val memoFolder = arguments?.getParcelable<MemoFolder>("memoFolder")
+        // 전달받은 폴더아이디 가져오기
+        val folderId = arguments?.getLong("folderId") ?: return
 
-        memoFolder?.let {
-            binding.tvMemoDetailFolderTitle.text = it.title
-            binding.tvMemoDetailFolderContent.text = it.content ?: null
+        // 뷰모델에서 폴더 상세 데이터 가져오기
+        memoFolderViewModel.fetchMemoFolderDetails(folderId)
 
-            // 이미지 리사이클러뷰 설정
-            imageAdapter = MemoDetailImageAdapter(it.imageResIds)
-            binding.rvMemoDetailImages.layoutManager =
-                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-            binding.rvMemoDetailImages.adapter = imageAdapter
+        // RecyclerView 설정
+        imageAdapter = MemoDetailImageAdapter(emptyList())
+        binding.rvMemoDetailImages.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.rvMemoDetailImages.adapter = imageAdapter
+
+        // UI 변환
+        memoFolderViewModel.memoFolderDetail.observe(viewLifecycleOwner) { memoDetail ->
+            if (memoDetail != null) {
+                binding.tvMemoDetailFolderTitle.text = memoDetail.folderName
+                binding.tvMemoDetailFolderContent.text = memoDetail.imageText?.takeIf { it.isNotEmpty() } ?: ""
+
+                // 이미지 리스트가 있으면 리사이클러뷰 업데이트
+                val imageUrls = memoDetail.images.mapNotNull { it.imageUrl }
+                if (imageUrls.isNotEmpty()) {
+                    imageAdapter.updateData(imageUrls)
+                    binding.rvMemoDetailImages.visibility = View.VISIBLE
+                } else {
+                    binding.rvMemoDetailImages.visibility = View.GONE
+                }
+            }
         }
 
-        // 뒤로가기 버튼 누르면 전 화면으로 이동
+        // 뒤로 가기 버튼 설정
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        // 메뉴 버튼 누르면 팝업 메뉴
+        // 메뉴 버튼 클릭 시 팝업 메뉴 표시
         binding.btnMenu.setOnClickListener { view ->
             showPopupMenu(view)
         }
     }
+
 
     private fun showPopupMenu(view: View) {
         val popup = PopupMenu(requireContext(), view)
@@ -102,9 +124,25 @@ class MemoDetailFragment : Fragment() {
         popup.show()
     }
 
-    //폴더 삭제 (미구현)
     private fun handleFolderDelete() {
+        val folderId = arguments?.getLong("folderId") ?: return
+        val folderName = binding.tvMemoDetailFolderTitle.text.toString() // ✅ 현재 폴더 이름 가져오기
+        showDeleteConfirmationDialog(folderId, folderName) // ✅ 폴더 이름 전달
+    }
 
+    // 폴더 삭제 다이얼로그 창
+    private fun showDeleteConfirmationDialog(folderId: Long, folderName: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("폴더 삭제")
+            .setMessage("[$folderName] 폴더를 정말 삭제하시겠어요?\n지금 폴더를 삭제하면 다시 복구할 수 없어요.")
+            .setPositiveButton("삭제") { _, _ ->
+                // ✅ 사용자가 '삭제' 버튼을 눌렀을 때 폴더 삭제 실행
+                memoFolderViewModel.deleteMemoFolder(folderId)
+                Toast.makeText(requireContext(), "폴더가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack() // 이전 화면으로 이동
+            }
+            .setNegativeButton("취소", null) // 취소 버튼 누르면 아무 동작 없음
+            .show()
     }
 
 
@@ -116,7 +154,26 @@ class MemoDetailFragment : Fragment() {
 
     //선택한 사진 삭제
     private fun handlePhotoDelete() {
-        val selectedItems = imageAdapter.getSelectedItems()
+//        val selectedItems = imageAdapter.getSelectedItems()
+//        Log.d("MemoDetailFragment", "선택된 사진 목록: $selectedItems")
+//
+//        if (selectedItems.isEmpty()) {
+//            Toast.makeText(requireContext(), "삭제할 사진을 선택해주세요.", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//
+//        val folderId = arguments?.getLong("folderId") ?: return
+//        val selectedImageIds = selectedItems.map { it.toLong() } // ✅ 선택된 이미지 ID 리스트
+//
+//        AlertDialog.Builder(requireContext())
+//            .setTitle("사진 삭제")
+//            .setMessage("선택한 사진을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.")
+//            .setPositiveButton("삭제") { _, _ ->
+//                memoFolderViewModel.deleteImages(folderId, selectedImageIds)
+//                Toast.makeText(requireContext(), "사진이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+//            }
+//            .setNegativeButton("취소", null)
+//            .show()
     }
 
     //사진 이동(다이얼로그 창이 떠야함!!)
@@ -128,23 +185,18 @@ class MemoDetailFragment : Fragment() {
             return
         }
 
-        memoFolderViewModel.memoFolders.value?.let { folders ->
-            val currentFolder = arguments?.getParcelable<MemoFolder>("memoFolder")
-            if (currentFolder != null) {
-                // 현재 폴더 제외하고 다이얼로그에 뜨게끔하기
-                val filteredFolders = folders.filter { it.id != currentFolder.id }
-                val folderSelectDialog = FolderSelectDialog(
-                    folders = filteredFolders,
-                    onMoveButtonClick = { selectedFolder ->
-                        movePhotosToFolder(selectedFolder)
-                    },
-                    onDialogDismiss = {
-                        resetToDefaultState()
-                    }
-                )
-                folderSelectDialog.show(parentFragmentManager, "FolderSelectDialog")
+        val currentFolderId = arguments?.getLong("folderId") ?: return // ✅ 현재 폴더 ID 가져오기
+
+        val folderSelectDialog = FolderSelectDialog(
+            currentFolderId = currentFolderId, // ✅ 현재 폴더 ID 전달
+            onMoveButtonClick = { selectedFolder ->
+                movePhotosToFolder(selectedFolder)
+            },
+            onDialogDismiss = {
+                resetToDefaultState()
             }
-        }
+        )
+        folderSelectDialog.show(parentFragmentManager, "FolderSelectDialog") // ✅ 실행
     }
 
 

@@ -5,13 +5,17 @@ import android.content.Context
 import com.umc.sweepic.data.repositoryImpl.TestRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.GalleryRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.SweepRepositoryImpl
+import com.umc.sweepic.data.repositoryImpl.sweep.MemoRepositoryImpl
 import com.umc.sweepic.data.service.TestService
 import com.umc.sweepic.domain.repository.TestRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
+import com.umc.sweepic.domain.repository.sweep.MemoRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -44,4 +48,9 @@ object RepositoryModule {
         sweepRepositoryImpl: SweepRepositoryImpl
     ): SweepRepository = sweepRepositoryImpl
 
+    @Singleton
+    @Provides
+    fun providesMemoRepository(
+        memoRepositoryImpl: MemoRepositoryImpl
+    ) : MemoRepository = memoRepositoryImpl
 }

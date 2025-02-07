@@ -1,10 +1,11 @@
+package com.umc.sweepic.presentation.record.memo
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.umc.sweepic.R
+import com.bumptech.glide.Glide
 import com.umc.sweepic.databinding.ItemMemoFolderBinding
-import com.umc.sweepic.presentation.record.memo.MemoFolder
 
 class MemoAdapter(
     private var memoFolders: List<MemoFolder>,
@@ -26,7 +27,6 @@ class MemoAdapter(
 
     override fun getItemCount(): Int = memoFolders.size
 
-//     데이터 갱신 메서드
     fun updateData(newData: List<MemoFolder>) {
         memoFolders = newData
         notifyDataSetChanged()
@@ -38,20 +38,35 @@ class MemoAdapter(
         fun bind(memoFolder: MemoFolder) {
             binding.tvMemoFolderTitle.text = memoFolder.title
             binding.tvMemoDate.text = memoFolder.date
-            binding.tvMemoContent.text = memoFolder.content ?: ""
-            binding.tvMemoPhotoNum.text = if (memoFolder.imageResIds.isNotEmpty()) {
-                "${memoFolder.imageResIds.size}장의 사진"
+
+
+            //사진 수 표시
+            if (memoFolder.imageCount > 0) {
+                binding.tvMemoPhotoNum.text = "${memoFolder.imageCount}장의 사진"
+                binding.tvMemoPhotoNum.visibility = View.VISIBLE
             } else {
-                ""
+                binding.tvMemoPhotoNum.visibility = View.GONE // 🔹 사진 없으면 아예 안 보이게 설정
             }
-            binding.root.setOnClickListener { onItemClick(memoFolder) }
 
-            binding.memoImage.setImageResource(
-                memoFolder.imageResIds.firstOrNull() ?: R.drawable.img_record_ex
-            )
-            binding.memoImage.visibility =
-                if (memoFolder.imageResIds.isNotEmpty()) View.VISIBLE else View.GONE
 
+            //메모 내용 표시
+            if (!memoFolder.content.isNullOrEmpty()) {
+                binding.tvMemoContent.text = memoFolder.content
+                binding.tvMemoContent.visibility = View.VISIBLE
+            } else {
+                binding.tvMemoContent.visibility = View.GONE //
+            }
+
+
+            // 썸네일 이미지 표시 (이미지가 있을 경우만 로드하기)
+            if (!memoFolder.imageUrl.isNullOrEmpty()) {
+                Glide.with(binding.root.context)
+                    .load(memoFolder.imageUrl)
+                    .into(binding.memoImage)
+                binding.memoImage.visibility = View.VISIBLE
+            } else {
+                binding.memoImage.visibility = View.GONE
+            }
             binding.root.setOnClickListener { onItemClick(memoFolder) }
         }
     }
