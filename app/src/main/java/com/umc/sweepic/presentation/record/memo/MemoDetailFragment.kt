@@ -154,7 +154,26 @@ class MemoDetailFragment : Fragment() {
 
     //선택한 사진 삭제
     private fun handlePhotoDelete() {
-        val selectedItems = imageAdapter.getSelectedItems()
+//        val selectedItems = imageAdapter.getSelectedItems()
+//        Log.d("MemoDetailFragment", "선택된 사진 목록: $selectedItems")
+//
+//        if (selectedItems.isEmpty()) {
+//            Toast.makeText(requireContext(), "삭제할 사진을 선택해주세요.", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//
+//        val folderId = arguments?.getLong("folderId") ?: return
+//        val selectedImageIds = selectedItems.map { it.toLong() } // ✅ 선택된 이미지 ID 리스트
+//
+//        AlertDialog.Builder(requireContext())
+//            .setTitle("사진 삭제")
+//            .setMessage("선택한 사진을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.")
+//            .setPositiveButton("삭제") { _, _ ->
+//                memoFolderViewModel.deleteImages(folderId, selectedImageIds)
+//                Toast.makeText(requireContext(), "사진이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+//            }
+//            .setNegativeButton("취소", null)
+//            .show()
     }
 
     //사진 이동(다이얼로그 창이 떠야함!!)

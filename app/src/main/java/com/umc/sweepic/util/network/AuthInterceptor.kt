@@ -10,7 +10,7 @@ class AuthInterceptor @Inject constructor(
     private val spf: SharedPreferences
 ): Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val authRequest = chain.request().newBuilder().addHeader("Cookie", "connect.sid= ${spf.getString("cookie", "")}").build()
+        val authRequest = chain.request().newBuilder().addHeader("Cookie", "connect.sid= ${spf.getString("cookie", "s%3ACni--i6VN30lnlMSCvt46gOEyx6NMl7H.nO6yvfpDYjPd7vJaKgxuQ2dAhhcJWDL2xr6rwWMQtZ8")}").build()
         return chain.proceed(authRequest)
     }
 }
