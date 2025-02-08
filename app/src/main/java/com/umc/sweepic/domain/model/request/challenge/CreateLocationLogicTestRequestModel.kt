@@ -15,4 +15,10 @@ data class CreateLocationLogicTestRequestModel (
         CreateLocationLogicTestRequestDto(
             id, displayName, latitude, longitude, timestamp
         )
+
+    companion object {
+        fun List<CreateLocationLogicTestRequestModel>.toDtoList(): List<CreateLocationLogicTestRequestDto> {
+            return this.map { it.toCreateLocationLogicTestRequestDto() }
+        }
+    }
 }

@@ -10,6 +10,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.umc.sweepic.databinding.FragmentChallengeBinding
 import com.umc.sweepic.presentation.base.BaseFragment
 import com.umc.sweepic.R
+import com.umc.sweepic.domain.model.request.challenge.CreateLocationChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel
 import com.umc.sweepic.presentation.challenge.adapter.ChallengeAdapter
 import com.umc.sweepic.presentation.challenge.adapter.ChallengePagerAdapter
@@ -30,6 +31,15 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
                 Toast.makeText(requireContext(), "API 응답 실패!", Toast.LENGTH_SHORT).show()
             }
         }
+        viewModel.locationChallengeRespone.observe(viewLifecycleOwner) { response ->
+            if (response != null) {
+                Log.d("ChallengeFragment", "locationChallnege API 응답 성공: $response")
+                Toast.makeText(requireContext(), "locationChallnege API 응답 성공!", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("ChallengeFragment", "locationChallnege API 응답 실패")
+                Toast.makeText(requireContext(), "locationChallnege API 응답 실패!", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun initView() {
@@ -41,19 +51,34 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
 
         setupViewPagerAndTabs()
         fetchChallengeTestData()
+        fetchLocationChallengeData()
     }
 
     private fun fetchChallengeTestData() {
         val request = CreateLocationLogicTestRequestModel(
-            id = "12345",
-            displayName = "테스트 챌린지",
-            latitude = 37.5665,
-            longitude = 126.9780,
-            timestamp = System.currentTimeMillis().toString()
+            id = "12",
+            displayName = "string",
+            latitude = 0.0,
+            longitude = 0.0,
+            timestamp = "string"
         )
 
         Log.d("ChallengeFragment", "API 요청 시작: $request")
         viewModel.fetchChallengeLocationLogicTestChallengeCreate(request)
+
+    }
+
+    private fun fetchLocationChallengeData(){
+        val request = CreateLocationChallengeRequestModel(
+            userId = "12",
+            title = "string",
+            context = "string",
+            location = "string",
+            required = 0
+        )
+
+        Log.d("ChallengeFragment", "locationChallnege API 요청 시작: $request")
+        viewModel.fetchChallengeLocationChallengeCreate(request)
     }
 
     private fun setupViewPagerAndTabs() {
