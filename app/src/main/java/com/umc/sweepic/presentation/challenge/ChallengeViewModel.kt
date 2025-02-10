@@ -6,9 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.umc.sweepic.R
+import com.umc.sweepic.data.dto.response.challenge.CreateChallengeDeleteResponseDto
 import com.umc.sweepic.domain.model.Challenge
+import com.umc.sweepic.domain.model.request.challenge.CreateChallengeUpdateRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel
+import com.umc.sweepic.domain.model.response.challenge.CreateChallengeDeleteResponseModel
+import com.umc.sweepic.domain.model.response.challenge.CreateChallengeUpdateResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateLocationChallengeResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateLocationLogicTestResponseModel
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
@@ -20,11 +24,17 @@ import javax.inject.Inject
 class ChallengeViewModel @Inject constructor(
     private val repository: ChallengeRepository) : ViewModel(){
 
+    private val _updateResponse = MutableLiveData<CreateChallengeUpdateResponseModel?>()
+    val updateResponse: LiveData<CreateChallengeUpdateResponseModel?> get() = _updateResponse
+
+    private val _deleteResponse = MutableLiveData<CreateChallengeDeleteResponseModel?>()
+    val deleteResponse: LiveData<CreateChallengeDeleteResponseModel?> get() = _deleteResponse
+
     private val _locationTestResponse = MutableLiveData<List<CreateLocationLogicTestResponseModel>>()
     val locationTestResponse: LiveData<List<CreateLocationLogicTestResponseModel>> get() = _locationTestResponse
 
     private val _locationChallengeResponse = MutableLiveData<CreateLocationChallengeResponseModel?>()
-    val locationChallengeRespone: LiveData<CreateLocationChallengeResponseModel?> get() = _locationChallengeResponse
+    val locationChallengeResponse: LiveData<CreateLocationChallengeResponseModel?> get() = _locationChallengeResponse
 
     private val _newChallenges = MutableLiveData<List<Challenge>>()
     val newChallenges: LiveData<List<Challenge>> get() = _newChallenges
@@ -57,9 +67,33 @@ class ChallengeViewModel @Inject constructor(
         _inProgressChallenges.value = currentInProgressChallenges
     }
 
+    fun fetchChallengeUpdateCreate(request: CreateChallengeUpdateRequestModel?) {
+        if (request == null) {
+            Log.e("ChallengeViewModel", "update API 요청 실패: request가 null입니다.")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                Log.d("ChallengeViewModel", "update API 호출 시작: $request")
+                repository.fetchChallengeUpdate(request)
+                    .onSuccess { response ->
+                        _updateResponse.value = response
+                        Log.d("ChallengeViewModel", "update API 요청 성공: $response")
+                    }
+                    .onFailure { exception ->
+                        _updateResponse.value = null
+                        Log.e("ChallengeViewModel", "update API 요청 실패", exception)
+                    }
+            } catch (e: Exception) {
+                Log.e("ChallengeViewModel", "update API 호출 중 예외 발생", e)
+            }
+        }
+    }
+
     fun fetchChallengeLocationLogicTestChallengeCreate(request: CreateLocationLogicTestRequestModel?) {
         if (request == null) {
-            Log.e("ChallengeViewModel", "API 요청 실패: request가 null입니다.")
+            Log.e("ChallengeViewModel", "location logic test API 요청 실패: request가 null입니다.")
             _locationTestResponse.value = emptyList()
             return
         }
@@ -68,18 +102,18 @@ class ChallengeViewModel @Inject constructor(
             try {
                 val requestList = listOf(request)
 
-                Log.d("ChallengeViewModel", "API 호출 시작: $requestList")
+                Log.d("ChallengeViewModel", "location logic test API 호출 시작: $requestList")
                 repository.fetchChallengeLocationLogicTestChallengeCreate(requestList)
                     .onSuccess { response ->
                         _locationTestResponse.value = response
-                        Log.d("ChallengeViewModel", "API 요청 성공: $response")
+                        Log.d("ChallengeViewModel", "location logic test API 요청 성공: $response")
                     }
                     .onFailure { exception ->
                         _locationTestResponse.value = emptyList()
-                        Log.e("ChallengeViewModel", "API 요청 실패", exception)
+                        Log.e("ChallengeViewModel", "location logic test API 요청 실패", exception)
                     }
             } catch (e: Exception) {
-                Log.e("ChallengeViewModel", "API 호출 중 예외 발생", e)
+                Log.e("ChallengeViewModel", "location logic test API 호출 중 예외 발생", e)
             }
         }
     }

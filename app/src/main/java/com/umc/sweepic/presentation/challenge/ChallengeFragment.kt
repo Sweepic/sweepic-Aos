@@ -10,6 +10,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.umc.sweepic.databinding.FragmentChallengeBinding
 import com.umc.sweepic.presentation.base.BaseFragment
 import com.umc.sweepic.R
+import com.umc.sweepic.domain.model.request.challenge.CreateChallengeUpdateRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel
 import com.umc.sweepic.presentation.challenge.adapter.ChallengeAdapter
@@ -22,6 +23,15 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
     private val viewModel: ChallengeViewModel by viewModels()
 
     override fun initObserver() {
+        viewModel.updateResponse.observe(viewLifecycleOwner) { response ->
+            if (response != null) {
+                Log.d("ChallengeFragment", "update API 응답 성공: $response")
+                Toast.makeText(requireContext(), "update API 응답 성공!", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("ChallengeFragment", "update API 응답 실패")
+                Toast.makeText(requireContext(), "update API 응답 실패!", Toast.LENGTH_SHORT).show()
+            }
+        }
         viewModel.locationTestResponse.observe(viewLifecycleOwner) { response ->
             if (response != null) {
                 Log.d("ChallengeFragment", "API 응답 성공: $response")
@@ -31,7 +41,7 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
                 Toast.makeText(requireContext(), "API 응답 실패!", Toast.LENGTH_SHORT).show()
             }
         }
-        viewModel.locationChallengeRespone.observe(viewLifecycleOwner) { response ->
+        viewModel.locationChallengeResponse.observe(viewLifecycleOwner) { response ->
             if (response != null) {
                 Log.d("ChallengeFragment", "locationChallnege API 응답 성공: $response")
                 Toast.makeText(requireContext(), "locationChallnege API 응답 성공!", Toast.LENGTH_SHORT).show()
@@ -50,8 +60,20 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
         }
 
         setupViewPagerAndTabs()
+        fetchChallengeUpdateData()
         fetchChallengeTestData()
         fetchLocationChallengeData()
+    }
+
+    private fun fetchChallengeUpdateData(){
+        val request = CreateChallengeUpdateRequestModel(
+            id = "12",
+            required = 0,
+            remaining = 0
+        )
+
+        Log.d("ChallengeFragment", "update API 요청 시작: $request")
+        viewModel.fetchChallengeUpdateCreate(request)
     }
 
     private fun fetchChallengeTestData() {
@@ -63,7 +85,7 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
             timestamp = "string"
         )
 
-        Log.d("ChallengeFragment", "API 요청 시작: $request")
+        Log.d("ChallengeFragment", "location logic test API 요청 시작: $request")
         viewModel.fetchChallengeLocationLogicTestChallengeCreate(request)
 
     }

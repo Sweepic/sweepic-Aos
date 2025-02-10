@@ -14,10 +14,4 @@ data class CreateLocationChallengeRequestModel(
         CreateLocationChallengeRequestDto(
             userId, title, context, location, required
         )
-
-    companion object {
-        fun List<CreateLocationChallengeRequestModel>.toDtoList(): List<CreateLocationChallengeRequestDto> {
-            return this.map { it.toCreateLocationChallengeRequestDto() }
-        }
-    }
 }
