@@ -63,7 +63,7 @@ class MemoRepositoryImpl @Inject constructor(
 //            }
 //        }.onFailure { Log.e("MemoRepositoryImpl", "사진 삭제 오류: ${it.message}") }
 
-    override suspend fun moveImages(folderId: Long, targetFolderId: Long, imageIds: List<Long>): Result<Unit> =
+    override suspend fun moveImages(folderId: Long, targetFolderId: String, imageIds: List<String>): Result<Unit> =
         runCatching {
             val requestDto = MoveImagesRequestDto(targetFolderId, imageIds)
             val response = memoDataSource.moveImages(folderId, requestDto)

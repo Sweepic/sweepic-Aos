@@ -13,10 +13,12 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentMemoDetailBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MemoDetailFragment : Fragment() {
@@ -200,10 +202,49 @@ class MemoDetailFragment : Fragment() {
     }
 
 
-    //선택된 폴더로 이동
+    // 선택된 폴더로 이동
+    // ✅ 선택된 폴더로 이동
     private fun movePhotosToFolder(selectedFolder: MemoFolder) {
+        val selectedItems = imageAdapter.getSelectedItems()
 
+        if (selectedItems.isEmpty()) {
+            Toast.makeText(requireContext(), "이동할 사진을 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val folderId = arguments?.getLong("folderId") ?: return
+        val targetFolderId = selectedFolder.id.toString()
+        val selectedImageIds = selectedItems.map { it.toString() }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("사진 이동")
+            .setMessage("선택한 사진을 '${selectedFolder.title}' 폴더로 이동하시겠습니까?")
+            .setPositiveButton("이동") { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        memoFolderViewModel.moveImages(folderId, targetFolderId, selectedImageIds)
+
+                        // ✅ 이동 완료 후 UI 갱신
+                        memoFolderViewModel.fetchMemoFolderDetails(folderId)
+
+                        // ✅ RecyclerView 다시 갱신
+                        requireActivity().runOnUiThread {
+                            imageAdapter.setSelectionMode(false) // 선택 모드 종료
+                            imageAdapter.notifyDataSetChanged() // RecyclerView 새로고침
+                        }
+
+                        Toast.makeText(requireContext(), "사진이 이동되었습니다.", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Log.e("MemoDetailFragment", "사진 이동 실패: ${e.message}")
+                        Toast.makeText(requireContext(), "사진 이동 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
+
+
 
     //다이얼로그 창 닫을때 실행되는 메서드
     private fun resetToDefaultState() {

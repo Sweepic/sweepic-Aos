@@ -96,4 +96,16 @@ class MemoFolderViewModel @Inject constructor(
 //                Log.e("MemoFolderViewModel", "사진 삭제 중 오류 발생", e)
 //            }
 //        }
+        fun moveImages(folderId: Long, targetFolderId: String, imageIds: List<String>) {
+            viewModelScope.launch {
+                memoRepository.moveImages(folderId, targetFolderId, imageIds)
+                    .onSuccess {
+                        Log.d("MemoFolderViewModel", "사진 이동 성공")
+                    }
+                    .onFailure {
+                        Log.e("MemoFolderViewModel", "사진 이동 실패: ${it.message}")
+                    }
+            }
+        }
     }
+
