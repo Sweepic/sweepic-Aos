@@ -11,6 +11,8 @@ import com.umc.sweepic.domain.repository.sweep.MemoRepository
 import com.umc.sweepic.presentation.record.memo.MemoFolder.Companion.toMemoFolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,7 +23,7 @@ class MemoFolderViewModel @Inject constructor(
     private val _memoFolders = MutableLiveData<List<MemoFolder>>()
     val memoFolders: LiveData<List<MemoFolder>> get() = _memoFolders
 
-    // ✅ 메모 목록 가져오기
+    // 메모 목록 가져오기
     fun fetchMemoFolders() {
         viewModelScope.launch {
             memoRepository.recordMemoList()
