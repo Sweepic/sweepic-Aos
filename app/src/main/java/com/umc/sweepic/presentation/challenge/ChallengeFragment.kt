@@ -13,6 +13,8 @@ import com.umc.sweepic.R
 import com.umc.sweepic.domain.model.request.challenge.CreateChallengeUpdateRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel
+import com.umc.sweepic.domain.model.request.challenge.CreateWeeklyChallengeRequestModel
+import com.umc.sweepic.domain.model.response.challenge.ChallengeGetResponseModel
 import com.umc.sweepic.presentation.challenge.adapter.ChallengeAdapter
 import com.umc.sweepic.presentation.challenge.adapter.ChallengePagerAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,18 +29,33 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
             if (response != null) {
                 Log.d("ChallengeFragment", "update API 응답 성공: $response")
                 Toast.makeText(requireContext(), "update API 응답 성공!", Toast.LENGTH_SHORT).show()
+
+                binding.tvRecentNumber.text = response.remaining.toString()
+                binding.tvTotal.text = response.required.toString()
+
             } else {
                 Log.e("ChallengeFragment", "update API 응답 실패")
                 Toast.makeText(requireContext(), "update API 응답 실패!", Toast.LENGTH_SHORT).show()
             }
         }
+        viewModel.getChallengeResponse.observe(viewLifecycleOwner) { response ->
+            if (response != null) {
+                Log.d("ChallengeFragment", "getChallenge API 응답 성공: $response")
+                Toast.makeText(requireContext(), "getChallenge API 응답 성공!", Toast.LENGTH_SHORT).show()
+
+
+            } else {
+                Log.e("ChallengeFragment", "getChallenge API 응답 실패")
+                Toast.makeText(requireContext(), "getChallenge API 응답 실패!", Toast.LENGTH_SHORT).show()
+            }
+        }
         viewModel.locationTestResponse.observe(viewLifecycleOwner) { response ->
             if (response != null) {
-                Log.d("ChallengeFragment", "API 응답 성공: $response")
-                Toast.makeText(requireContext(), "API 응답 성공!", Toast.LENGTH_SHORT).show()
+                Log.d("ChallengeFragment", "location logic test API 응답 성공: $response")
+                Toast.makeText(requireContext(), "location logic test API 응답 성공!", Toast.LENGTH_SHORT).show()
             } else {
-                Log.e("ChallengeFragment", "API 응답 실패")
-                Toast.makeText(requireContext(), "API 응답 실패!", Toast.LENGTH_SHORT).show()
+                Log.e("ChallengeFragment", "location logic test API 응답 실패")
+                Toast.makeText(requireContext(), "location logic test API 응답 실패!", Toast.LENGTH_SHORT).show()
             }
         }
         viewModel.locationChallengeResponse.observe(viewLifecycleOwner) { response ->
@@ -48,6 +65,15 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
             } else {
                 Log.e("ChallengeFragment", "locationChallnege API 응답 실패")
                 Toast.makeText(requireContext(), "locationChallnege API 응답 실패!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        viewModel.weeklyChallengeResponse.observe(viewLifecycleOwner) { response ->
+            if (response != null) {
+                Log.d("ChallengeFragment", "weekly API 응답 성공: $response")
+                Toast.makeText(requireContext(), "weekly API 응답 성공!", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("ChallengeFragment", "weekly API 응답 실패")
+                Toast.makeText(requireContext(), "weekly API 응답 실패!", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -61,19 +87,28 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
 
         setupViewPagerAndTabs()
         fetchChallengeUpdateData()
+        fetchChallengeGet()
         fetchChallengeTestData()
         fetchLocationChallengeData()
+        fetchWeeklyChallengeCreate()
     }
 
     private fun fetchChallengeUpdateData(){
         val request = CreateChallengeUpdateRequestModel(
-            id = "12",
+            id = "45",
             required = 0,
             remaining = 0
         )
 
         Log.d("ChallengeFragment", "update API 요청 시작: $request")
         viewModel.fetchChallengeUpdateCreate(request)
+    }
+
+    private fun fetchChallengeGet(){
+        val userId = "12"
+
+        Log.d("ChallengeFragment", "getChallenge API 요청 시작: $userId")
+        viewModel.fetchChallengeGet(userId)
     }
 
     private fun fetchChallengeTestData() {
@@ -92,8 +127,6 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
 
     private fun fetchLocationChallengeData(){
         val request = CreateLocationChallengeRequestModel(
-            userId = "12",
-            title = "string",
             context = "string",
             location = "string",
             required = 0
@@ -101,6 +134,18 @@ class ChallengeFragment : BaseFragment<FragmentChallengeBinding>(R.layout.fragme
 
         Log.d("ChallengeFragment", "locationChallnege API 요청 시작: $request")
         viewModel.fetchChallengeLocationChallengeCreate(request)
+    }
+
+    private fun fetchWeeklyChallengeCreate() {
+        val request = CreateWeeklyChallengeRequestModel(
+            context = "string",
+            challengeDate = "string",
+            required = 0
+        )
+
+        Log.d("ChallengeFragment", "Weekly challenge API 요청 시작: $request")
+        viewModel.fetchWeeklyChallengeCreate(request)
+
     }
 
     private fun setupViewPagerAndTabs() {

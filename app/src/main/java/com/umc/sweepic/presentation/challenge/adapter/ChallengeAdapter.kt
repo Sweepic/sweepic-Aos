@@ -36,7 +36,7 @@ class ChallengeAdapter(
             image.setImageResource(challenge.imageResId)
 
             button.setOnClickListener {
-                onChallengeButtonClick(challenge) // 버튼 클릭 이벤트 콜백 호출
+                onChallengeButtonClick(challenge) // 버튼 클릭 이벤트 콜백 호출c
             }
         }
     }

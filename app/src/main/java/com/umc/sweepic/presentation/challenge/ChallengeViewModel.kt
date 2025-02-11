@@ -6,15 +6,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.umc.sweepic.R
+import com.umc.sweepic.data.dto.response.challenge.ChallengeGetResponseDto
 import com.umc.sweepic.data.dto.response.challenge.CreateChallengeDeleteResponseDto
 import com.umc.sweepic.domain.model.Challenge
 import com.umc.sweepic.domain.model.request.challenge.CreateChallengeUpdateRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel
+import com.umc.sweepic.domain.model.request.challenge.CreateWeeklyChallengeRequestModel
+import com.umc.sweepic.domain.model.response.challenge.ChallengeGetResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateChallengeDeleteResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateChallengeUpdateResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateLocationChallengeResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateLocationLogicTestResponseModel
+import com.umc.sweepic.domain.model.response.challenge.CreateWeeklyChallengeResponseModel
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -27,14 +31,17 @@ class ChallengeViewModel @Inject constructor(
     private val _updateResponse = MutableLiveData<CreateChallengeUpdateResponseModel?>()
     val updateResponse: LiveData<CreateChallengeUpdateResponseModel?> get() = _updateResponse
 
-    private val _deleteResponse = MutableLiveData<CreateChallengeDeleteResponseModel?>()
-    val deleteResponse: LiveData<CreateChallengeDeleteResponseModel?> get() = _deleteResponse
+    private val _getChallengeResponse = MutableLiveData<List<ChallengeGetResponseModel>>()
+    val getChallengeResponse: LiveData<List<ChallengeGetResponseModel>> get() = _getChallengeResponse
 
     private val _locationTestResponse = MutableLiveData<List<CreateLocationLogicTestResponseModel>>()
     val locationTestResponse: LiveData<List<CreateLocationLogicTestResponseModel>> get() = _locationTestResponse
 
     private val _locationChallengeResponse = MutableLiveData<CreateLocationChallengeResponseModel?>()
     val locationChallengeResponse: LiveData<CreateLocationChallengeResponseModel?> get() = _locationChallengeResponse
+
+    private val _weeklyChallengeResponse = MutableLiveData<CreateWeeklyChallengeResponseModel?>()
+    val weeklyChallengeResponse: LiveData<CreateWeeklyChallengeResponseModel?> get() = _weeklyChallengeResponse
 
     private val _newChallenges = MutableLiveData<List<Challenge>>()
     val newChallenges: LiveData<List<Challenge>> get() = _newChallenges
@@ -91,6 +98,25 @@ class ChallengeViewModel @Inject constructor(
         }
     }
 
+    fun fetchChallengeGet(userId: String) {
+        viewModelScope.launch {
+            try {
+                Log.d("ChallengeViewModel", "getChallenge API 호출 시작: $userId")
+                repository.fetchChallengeGet(userId)
+                    .onSuccess { response ->
+                        _getChallengeResponse.value = response
+                        Log.d("ChallengeViewModel", "getChallenge API 요청 성공: $response")
+                    }
+                    .onFailure { exception ->
+                        _getChallengeResponse.value = emptyList()
+                        Log.e("ChallengeViewModel", "getChallenge API 요청 실패", exception)
+                    }
+            } catch (e: Exception) {
+                Log.e("ChallengeViewModel", "getChallenge API 호출 중 예외 발생", e)
+            }
+        }
+    }
+
     fun fetchChallengeLocationLogicTestChallengeCreate(request: CreateLocationLogicTestRequestModel?) {
         if (request == null) {
             Log.e("ChallengeViewModel", "location logic test API 요청 실패: request가 null입니다.")
@@ -126,18 +152,42 @@ class ChallengeViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                Log.d("ChallengeViewModel", "API 호출 시작: $request")
+                Log.d("ChallengeViewModel", "location API 호출 시작: $request")
                 repository.fetchChallengeLocationChallengeCreate(request)
                     .onSuccess { response ->
                         _locationChallengeResponse.value = response
-                        Log.d("ChallengeViewModel", "API 요청 성공: $response")
+                        Log.d("ChallengeViewModel", "location API 요청 성공: $response")
                     }
                     .onFailure { exception ->
                         _locationChallengeResponse.value = null
-                        Log.e("ChallengeViewModel", "API 요청 실패", exception)
+                        Log.e("ChallengeViewModel", "location API 요청 실패", exception)
                     }
             } catch (e: Exception) {
-                Log.e("ChallengeViewModel", "API 호출 중 예외 발생", e)
+                Log.e("ChallengeViewModel", "location API 호출 중 예외 발생", e)
+            }
+        }
+    }
+
+    fun fetchWeeklyChallengeCreate(request: CreateWeeklyChallengeRequestModel?) {
+        if (request == null) {
+            Log.e("ChallengeViewModel", "weekly API 요청 실패: request가 null입니다.")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                Log.d("ChallengeViewModel", "weekly API 호출 시작: $request")
+                repository.fetchWeeklyChallengeCreate(request)
+                    .onSuccess { response ->
+                        _weeklyChallengeResponse.value = response
+                        Log.d("ChallengeViewModel", "weekly API 요청 성공: $response")
+                    }
+                    .onFailure { exception ->
+                        _weeklyChallengeResponse.value = null
+                        Log.e("ChallengeViewModel", "weekly API 요청 실패", exception)
+                    }
+            } catch (e: Exception) {
+                Log.e("ChallengeViewModel", "weekly API 호출 중 예외 발생", e)
             }
         }
     }

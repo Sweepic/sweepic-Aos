@@ -5,18 +5,18 @@ import com.umc.sweepic.domain.model.response.challenge.CreateLocationChallengeRe
 data class CreateLocationChallengeResponseDto (
     val id: String,
     val title: String,
-    val context: Double,
-    val requireCount: Int,
+    val context: String,
+    val requiredCount: Int,
     val remainingCount: Int,
     val userId: String,
-    val createAt: String,
-    val updateAt: String,
+    val createdAt: String,
+    val updatedAt: String,
     val acceptedAt: String,
     val completedAt: String,
     val status: Int
 ) {
     fun toCreateLocationChallengeResponseModel() =
         CreateLocationChallengeResponseModel(
-            id, title, context, requireCount, remainingCount, userId, createAt, updateAt, acceptedAt, completedAt, status
+            id, title, context, requiredCount, remainingCount, userId, createdAt, updatedAt, acceptedAt, completedAt, status
         )
 }
