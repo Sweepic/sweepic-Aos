@@ -672,9 +672,50 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         // RecyclerView 설정
         val recyclerView: RecyclerView = view.findViewById(R.id.rv_add_memo_folder_list)
         val adapter = SweepMemoFolderRVA { folder ->
-            // 선택한 폴더 처리 동작
-            showToast("${folder.folderName} 선택됨")
+            // 폴더 선택 시 처리
+            bottomSheetDialog.dismiss()
+
+            // 현재 뷰페이저의 선택된 이미지 가져오기
+            val currentPosition = binding.vpSweepMainImg.currentItem
+            if (currentPosition !in currentImages.indices) {
+                Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return@SweepMemoFolderRVA
+            }
+            val currentImage = currentImages[currentPosition]
+            val imageUri = currentImage.uri
+
+            // 이미지 URI를 ByteArray로 변환 (Activity에 있는 헬퍼 함수 사용)
+            val imageByteArray = convertUriToByteArray(imageUri)
+            if (imageByteArray == null) {
+                Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
+                return@SweepMemoFolderRVA
+            }
+
+            // MultipartBody.Part 생성
+            val mediaType = "image/jpeg".toMediaTypeOrNull()
+            val imageRequestBody = imageByteArray.toRequestBody(mediaType)
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+
+            // ViewModel의 API 호출 (코루틴 내에서 실행)
+            lifecycleScope.launch {
+                viewModel.fetchSweepSaveTextMemo(folder.folderId, imagePart).onSuccess { response ->
+                    // API 호출 성공 시 현재 이미지 삭제
+                    deleteCurrentImage(currentPosition)
+                    Toast.makeText(
+                        this@SweepActivity,
+                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }.onFailure { e ->
+                    Toast.makeText(
+                        this@SweepActivity,
+                        "폴더 저장 실패: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
+
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -788,29 +829,22 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         val currentImage = currentImages[currentPosition]
         val imageUri = currentImage.uri
 
-        // 2) 이미지 -> Base64 변환
-        val base64Image = convertUriToBase64(imageUri)
-        if (base64Image == null) {
+        // 🛠 이미지 URI를 ByteArray로 변환
+        val imageByteArray = convertUriToByteArray(imageUri)
+        if (imageByteArray == null) {
             Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 3) API 요청 모델 생성
-        val requestModel = CreateTextFolderRequestModel(
-            base64_image = base64Image,
-            user_id = 12L, // 실제 유저 ID
-            folder_name = folderName
-        )
-
         // 4) ViewModel (or Repository directly) 통해 API 호출
         lifecycleScope.launch {
-            val result = viewModel.fetchSweepCreateTextFolder(requestModel)
+            val result = viewModel.fetchSweepCreateTextFolder(folderName, imageByteArray)
             result.onSuccess { response ->
                 // 성공 시 → 실제 파일 OS에서 삭제
                 deleteCurrentImage(currentPosition)
                 Toast.makeText(
                     this@SweepActivity,
-                    "폴더 생성+텍스트 저장 성공: folderId=${response.folderId}",
+                    "폴더 생성+텍스트 저장 성공: folderId=${response.folderId} imageText=${response.imageText}",
                     Toast.LENGTH_SHORT
                 ).show()
             }.onFailure { e ->

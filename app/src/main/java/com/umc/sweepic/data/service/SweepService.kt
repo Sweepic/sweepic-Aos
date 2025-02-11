@@ -20,9 +20,18 @@ interface SweepService {
     @GET("memo/list")
     suspend fun fetchSweepMemoList(): BaseResponse<SweepMemoListResponseDto>
 
+    @Multipart
     @POST("memo/text-format/folders")
     suspend fun fetchSweepCreateTextFolder(
-        @Body request: CreateTextFolderRequestDto
+        @Part("folder_name") folder_name: RequestBody,
+        @Part base64_image: MultipartBody.Part
+    ): BaseResponse<CreateTextFolderResponseDto>
+
+    @Multipart
+    @PATCH("memo/text-format/folders/{folderId}")
+    suspend fun fetchSweepSaveTextMemo(
+        @Path("folderId") folderId: Number,
+        @Part base64_image: MultipartBody.Part
     ): BaseResponse<CreateTextFolderResponseDto>
 
     @Multipart

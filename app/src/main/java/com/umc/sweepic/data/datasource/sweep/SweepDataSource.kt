@@ -12,7 +12,8 @@ import okhttp3.RequestBody
 
 interface SweepDataSource {
     suspend fun fetchSweepMemoList(): BaseResponse<SweepMemoListResponseDto>
-    suspend fun fetchSweepCreateTextFolder(request: CreateTextFolderRequestDto): BaseResponse<CreateTextFolderResponseDto>
+    suspend fun fetchSweepCreateTextFolder(folder_name: RequestBody, base64_image: MultipartBody.Part): BaseResponse<CreateTextFolderResponseDto>
+    suspend fun fetchSweepSaveTextMemo(folderId: Number, base64_image: MultipartBody.Part): BaseResponse<CreateTextFolderResponseDto>
     suspend fun fetchSweepCreateImageFolder(folderName: RequestBody, image: MultipartBody.Part): BaseResponse<CreateImageFolderResponseDto>
     suspend fun fetchSweepSaveImageMemo(folderId: Long, image: MultipartBody.Part): BaseResponse<SaveImageMemoResponseDto>
 }

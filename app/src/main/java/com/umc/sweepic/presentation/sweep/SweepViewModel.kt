@@ -63,8 +63,20 @@ class SweepViewModel @Inject constructor(
         _imagesLiveData.value = allImages.filterNot { trashedUris.contains(it.uri) }
     }
 
-    suspend fun fetchSweepCreateTextFolder(request: CreateTextFolderRequestModel): Result<CreateTextFolderResponseModel> {
-        return repository.fetchSweepCreateTextFolder(request)
+    suspend fun fetchSweepCreateTextFolder(folderName: String, image: ByteArray): Result<CreateTextFolderResponseModel> {
+        return try {
+            val folderRequestBody = folderName.toRequestBody("text/plain".toMediaType()) // 폴더 이름을 RequestBody로 변환
+            val imageRequestBody = image.toRequestBody("image/jpeg".toMediaTypeOrNull()) // 이미지 바이트 배열을 RequestBody로 변환
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+
+            repository.fetchSweepCreateTextFolder(folderRequestBody, imagePart) // API 호출
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun fetchSweepSaveTextMemo(folderId: Number, image: MultipartBody.Part): Result<CreateTextFolderResponseModel> {
+        return repository.fetchSweepSaveTextMemo(folderId, image)
     }
 
     suspend fun fetchSweepCreateImageFolder(folderName: String, image: ByteArray): Result<CreateImageFolderResponseModel> {
