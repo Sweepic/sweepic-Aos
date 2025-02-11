@@ -1,5 +1,6 @@
 package com.umc.sweepic.domain.repository.sweep
 
+import com.umc.sweepic.data.dto.response.DeleteImagesResponseDto
 import com.umc.sweepic.domain.model.MemoFolderDetailModel
 import com.umc.sweepic.domain.model.RecordMemoListModel
 import com.umc.sweepic.presentation.record.memo.MemoFolder
@@ -11,4 +12,5 @@ interface MemoRepository {
     suspend fun deleteMemoFolder(folderId: Long): Result<Unit>
 //    suspend fun deleteImages(folderId: Long, imageIds: List<Long>): Result<Unit>
     suspend fun moveImages(folderId: Long, targetFolderId: String, imageIds: List<String>): Result<Unit>
+    suspend fun deleteImages(folderId: String, imageIds: List<String> ) : Result<DeleteImagesResponseDto>
 }

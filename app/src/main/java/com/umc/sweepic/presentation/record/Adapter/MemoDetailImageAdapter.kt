@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.umc.sweepic.R
 
-class MemoDetailImageAdapter(private var images: List<String>) :
+class MemoDetailImageAdapter(private var images: List<Pair<String, String>>) :  // (imageId, imageUrl)
     RecyclerView.Adapter<MemoDetailImageAdapter.ImageViewHolder>() {
 
     private val selectedItems = mutableSetOf<Int>() // 선택된 사진의 위치 저장
@@ -20,7 +20,7 @@ class MemoDetailImageAdapter(private var images: List<String>) :
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val imageUrl = images[position]
+        val (imageId, imageUrl) = images[position] // imageId, imageUrl 가져오기
 
         Log.d("MemoDetailImageAdapter", "이미지 로드: $imageUrl") // ✅ 로드되는 이미지 확인
 
@@ -51,27 +51,30 @@ class MemoDetailImageAdapter(private var images: List<String>) :
         }
     }
 
-    // ✅ 데이터 업데이트 (리스트 변경 가능하도록 `var images` 사용)
-    fun updateData(newImages: List<String>) {
+    override fun getItemCount(): Int = images.size
+
+    // ✅ 선택된 항목들의 `imageId` 반환하도록 수정
+    fun getSelectedItems(): List<String> {
+        return selectedItems.map { images[it].first } // imageId 리스트 반환
+    }
+
+    // ✅ 데이터 업데이트
+    fun updateData(newImages: List<Pair<String, String>>) {
         Log.d("MemoDetailImageAdapter", "업데이트할 데이터: $newImages") // ✅ 로그 확인
         images = newImages
         notifyDataSetChanged() // ✅ UI 갱신
     }
 
-    override fun getItemCount(): Int = images.size
-
-    // 선택된 항목 반환
-    fun getSelectedItems(): List<Int> = selectedItems.toList()
-
     // 선택 모드 활성화/비활성화
     fun setSelectionMode(enabled: Boolean) {
         isSelectionMode = enabled
         if (!enabled) {
-            // 선택 모드 비활성화 시 선택 상태 초기화
-            selectedItems.clear()
-            notifyDataSetChanged()
+            selectedItems.clear() // ✅ 선택 모드 해제 시 선택한 사진 초기화
+            notifyDataSetChanged() // ✅ UI 갱신
         }
     }
+
+
 
     inner class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.iv_memoDetail_image)

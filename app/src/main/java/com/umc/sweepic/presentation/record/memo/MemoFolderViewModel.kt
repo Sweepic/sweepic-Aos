@@ -39,13 +39,15 @@ class MemoFolderViewModel @Inject constructor(
     private val _memoFolderDetail = MutableLiveData<MemoFolderDetailModel?>()
     val memoFolderDetail: LiveData<MemoFolderDetailModel?> get() = _memoFolderDetail
 
-
-    fun fetchMemoFolderDetails(folderId: Long) {
+    fun fetchMemoFolderDetails(folderId: Long, onFetched: (List<String>) -> Unit = {}) {
         viewModelScope.launch {
             memoRepository.fetchMemoFolderDetails(folderId)
                 .onSuccess { data ->
-                    Log.d("MemoFolderViewModel", "폴더 상세 조회 성공: $data")
-                    _memoFolderDetail.postValue(data)
+                    val safeImages = data.images ?: emptyList()
+                    val updatedData = data.copy(images = safeImages)
+                    _memoFolderDetail.postValue(updatedData)
+                    val imageIds = safeImages.map { it.imageId.toString() }
+                    onFetched(imageIds)
                 }
                 .onFailure {
                     Log.e("MemoFolderViewModel", "폴더 상세 조회 실패: ${it.message}")
@@ -81,21 +83,6 @@ class MemoFolderViewModel @Inject constructor(
         }
     }
 
-//    fun deleteImages(folderId: Long, imageIds: List<Long>) {
-//        viewModelScope.launch {
-//            try {
-//                memoRepository.deleteImages(folderId, imageIds)
-//                    .onSuccess {
-//                        Log.d("MemoFolderViewModel", "사진 삭제 성공: $imageIds")
-//                        fetchMemoFolderDetails(folderId) // ✅ 삭제 후 UI 갱신
-//                    }
-//                    .onFailure { error ->
-//                        Log.e("MemoFolderViewModel", "사진 삭제 실패: ${error.message}")
-//                    }
-//            } catch (e: Exception) {
-//                Log.e("MemoFolderViewModel", "사진 삭제 중 오류 발생", e)
-//            }
-//        }
         fun moveImages(folderId: Long, targetFolderId: String, imageIds: List<String>) {
             viewModelScope.launch {
                 memoRepository.moveImages(folderId, targetFolderId, imageIds)
@@ -107,5 +94,19 @@ class MemoFolderViewModel @Inject constructor(
                     }
             }
         }
+
+    fun deleteImages(folderId: String, imageIds: List<String>) {
+        viewModelScope.launch {
+            memoRepository.deleteImages(folderId, imageIds)
+                .onSuccess { response ->
+                    Log.d("MemoFolderViewModel", "사진 삭제 성공: $imageIds")
+                    fetchMemoFolderDetails(folderId.toLong()) // ✅ 삭제 후 UI 갱신
+                }
+                .onFailure { error ->
+                    Log.e("MemoFolderViewModel", "사진 삭제 실패: ${error.message}")
+                }
+        }
+    }
+
     }
 
