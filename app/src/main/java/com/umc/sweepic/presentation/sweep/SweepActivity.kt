@@ -694,16 +694,27 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             // MultipartBody.Part 생성
             val mediaType = "image/jpeg".toMediaTypeOrNull()
             val imageRequestBody = imageByteArray.toRequestBody(mediaType)
-            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+            val imagePart = MultipartBody.Part.createFormData("base64_image", "image.jpg", imageRequestBody)
 
             // ViewModel의 API 호출 (코루틴 내에서 실행)
             lifecycleScope.launch {
                 viewModel.fetchSweepSaveTextMemo(folder.folderId, imagePart).onSuccess { response ->
-                    // API 호출 성공 시 현재 이미지 삭제
+                    if (response.folder_id == null) {
+                        Toast.makeText(this@SweepActivity, "폴더 ID가 없습니다.", Toast.LENGTH_SHORT).show()
+                        return@onSuccess
+                    }
+
+                    // ✅ imageText가 없는 경우도 대비 (그냥 저장만 하고 이미지 삭제 안 함)
+                    if (response.image_text == null) {
+                        Toast.makeText(this@SweepActivity, "이미지에서 텍스트를 추출하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        return@onSuccess
+                    }
+
+                    // ✅ folderId와 imageText가 정상적으로 왔을 때만 실행
                     deleteCurrentImage(currentPosition)
                     Toast.makeText(
                         this@SweepActivity,
-                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+                        "텍스트가 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folder_id})",
                         Toast.LENGTH_SHORT
                     ).show()
                 }.onFailure { e ->
@@ -714,6 +725,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                     ).show()
                 }
             }
+
         }
 
         recyclerView.adapter = adapter
@@ -844,7 +856,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 deleteCurrentImage(currentPosition)
                 Toast.makeText(
                     this@SweepActivity,
-                    "폴더 생성+텍스트 저장 성공: folderId=${response.folderId} imageText=${response.imageText}",
+                    "폴더 생성+텍스트 저장 성공: folderId=${response.folder_id} imageText=${response.image_text}",
                     Toast.LENGTH_SHORT
                 ).show()
             }.onFailure { e ->

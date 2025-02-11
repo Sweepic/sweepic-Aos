@@ -10,8 +10,8 @@ import okhttp3.RequestBody
 
 interface SweepRepository {
     suspend fun fetchSweepMemoList(): Result<SweepMemoListModel>
-    suspend fun fetchSweepCreateTextFolder(folder_name: RequestBody, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel>
-    suspend fun fetchSweepSaveTextMemo(folderId: Number, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel>
+    suspend fun fetchSweepCreateTextFolder(folderName: RequestBody, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel>
+    suspend fun fetchSweepSaveTextMemo(folderId: Long, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel>
     suspend fun fetchSweepCreateImageFolder(folderName: RequestBody, image: MultipartBody.Part): Result<CreateImageFolderResponseModel>
     suspend fun fetchSweepSaveImageMemo(folderId:Long, image: MultipartBody.Part): Result<SaveImageMemoResponseModel>
 }

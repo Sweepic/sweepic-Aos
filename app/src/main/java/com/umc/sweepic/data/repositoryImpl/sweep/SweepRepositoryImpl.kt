@@ -18,10 +18,10 @@ class SweepRepositoryImpl @Inject constructor(
     override suspend fun fetchSweepMemoList(): Result<SweepMemoListModel> = runCatching {
         sweepDataSource.fetchSweepMemoList().success.toSweepMemoListModel()
     }
-    override suspend fun fetchSweepCreateTextFolder(folder_name: RequestBody, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel> = runCatching {
-        sweepDataSource.fetchSweepCreateTextFolder(folder_name, base64_image).success.toCreateTextFolderResponseModel()
+    override suspend fun fetchSweepCreateTextFolder(folderName: RequestBody, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel> = runCatching {
+        sweepDataSource.fetchSweepCreateTextFolder(folderName, base64_image).success.toCreateTextFolderResponseModel()
     }
-    override suspend fun fetchSweepSaveTextMemo(folderId: Number, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel> = runCatching {
+    override suspend fun fetchSweepSaveTextMemo(folderId: Long, base64_image: MultipartBody.Part): Result<CreateTextFolderResponseModel> = runCatching {
         sweepDataSource.fetchSweepSaveTextMemo(folderId, base64_image).success.toCreateTextFolderResponseModel()
     }
     override suspend fun fetchSweepCreateImageFolder(folderName: RequestBody, image: MultipartBody.Part): Result<CreateImageFolderResponseModel> = runCatching {
