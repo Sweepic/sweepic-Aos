@@ -14,7 +14,7 @@ import com.umc.sweepic.domain.model.response.challenge.ChallengeGetResponseModel
 
 interface ChallengeRepository {
     suspend fun fetchChallengeUpdate(request: CreateChallengeUpdateRequestModel): Result<CreateChallengeUpdateResponseModel>
-    suspend fun fetchChallengeGet(userId: String): Result<List<ChallengeGetResponseModel>>
+    suspend fun fetchChallengeGet(): Result<List<ChallengeGetResponseModel>>
     suspend fun fetchChallengeLocationLogicTestChallengeCreate(request: List<CreateLocationLogicTestRequestModel>): Result<List<CreateLocationLogicTestResponseModel>>
     suspend fun fetchChallengeLocationChallengeCreate(request: CreateLocationChallengeRequestModel): Result<CreateLocationChallengeResponseModel>
     suspend fun fetchWeeklyChallengeCreate(request: CreateWeeklyChallengeRequestModel): Result<CreateWeeklyChallengeResponseModel>

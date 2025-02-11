@@ -25,9 +25,9 @@ interface ChallengeService {
         @Body request: CreateChallengeUpdateRequestDto
     ): BaseResponse<CreateChallengeUpdateResponseDto>
 
-    @GET("challenge/get/{userId}")
+    @GET("challenge/get")
     suspend fun fetchChallengeGet(
-        @Path("userId") userId: String
+
     ): BaseResponse<List<ChallengeGetResponseDto>>
 
     @DELETE("challenge/delete")
@@ -44,6 +44,8 @@ interface ChallengeService {
     suspend fun fetchChallengeLocationChallengeCreate(
         @Body request: CreateLocationChallengeRequestDto
     ): BaseResponse<CreateLocationChallengeResponseDto>
+
+
 
     @POST("challenge/weekly_challenge/create")
     suspend fun fetchSweepWeeklyChallengeCreate(

@@ -20,8 +20,8 @@ class ChallengeDataSourceImpl @Inject constructor(
     override suspend fun fetchChallengeUpdate(request: CreateChallengeUpdateRequestDto): BaseResponse<CreateChallengeUpdateResponseDto> =
         challengeService.fetchChallengeUpdate(request)
 
-    override suspend fun fetchChallengeGet(userId: String): BaseResponse<List<ChallengeGetResponseDto>> =
-        challengeService.fetchChallengeGet(userId)
+    override suspend fun fetchChallengeGet(): BaseResponse<List<ChallengeGetResponseDto>> =
+        challengeService.fetchChallengeGet()
 
     override suspend fun fetchChallengeLocationLogicTestChallengeCreate(request: List<CreateLocationLogicTestRequestDto>): BaseResponse<List<CreateLocationLogicTestResponseDto>> =
         challengeService.fetchChallengeLocationLogicTestChallengeCreate(request)

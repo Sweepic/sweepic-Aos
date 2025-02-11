@@ -13,7 +13,7 @@ import com.umc.sweepic.data.dto.response.challenge.ChallengeGetResponseDto
 
 interface ChallengeDataSource {
     suspend fun fetchChallengeUpdate(request: CreateChallengeUpdateRequestDto): BaseResponse<CreateChallengeUpdateResponseDto>
-    suspend fun fetchChallengeGet(userId: String): BaseResponse<List<ChallengeGetResponseDto>>
+    suspend fun fetchChallengeGet(): BaseResponse<List<ChallengeGetResponseDto>>
 
     suspend fun fetchChallengeLocationLogicTestChallengeCreate(request: List<CreateLocationLogicTestRequestDto>): BaseResponse<List<CreateLocationLogicTestResponseDto>>
     suspend fun fetchChallengeLocationChallengeCreate(request: CreateLocationChallengeRequestDto): BaseResponse<CreateLocationChallengeResponseDto>

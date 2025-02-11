@@ -42,7 +42,7 @@ class ChallengeAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChallengeViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_vp, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_challenge, parent, false)
         return ChallengeViewHolder(view)
     }
 

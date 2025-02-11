@@ -1,5 +1,6 @@
 package com.umc.sweepic.data.repositoryImpl.challenge
 
+import android.util.Log
 import com.umc.sweepic.data.datasource.challenge.ChallengeDataSource
 import com.umc.sweepic.data.dto.response.challenge.CreateLocationLogicTestResponseDto.Companion.toResponseModelList
 import com.umc.sweepic.domain.model.request.challenge.CreateChallengeUpdateRequestModel
@@ -23,8 +24,8 @@ class ChallengeRepositoryImpl @Inject constructor(
         challengeDataSource.fetchChallengeUpdate(request.toCreateChallengeUpdateRequestDto()).success.toCreateChallengeUpdateResponseModel()
     }
 
-    override suspend fun fetchChallengeGet(userId: String): Result<List<ChallengeGetResponseModel>> = runCatching {
-        challengeDataSource.fetchChallengeGet(userId).success.map { it.toChallengeGetResponseModel() }
+    override suspend fun fetchChallengeGet(): Result<List<ChallengeGetResponseModel>> = runCatching {
+        challengeDataSource.fetchChallengeGet().success.map { it.toChallengeGetResponseModel() }
     }
 
     override suspend fun fetchChallengeLocationLogicTestChallengeCreate(request: List<CreateLocationLogicTestRequestModel>): Result<List<CreateLocationLogicTestResponseModel>> = runCatching {

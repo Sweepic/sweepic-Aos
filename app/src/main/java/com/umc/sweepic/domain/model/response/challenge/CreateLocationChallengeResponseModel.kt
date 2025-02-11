@@ -9,7 +9,7 @@ data class CreateLocationChallengeResponseModel(
     val userId: String,
     val createdAt: String,
     val updatedAt: String,
-    val acceptedAt: String,
-    val completedAt: String,
+    val acceptedAt: String?,
+    val completedAt: String?,
     val status: Int
 )
