@@ -7,14 +7,18 @@ import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivityOnboardingStep3Binding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class OnboardingStep3Activity : AppCompatActivity() {
 
     private lateinit var binding: ActivityOnboardingStep3Binding
+    private val viewModel: OnboardingViewModel by viewModels() // ✅ ViewModel 추가
     private var imageCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +33,7 @@ class OnboardingStep3Activity : AppCompatActivity() {
         imageCount = getImageCount(this)
 
         setupEditTextListener()
+        observeViewModel() // ✅ ViewModel의 LiveData 관찰
 
         binding.btnOnboardingNext.setOnClickListener {
             validateInput()
@@ -90,11 +95,24 @@ class OnboardingStep3Activity : AppCompatActivity() {
                 }
 
                 else -> {
-                    goToNextStep(inputNumber)
+                    updateGoalCount(inputNumber) // ✅ 목표 개수 변경 API 호출
                 }
             }
         } catch (e: NumberFormatException) {
             showError("숫자만 입력할 수 있습니다.")
+        }
+    }
+
+    private fun updateGoalCount(targetNumber: Int) {
+        viewModel.updateGoalCount(targetNumber) // ✅ ViewModel에 목표 개수 업데이트 요청
+    }
+
+    private fun observeViewModel() {
+        viewModel.goalUpdateResult.observe(this) { result ->
+            result.onSuccess {
+                goToNextStep()
+            }.onFailure {
+            }
         }
     }
 
@@ -117,10 +135,9 @@ class OnboardingStep3Activity : AppCompatActivity() {
         binding.etOnboardingTargetnum.setTextColor(ContextCompat.getColor(this, R.color.black))
     }
 
-    private fun goToNextStep(targetNumber: Int) {
+    private fun goToNextStep() {
         val name = intent.getStringExtra("name") ?: ""
         val intent = Intent(this, OnboardingStep4Activity::class.java)
-        intent.putExtra("photo_limit", targetNumber)
         intent.putExtra("name", name)
         startActivity(intent)
         finish()
