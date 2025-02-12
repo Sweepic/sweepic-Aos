@@ -23,9 +23,6 @@ class MemoDataSourceImpl @Inject constructor(
     override suspend fun deleteMemoFolder(folderId: Long): BaseResponse<Any> =
         memoService.deleteMemoFolder(folderId)
 
-//    override suspend fun deleteImages(folderId: Long,imageIds: List<Long>): BaseResponse<Any> =
-//        memoService.deleteImages(folderId,imageIds)
-
     override suspend fun moveImages(folderId: Long, requestDto: MoveImagesRequestDto) : BaseResponse<Unit>
     = memoService.moveImages(folderId, requestDto)
     }

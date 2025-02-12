@@ -30,12 +30,6 @@ interface MemoService {
         @Path("folderId") folderId: Long
     ): BaseResponse<Any>
 
-//    @DELETE("memo/folders/{folderId}/images")
-//    suspend fun deleteImages (
-//        @Path("folderId") folderId: Long,
-//        @Query("imageIds") imageIds: List<Long>
-//    ) : BaseResponse<Any>
-
     @PATCH("memo/folders/{folderId}/images/move")
     suspend fun moveImages (
         @Path("folderId") folderId: Long,
