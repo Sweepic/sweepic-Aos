@@ -2,7 +2,9 @@ package com.umc.sweepic.data.repositoryImpl.sweep
 
 import android.util.Log
 import com.umc.sweepic.data.datasource.MemoDataSource
+import com.umc.sweepic.data.dto.request.DeleteImagesRequestDto
 import com.umc.sweepic.data.dto.request.MoveImagesRequestDto
+import com.umc.sweepic.data.dto.response.DeleteImagesResponseDto
 import com.umc.sweepic.domain.model.MemoFolderDetailModel
 import com.umc.sweepic.domain.model.RecordMemoListModel
 import com.umc.sweepic.domain.repository.sweep.MemoRepository
@@ -47,28 +49,20 @@ class MemoRepositoryImpl @Inject constructor(
                 throw Exception("폴더 삭제 실패: $errorMessage")
             }
         }.onFailure { Log.e("MemoRepositoryImpl", "폴더 삭제 오류: ${it.message}") }
-//
-//    override suspend fun deleteImages(folderId: Long, imageIds: List<Long>): Result<Unit> =
-//        runCatching {
-//            val requestDto = DeleteImagesRequestDto(imageIds)
-//            val response = memoDataSource.deleteImages(folderId, imageIds)
-//            Log.d("MemoRepositoryImpl", "사진 삭제 응답: $response")
-//
-//            if (response.resultType == "SUCCESS") {
-//                Log.d("MemoRepositoryImpl", "사진 삭제 성공")
-//                Unit // ✅ 반환 타입을 `Unit`으로 변경
-//            } else {
-//                val errorMessage = response.error?.toString() ?: "알 수 없는 오류"
-//                throw Exception("사진 삭제 실패: $errorMessage")
-//            }
-//        }.onFailure { Log.e("MemoRepositoryImpl", "사진 삭제 오류: ${it.message}") }
 
-    override suspend fun moveImages(folderId: Long, targetFolderId: Long, imageIds: List<Long>): Result<Unit> =
+    override suspend fun moveImages(
+        folderId: Long,
+        targetFolderId: String,
+        imageIds: List<String>
+    ): Result<Unit> =
         runCatching {
             val requestDto = MoveImagesRequestDto(targetFolderId, imageIds)
             val response = memoDataSource.moveImages(folderId, requestDto)
 
-            Log.d("MemoRepositoryImpl", "사진 이동 요청: folderId=$folderId, targetFolderId=$targetFolderId, imageIds=$imageIds")
+            Log.d(
+                "MemoRepositoryImpl",
+                "사진 이동 요청: folderId=$folderId, targetFolderId=$targetFolderId, imageIds=$imageIds"
+            )
             Log.d("MemoRepositoryImpl", "사진 이동 응답: $response")
 
             if (response.resultType == "SUCCESS") {
@@ -78,6 +72,26 @@ class MemoRepositoryImpl @Inject constructor(
                 throw Exception("사진 이동 실패: $errorMessage")
             }
         }.onFailure { Log.e("MemoRepositoryImpl", "사진 이동 오류: ${it.message}") }
+
+    override suspend fun deleteImages(folderId: String, imageIds: List<String>): Result<DeleteImagesResponseDto> =
+        runCatching {
+            val requestDto = DeleteImagesRequestDto(imageIds) // 요청 DTO 생성
+            val response = memoDataSource.deleteImages(folderId, requestDto) // DTO 전달
+
+            Log.d("MemoRepositoryImpl", "사진 삭제 응답: $response")
+
+            if (response.resultType == "SUCCESS") {
+                Log.d("MemoRepositoryImpl", "사진 삭제 성공")
+                response.success // BaseResponse의 success 필드 반환
+            } else {
+                val errorMessage = response.error ?: "알 수 없는 오류"
+                Log.e("MemoRepositoryImpl", "사진 삭제 실패: $errorMessage")
+                throw Exception("사진 삭제 실패: $errorMessage")
+            }
+        }.onFailure {
+            Log.e("MemoRepositoryImpl", "사진 삭제 오류: ${it.message}")
+        }
+
 }
 
 

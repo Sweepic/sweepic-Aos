@@ -1,6 +1,5 @@
 package com.umc.sweepic.data.dto.request
 
-data class MoveImagesRequestDto(
-    val targetFolderId: String,
+data class DeleteImagesRequestDto (
     val imageId: List<String>
 )
