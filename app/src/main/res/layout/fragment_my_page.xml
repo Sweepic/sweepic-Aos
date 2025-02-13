@@ -76,7 +76,7 @@
                 android:layout_marginTop="20dp" />
 
             <TextView
-                android:id="@+id/tv_account_info"
+                android:id="@+id/tv_email"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="dkfusu199@naver.com"
@@ -86,13 +86,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="5dp" />
 
-            <ImageView
-                android:id="@+id/btn_next_account"
-                android:src="@drawable/btn_next"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                app:layout_constraintTop_toTopOf="@id/tv_account_info"
-                app:layout_constraintEnd_toEndOf="parent"/>
 
             <!-- 이름 -->
             <TextView
@@ -102,7 +95,7 @@
                 android:text="이름"
                 android:textSize="13sp"
                 android:textColor="@android:color/darker_gray"
-                app:layout_constraintTop_toBottomOf="@id/tv_account_info"
+                app:layout_constraintTop_toBottomOf="@id/tv_email"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="20dp" />

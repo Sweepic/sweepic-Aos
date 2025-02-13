@@ -36,6 +36,18 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
             findNavController().navigateUp()
         }
 
+        // 사용자 정보 가져오기
+        mypageViewModel.fetchUserInfo()
+
+        // 사용자 정보가 변경되면 UI 업데이트
+        mypageViewModel.userInfo.observe(viewLifecycleOwner) { user ->
+            user?.let {
+                view.findViewById<TextView>(R.id.tv_name)?.text = it.name
+                view.findViewById<TextView>(R.id.tv_email)?.text = it.email
+                view.findViewById<TextView>(R.id.tv_goal)?.text = "${it.goalCount}장"
+            }
+        }
+
         // 이름 수정 버튼 클릭 이벤트 (기존 기능 유지)
         view.findViewById<View>(R.id.btn_next_name).setOnClickListener {
             showEditNameDialog()
