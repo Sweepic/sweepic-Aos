@@ -24,7 +24,7 @@
         android:theme="@style/Theme.Sweepic"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <!--<service
+        <service
             android:name=".data.service.OnboardingService"
             android:exported="false"></service>
 
@@ -41,12 +41,12 @@
         <activity
             android:name=".presentation.onboarding.OnboardingStep1Activity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" /> &lt;!&ndash; LoginActivity (로그인 화면) &ndash;&gt;
+            android:windowSoftInputMode="adjustResize" /> <!-- LoginActivity (로그인 화면) -->
         <activity
             android:name=".presentation.LoginActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Sweepic" /> &lt;!&ndash; 스플래쉬 화면 &ndash;&gt;
+            android:theme="@style/Theme.Sweepic" /> <!-- 스플래쉬 화면 -->
         <activity
             android:name=".presentation.SplashActivity"
             android:exported="true">
@@ -55,10 +55,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> &lt;!&ndash; MainActivity &ndash;&gt;
+        </activity> <!-- MainActivity -->
         <activity
             android:name=".presentation.MainActivity"
-            android:exported="true" /> &lt;!&ndash; SweepActivity &ndash;&gt;
+            android:exported="true" /> <!-- SweepActivity -->
         <activity
             android:name=".presentation.sweep.SweepActivity"
             android:exported="true"
@@ -73,16 +73,7 @@
             android:name=".presentation.sweep.TrashActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />-->
-        <activity
-            android:name=".presentation.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
