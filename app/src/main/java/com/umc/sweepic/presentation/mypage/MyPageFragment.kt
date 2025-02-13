@@ -12,12 +12,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.umc.sweepic.R
 import com.umc.sweepic.presentation.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.DecimalFormat
 
+@AndroidEntryPoint
 class MyPageFragment : Fragment(R.layout.fragment_my_page) {
+
+    private val mypageViewModel: MypageViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -30,19 +36,45 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
             findNavController().navigateUp()
         }
 
-        // 이름 수정 버튼 클릭 이벤트
+        // 이름 수정 버튼 클릭 이벤트 (기존 기능 유지)
         view.findViewById<View>(R.id.btn_next_name).setOnClickListener {
             showEditNameDialog()
         }
+
+        // 이름 변경 성공 시 UI 업데이트
+        mypageViewModel.nameUpdateStatus.observe(viewLifecycleOwner, Observer { success ->
+            if (success) {
+                val newName = mypageViewModel.updatedName.value ?: return@Observer
+                updateName(newName)
+                Toast.makeText(requireContext(), "이름이 변경되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "이름 변경 실패. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
+        })
 
         // 목표 수정 버튼 클릭 이벤트
         view.findViewById<View>(R.id.btn_next_goal).setOnClickListener {
             showEditGoalDialog()
         }
 
+        // 목표 변경 성공 시 UI 업데이트
+        mypageViewModel.goalUpdateStatus.observe(viewLifecycleOwner, Observer { success ->
+            if (success) {
+                val newGoal = mypageViewModel.updatedGoalCount.value ?: return@Observer
+                updateGoal(newGoal.toString()) // ✅ UI 업데이트
+                Toast.makeText(requireContext(), "목표가 변경되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "목표 변경 실패. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
+        })
+
         // 로그아웃 버튼 클릭 이벤트
         view.findViewById<View>(R.id.btn_logout).setOnClickListener {
             showLogoutDialog()
+        }
+
+        view.findViewById<View>(R.id.btn_withdrawal).setOnClickListener{
+            showWithdrawalDialog()
         }
 
     }
@@ -88,7 +120,8 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
         confirmButton.setOnClickListener {
             val newName = editText.text.toString().trim()
             if (newName.isNotEmpty()) {
-                updateName(newName)
+                //updateName(newName)
+                mypageViewModel.updateUserName(newName) //name update api
                 dialog.dismiss()
             } else {
                 Toast.makeText(requireContext(), "이름을 입력해주세요.", Toast.LENGTH_SHORT).show()
@@ -99,8 +132,7 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
     }
 
     private fun updateName(newName: String) {
-        val nameTextView = view?.findViewById<TextView>(R.id.tv_name)
-        nameTextView?.text = newName
+        view?.findViewById<TextView>(R.id.tv_name)?.text = newName
     }
 
     private fun showEditGoalDialog() {
@@ -167,7 +199,8 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
             val input = editText.text.toString().replace(",", "")
             val numericValue = input.toLongOrNull()
             if (numericValue != null && numericValue <= 10000) {
-                updateGoal(decimalFormat.format(numericValue)) // 쉼표 추가된 값으로 업데이트
+                //updateGoal(decimalFormat.format(numericValue))
+                mypageViewModel.updateGoalCount(numericValue.toInt()) //목표 api
                 dialog.dismiss()
             } else {
                 Toast.makeText(requireContext(), "올바른 목표 값을 입력해주세요.", Toast.LENGTH_SHORT).show()
@@ -202,7 +235,34 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
         // 확인 버튼 클릭 이벤트
         confirmButton.setOnClickListener {
             dialog.dismiss()
+            mypageViewModel.logout()
             performLogout()
+        }
+
+        dialog.show()
+    }
+
+    private fun showWithdrawalDialog() {
+        // 다이얼로그 레이아웃을 가져옴
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_withdrawal, null)
+        val cancelButton = dialogView.findViewById<Button>(R.id.btn_withdrawal_dialog_cancel)
+        val confirmButton = dialogView.findViewById<Button>(R.id.btn_withdrawal_dialog_confirm)
+
+        // 다이얼로그 빌더 생성
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        // 취소 버튼 클릭 이벤트
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // 확인 버튼 클릭 이벤트
+        confirmButton.setOnClickListener {
+            dialog.dismiss()
+            mypageViewModel.withdrawal()
+            performWithdrawal()
         }
 
         dialog.show()
@@ -216,6 +276,13 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
         //findNavController().navigate(R.id.action_myPageFragment_to_loginFragment)
     }
 
+    private fun performWithdrawal() {
+        // 로그아웃 처리 로직
+        Toast.makeText(requireContext(), "탈퇴되었습니다.", Toast.LENGTH_SHORT).show()
+
+        // 예: 처음 화면으로 이동
+        //findNavController().navigate(R.id.action_myPageFragment_to_loginFragment)
+    }
 
 
 }

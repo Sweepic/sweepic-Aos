@@ -252,6 +252,26 @@
                 app:layout_constraintTop_toTopOf="@id/tv_challenge_recommendation_notifications" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- 계정삭제 버튼 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_withdrawal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="계정 삭제"
+            android:background="@drawable/btn_logout"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/btn_logout"
+            android:layout_marginBottom="56dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
+
         <!-- 로그아웃 버튼 -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_logout"
@@ -267,8 +287,10 @@
             android:textAlignment="center"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btn_withdrawal"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"/>
 

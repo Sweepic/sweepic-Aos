@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_rect_10_white_fill">
+
+        <TextView
+            android:id="@+id/tv_dialog_withdrawal_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="정말 탈퇴하시겠어요?"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="26dp"
+            />
+
+        <TextView
+            android:id="@+id/tv_withdrawal_context"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="탈퇴 버튼 선택 시,\n계정은 삭제되며 복구되지 않습니다."
+            android:textAlignment="center"
+            android:textSize="14sp"
+            android:textColor="@color/sw_gray2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_dialog_withdrawal_title"
+            app:layout_constraintBottom_toTopOf="@id/btn_withdrawal_dialog_cancel"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_withdrawal_dialog_cancel"
+            android:layout_width="140dp"
+            android:layout_height="36dp"
+            android:text="취소"
+            android:textStyle="bold"
+            android:background="@drawable/shape_rect_4_white_fill"
+            android:textColor="@color/sw_gray2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_withdrawal_context"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_withdrawal_dialog_confirm"
+            android:layout_marginBottom="20dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_withdrawal_dialog_confirm"
+            android:layout_width="140dp"
+            android:layout_height="36dp"
+            android:background="@drawable/shape_rect_4_blue_fill"
+            android:text="탈퇴"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_withdrawal_dialog_cancel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_withdrawal_dialog_cancel"
+            app:layout_constraintTop_toTopOf="@+id/btn_withdrawal_dialog_cancel" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
