@@ -1,6 +1,6 @@
 package com.umc.sweepic.domain.model.request.sweep
 
-import com.umc.sweepic.data.dto.request.CreateTextFolderRequestDto
+import com.umc.sweepic.data.dto.request.sweep.CreateTextFolderRequestDto
 import java.io.Serializable
 
 data class CreateTextFolderRequestModel(

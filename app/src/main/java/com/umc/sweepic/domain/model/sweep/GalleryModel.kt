@@ -4,6 +4,7 @@ import android.net.Uri
 import java.util.Date
 
 data class GalleryModel(
+    val id: Int,
     val uri: Uri,
     val name: String,
     val fullName: String,
@@ -15,6 +16,7 @@ data class GalleryModel(
     val height: Int,
 ){
     fun toGallery() = Gallery(
+        id,
         uri,
         name,
         fullName,
@@ -30,6 +32,7 @@ data class GalleryModel(
 
 
 data class Gallery(
+    val id: Int,
     val uri: Uri,
     val name: String,
     val fullName: String,

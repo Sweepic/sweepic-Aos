@@ -97,6 +97,7 @@ class GalleryDataSourceImpl @Inject constructor(
 
                 galleryImage.add(
                     GalleryModel(
+                        id = actualId.toInt(),
                         uri = Uri.withAppendedPath(
                             contentUri,
                             cursor.getLong(idColumn).toString()
@@ -197,6 +198,7 @@ class GalleryDataSourceImpl @Inject constructor(
                     Log.d("GalleryDataSourceImpl", "ID: $id, IS_TRASHED: $isTrashed")
                     trashedImages.add(
                         GalleryModel(
+                            id = id.toInt(),
                             uri = Uri.withAppendedPath(trashUri, id.toString()),
                             name = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)),
                             fullName = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)),

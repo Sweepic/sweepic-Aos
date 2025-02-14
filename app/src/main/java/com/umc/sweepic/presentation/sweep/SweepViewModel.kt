@@ -6,10 +6,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
+import com.umc.sweepic.domain.model.request.sweep.MoveTrashRequestModel
+import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.response.sweep.CreateImageFolderResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateTextFolderResponseModel
+import com.umc.sweepic.domain.model.response.sweep.MoveTrashResponseModel
 import com.umc.sweepic.domain.model.response.sweep.SaveImageMemoResponseModel
 import com.umc.sweepic.domain.model.response.sweep.SweepMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.UpdateImageResponseModel
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
@@ -32,6 +36,9 @@ class SweepViewModel @Inject constructor(
 
     private val _imagesLiveData = MutableLiveData<List<Gallery>>()
     val imagesLiveData: LiveData<List<Gallery>> = _imagesLiveData
+
+    private val _updateImageResult = MutableLiveData<UpdateImageResponseModel>()
+    val updateImageResult: LiveData<UpdateImageResponseModel> = _updateImageResult
 
     fun fetchFolderList() {
         viewModelScope.launch {
@@ -93,5 +100,22 @@ class SweepViewModel @Inject constructor(
 
     suspend fun fetchSweepSaveImageMemo(folderId: Long, image: MultipartBody.Part): Result<SaveImageMemoResponseModel> {
         return repository.fetchSweepSaveImageMemo(folderId, image)
+    }
+
+    suspend fun fetchSweepMoveToTrash(request: MoveTrashRequestModel): Result<MoveTrashResponseModel> {
+        return repository.fetchSweepMoveToTrash(request)
+    }
+
+    fun fetchSweepImages(request: UpdateImageRequestModel) {
+        viewModelScope.launch {
+            repository.fetchSweepImages(request)
+                .onSuccess { response ->
+                    _updateImageResult.value = response
+                    Log.d("fetchSweepImages", "이미지 업데이트 성공: ${response.imageId}")
+                }
+                .onFailure { exception ->
+                    Log.e("fetchSweepImages", "이미지 업데이트 실패: ${exception.message}")
+                }
+        }
     }
 }

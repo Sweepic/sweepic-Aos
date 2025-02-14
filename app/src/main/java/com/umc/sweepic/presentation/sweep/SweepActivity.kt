@@ -39,6 +39,8 @@ import com.google.gson.reflect.TypeToken
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
 import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
+import com.umc.sweepic.domain.model.request.sweep.MoveTrashRequestModel
+import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.sweep.AlbumList
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
@@ -132,6 +134,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                         } else {
                             // 만약 리스트에 없는 경우, 새 Gallery 객체를 생성해서 리스트의 맨 앞에 추가
                             val newGallery = Gallery(
+                                id = 0,
                                 uri = uri,
                                 name = "",
                                 fullName = "",
@@ -146,6 +149,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                             pagerAdapter.notifyDataSetChanged()
                             binding.vpSweepMainImg.setCurrentItem(0, false)
                             updatePageInfo(0)
+                            fetchSweepImagesForCurrentPage(newGallery)
                         }
                         // 한 번 적용한 후에는 selectedUri 초기화
                         selectedUri = null
@@ -154,6 +158,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                         val newPage = binding.vpSweepMainImg.currentItem.coerceAtMost(currentImages.size - 1)
                         binding.vpSweepMainImg.setCurrentItem(newPage, false)
                         updatePageInfo(newPage)
+                        fetchSweepImagesForCurrentPage(currentImages[newPage])
                     }
                 }
             } else {
@@ -376,6 +381,10 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     updatePageInfo(position)
+
+                    currentImages.getOrNull(position)?.let { image ->
+                        fetchSweepImagesForCurrentPage(image)
+                    }
                 }
             }
         )
@@ -398,6 +407,23 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
+    private fun fetchSweepImagesForCurrentPage(image: Gallery) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale("ko","KR"))
+        val dateString = dateFormat.format(image.addedDate)
+        val request = UpdateImageRequestModel(
+            timestamp = dateString.toString(),
+            mediaId = image.id.toString()
+        )
+        viewModel.fetchSweepImages(request)
+        viewModel.updateImageResult.observe(this) { response ->
+            response?.let {
+                showToast("이미지 업데이트 성공: ${it.imageId}")
+            } ?: showToast("이미지 업데이트 실패")
+        }
+    }
+
+
+
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSwipeToTrashGesture() {
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
@@ -410,11 +436,24 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                         if (currentPosition in currentImages.indices) {
                             val currentImage = currentImages[currentPosition]
 
-                            // 1) 휴지통으로 이동 (TrashRepository 추가)
-                            TrashRepository.addToTrash(currentImage)
+                            // ✅ 1) MediaStore ID 확인
+                            val mediaId = currentImage.id // currentImage.id는 MediaStore의 _ID여야 함
+                            if (mediaId == null) {
+                                Toast.makeText(this@SweepActivity, "이미지 ID를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                return false
+                            }
 
-                            // 2) 현재 리스트/어댑터에서 제거 & 애니메이션
-                            removeImageWithAnimation(currentPosition)
+                            // ✅ 2) MoveTrash API 호출
+                            lifecycleScope.launch {
+                                val request = MoveTrashRequestModel(mediaId = mediaId)
+                                viewModel.fetchSweepMoveToTrash(request).onSuccess {
+                                    // ✅ 성공 시 애니메이션과 삭제
+                                    Toast.makeText(this@SweepActivity, "휴지통으로 이동됨", Toast.LENGTH_SHORT).show()
+                                    removeImageWithAnimation(currentPosition)
+                                }.onFailure { e ->
+                                    Toast.makeText(this@SweepActivity, "이동 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         }
                         return true
                     }
