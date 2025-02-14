@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation
+package com.umc.sweepic.presentation.login
 
 import android.content.Context
 import android.content.Intent

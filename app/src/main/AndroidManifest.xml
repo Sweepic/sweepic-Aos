@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".SweepicApplication"
@@ -24,9 +25,23 @@
         android:theme="@style/Theme.Sweepic"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <service
-            android:name=".data.service.OnboardingService"
-            android:exported="false"></service>
+<!--        <service-->
+<!--            android:name=".data.service.OnboardingService"-->
+<!--            android:exported="false"></service>-->
+
+        <activity
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Redirect URI: "kakao${NATIVE_APP_KEY}://oauth" -->
+                <data android:host="oauth"
+                    android:scheme="${kakao_native_app_key}" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".presentation.onboarding.OnboardingStep4Activity"
@@ -43,7 +58,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" /> <!-- LoginActivity (로그인 화면) -->
         <activity
-            android:name=".presentation.LoginActivity"
+            android:name=".presentation.login.LoginActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Sweepic" /> <!-- 스플래쉬 화면 -->
