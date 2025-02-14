@@ -1,9 +1,7 @@
 package com.umc.sweepic.domain.model.response.sweep
 
-import com.umc.sweepic.data.dto.response.GetMostTaggedResponseDto.MostTaggedItemDto
-
 data class GetMostTaggedModel(
-    val tags: List<MostTaggedItem>
+    val success: List<MostTaggedItem>
 ) {
     data class MostTaggedItem(
         val _count: CountModel,

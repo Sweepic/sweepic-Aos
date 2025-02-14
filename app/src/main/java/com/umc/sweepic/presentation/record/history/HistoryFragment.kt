@@ -21,9 +21,9 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
 
     override fun initObserver() {
         viewModel.mostTaggedData.observe(viewLifecycleOwner) { mostTagged ->
-            binding.tvRecordVisittag.text = "#${mostTagged.tags.find { it.tagCategoryId == "1" }?.content ?: "알 수 없음"}"
-            binding.tvRecordPeopletag.text = "#${mostTagged.tags.find { it.tagCategoryId == "2" }?.content ?: "알 수 없음"}"
-            binding.tvRecordFoodtag.text = "#${mostTagged.tags.find { it.tagCategoryId == "3" }?.content ?: "알 수 없음"}"
+            binding.tvRecordVisittag.text = "#${mostTagged.success.find { it.tagCategoryId == "1" }?.content ?: "알 수 없음"}"
+            binding.tvRecordPeopletag.text = "#${mostTagged.success.find { it.tagCategoryId == "2" }?.content ?: "알 수 없음"}"
+            binding.tvRecordFoodtag.text = "#${mostTagged.success.find { it.tagCategoryId == "3" }?.content ?: "알 수 없음"}"
         }
     }
 

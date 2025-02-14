@@ -4,5 +4,5 @@ import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.response.GetMostTaggedResponseDto
 
 interface HistoryDataSource {
-    suspend fun getMostTagged(): BaseResponse<GetMostTaggedResponseDto>
+    suspend fun getMostTagged(): BaseResponse<List<GetMostTaggedResponseDto>>
 }

@@ -24,11 +24,11 @@ class HistoryTagViewModel @Inject constructor(
             historyRepository.getMostTagged()
                 .onSuccess { data ->
                     Log.d("HistoryViewModel", "Most Tagged Data: $data")
-                    _mostTaggedData.postValue(data)
+                    _mostTaggedData.value = data
                 }
                 .onFailure { error ->
                     Log.e("HistoryViewModel", "Error fetching data: $error")
-                    _mostTaggedData.postValue(GetMostTaggedModel(emptyList()))
+                    _mostTaggedData.value = GetMostTaggedModel(emptyList())
                 }
         }
     }

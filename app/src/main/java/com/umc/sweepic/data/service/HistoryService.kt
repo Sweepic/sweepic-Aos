@@ -7,6 +7,6 @@ import retrofit2.http.Query
 
 interface HistoryService {
     @GET("user/history/most_tagged/get")
-    suspend fun getMostTagged() : BaseResponse<GetMostTaggedResponseDto>
+    suspend fun getMostTagged() : BaseResponse<List<GetMostTaggedResponseDto>>
 
 }
