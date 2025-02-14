@@ -1,16 +1,29 @@
 package com.umc.sweepic.data.dto.response
 
+import com.umc.sweepic.domain.model.RecordMemoListModel
 import com.umc.sweepic.domain.model.response.sweep.GetMostTaggedModel
 
 data class GetMostTaggedResponseDto(
-    val tags: List<MostTaggedItemDto>
+    val success: List<MostTaggedItemDto>
 ) {
-    fun toMostTaggedModel() = GetMostTaggedModel(tags.map { it.toMostTaggedItemModel() })
-}
+    data class MostTaggedItemDto(
+        val _count: CountDto,
+        val tagCategoryId: String,
+        val content: String
+    ) {
+        data class CountDto (
+            val _all : Int
+        )
 
-data class MostTaggedItemDto(
-    val tagCategoryId: String,
-    val content: String
-) {
-    fun toMostTaggedItemModel() = GetMostTaggedModel.MostTaggedItem(tagCategoryId, content)
+        fun toMostTaggedModel () =
+            GetMostTaggedModel.MostTaggedItem(
+                _count = GetMostTaggedModel.MostTaggedItem.CountModel(_count._all),
+                tagCategoryId,
+                content
+            )
+    }
+    fun toGetMostTaggedModel() =
+        GetMostTaggedModel(
+            tags = success.map { it.toMostTaggedModel() }
+        )
 }

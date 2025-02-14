@@ -2,19 +2,11 @@ package com.umc.sweepic.data.service
 
 import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.response.GetMostTaggedResponseDto
-import com.umc.sweepic.data.dto.response.GetTagsByDateResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface HistoryService {
     @GET("user/history/most_tagged/get")
     suspend fun getMostTagged() : BaseResponse<GetMostTaggedResponseDto>
-
-    @GET("tags/date")
-    suspend fun getTagsByDate(
-        @Query("year") year: Double,
-        @Query("month") month: Double,
-        @Query("date") date: Double? = null
-    ) : BaseResponse<GetTagsByDateResponseDto>
 
 }
