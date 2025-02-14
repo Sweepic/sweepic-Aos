@@ -23,10 +23,11 @@
             <!--인기 태그 모아보기-->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_marginTop="16dp"
-                android:paddingBottom="30dp"
+                android:layout_marginBottom="30dp"
                 android:id="@+id/layout_record_mainhistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 >
                 <!--월 타이틀-->
@@ -66,7 +67,7 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cv_record_place"
                     android:layout_width="0dp"
-                    android:layout_height="57dp"
+                    android:layout_height="wrap_content"
                     app:cardCornerRadius="5dp"
                     app:cardElevation="2dp"
                     android:layout_marginStart="16dp"
@@ -105,7 +106,7 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cv_record_people"
                     android:layout_width="0dp"
-                    android:layout_height="57dp"
+                    android:layout_height="wrap_content"
                     app:cardCornerRadius="5dp"
                     app:cardElevation="2dp"
                     android:layout_marginTop="10dp"
@@ -117,7 +118,7 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="10dp">
 
@@ -144,12 +145,13 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cv_record_food"
                     android:layout_width="0dp"
-                    android:layout_height="57dp"
+                    android:layout_height="wrap_content"
                     app:cardCornerRadius="5dp"
                     app:cardElevation="2dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/cv_record_people"
                     app:layout_constraintStart_toStartOf="parent"
@@ -158,7 +160,7 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="10dp">
 
