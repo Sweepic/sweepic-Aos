@@ -38,6 +38,104 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_bias="0"
             android:layout_marginTop="20dp"/>
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/et_sweep_input_location"
+            app:layout_constraintEnd_toEndOf="@+id/et_sweep_input_location"
+            app:layout_constraintBottom_toBottomOf="@id/et_sweep_input_location">
+
+            <TextView
+                android:id="@+id/tv_tag_name_length"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Content.Light"
+                android:text="1"
+                android:textColor="@color/sw_gray2" />
+
+            <TextView
+                android:id="@+id/tv_tag_full_length"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Content.Light"
+                android:text="/10"
+                android:textColor="@color/sw_gray2" />
+
+            <ImageView
+                android:id="@+id/iv_tag_length_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_error"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_ai_recommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI가 태그를 추천해드려요."
+            style="@style/TextAppearance.Sweepic.Content.Light"
+            android:textColor="@color/sweepic"
+            android:textSize="13sp"
+            android:layout_marginStart="5dp"
+            app:layout_constraintTop_toBottomOf="@+id/et_sweep_input_location"
+            app:layout_constraintStart_toStartOf="@id/et_sweep_input_location"/>
+
+        <LinearLayout
+            android:id="@+id/layout_ai_tag_recommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.Sweepic.Content.Light"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_ai_recommend"
+            app:layout_constraintStart_toStartOf="@id/tv_ai_recommend">
+
+            <TextView
+                android:id="@+id/tv_ai_tag1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Content.Light"
+                android:text="#태그추천"
+                android:textColor="@color/sweepic"
+                android:paddingStart="8dp"
+                android:paddingEnd="9dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="3dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/shape_rect_16_blue_line"/>
+
+            <TextView
+                android:id="@+id/tv_ai_tag2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Content.Light"
+                android:text="#태그추천"
+                android:textColor="@color/sweepic"
+                android:paddingStart="8dp"
+                android:paddingEnd="9dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="3dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/shape_rect_16_blue_line"/>
+
+            <TextView
+                android:id="@+id/tv_ai_tag3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Content.Light"
+                android:text="#태그추천"
+                android:textColor="@color/sweepic"
+                android:paddingStart="8dp"
+                android:paddingEnd="9dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="3dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/shape_rect_16_blue_line"/>
+
+        </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_input_location_cancel"
@@ -48,7 +146,7 @@
             android:background="@null"
             android:textColor="@color/sw_gray2"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/et_sweep_input_location"
+            app:layout_constraintTop_toBottomOf="@id/layout_ai_tag_recommend"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btn_input_location_confirm"
             android:layout_marginTop="20dp"
@@ -64,7 +162,7 @@
             android:background="@drawable/shape_rect_4_blue_fill"
             app:layout_constraintStart_toEndOf="@id/btn_input_location_cancel"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/et_sweep_input_location"
+            app:layout_constraintTop_toBottomOf="@id/layout_ai_tag_recommend"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="27dp"
