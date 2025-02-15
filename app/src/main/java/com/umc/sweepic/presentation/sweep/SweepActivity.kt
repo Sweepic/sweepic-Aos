@@ -170,7 +170,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun initView() {
         requestPermissionsAndLoadImages()
-        setupSwitchToggle()
+//        setupSwitchToggle()
         setupButtons()
         initializeViewPager()
         setupBackPressHandler()
@@ -543,11 +543,12 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
-    private fun setupSwitchToggle() {
-        binding.switchSweepAiBtn.setOnCheckedChangeListener { _, isChecked ->
-            binding.tvSweepAiOn.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
-    }
+    //AI 버튼 삭제로 인해 표시 안함
+//    private fun setupSwitchToggle() {
+//        binding.switchSweepAiBtn.setOnCheckedChangeListener { _, isChecked ->
+//            binding.tvSweepAiOn.visibility = if (isChecked) View.VISIBLE else View.GONE
+//        }
+//    }
 
     private fun setupTagClickListener(textView: TextView, dialogTag: String, title: String, hint: String, onSave: (String) -> Unit) {
         textView.setOnClickListener {

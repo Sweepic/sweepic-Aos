@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="#장소 입력하기"
-            style="@style/TextAppearance.Sweepic.Content"
+            style="@style/TextAppearance.Sweepic.Bold.Title_16sp"
             android:textSize="17sp"
             android:textColor="@color/sw_bk"
             app:layout_constraintTop_toTopOf="parent"
@@ -28,7 +28,7 @@
             android:id="@+id/et_sweep_input_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            style="@style/TextAppearance.Sweepic.Content.Light"
+            style="@style/TextAppearance.Sweepic.Regular.Body_16_R"
             android:hint="장소를 입력해주세요."
             android:textColorHint="@color/sw_gray2"
             android:textColor="@color/sw_bk"
@@ -50,7 +50,7 @@
                 android:id="@+id/tv_tag_name_length"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.Sweepic.Content.Light"
+                style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
                 android:text="1"
                 android:textColor="@color/sw_gray2" />
 
@@ -58,7 +58,7 @@
                 android:id="@+id/tv_tag_full_length"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.Sweepic.Content.Light"
+                style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
                 android:text="/10"
                 android:textColor="@color/sw_gray2" />
 
@@ -77,7 +77,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="AI가 태그를 추천해드려요."
-            style="@style/TextAppearance.Sweepic.Content.Light"
+            style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
             android:textColor="@color/sweepic"
             android:textSize="13sp"
             android:layout_marginStart="5dp"
@@ -97,13 +97,13 @@
                 android:id="@+id/tv_ai_tag1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.Sweepic.Content.Light"
+                style="@style/TextAppearance.Sweepic.Medium.Body_14_M"
                 android:text="#태그추천"
                 android:textColor="@color/sweepic"
                 android:paddingStart="8dp"
                 android:paddingEnd="9dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="3dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
                 android:layout_marginEnd="5dp"
                 android:background="@drawable/shape_rect_16_blue_line"/>
 
@@ -111,13 +111,13 @@
                 android:id="@+id/tv_ai_tag2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.Sweepic.Content.Light"
+                style="@style/TextAppearance.Sweepic.Medium.Body_14_M"
                 android:text="#태그추천"
                 android:textColor="@color/sweepic"
                 android:paddingStart="8dp"
                 android:paddingEnd="9dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="3dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
                 android:layout_marginEnd="5dp"
                 android:background="@drawable/shape_rect_16_blue_line"/>
 
@@ -125,13 +125,13 @@
                 android:id="@+id/tv_ai_tag3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.Sweepic.Content.Light"
+                style="@style/TextAppearance.Sweepic.Medium.Body_14_M"
                 android:text="#태그추천"
                 android:textColor="@color/sweepic"
                 android:paddingStart="8dp"
                 android:paddingEnd="9dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="3dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
                 android:layout_marginEnd="5dp"
                 android:background="@drawable/shape_rect_16_blue_line"/>
 
@@ -142,8 +142,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="취소"
-            style="@style/TextAppearance.Sweepic.Content"
-            android:background="@null"
+            style="@style/TextAppearance.Sweepic.Bold.Title_14sp"
+            android:background="@drawable/shape_rect_4_gray_line"
             android:textColor="@color/sw_gray2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/layout_ai_tag_recommend"
@@ -151,14 +151,15 @@
             app:layout_constraintEnd_toStartOf="@id/btn_input_location_confirm"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="27dp"
-            android:layout_marginHorizontal="20dp"/>
+            android:layout_marginHorizontal="15dp"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_input_location_confirm"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="완성"
-            style="@style/TextAppearance.Sweepic.Content"
+            style="@style/TextAppearance.Sweepic.Bold.Title_14sp"
+            android:textColor="@color/white"
             android:background="@drawable/shape_rect_4_blue_fill"
             app:layout_constraintStart_toEndOf="@id/btn_input_location_cancel"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -166,7 +167,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="27dp"
-            android:layout_marginHorizontal="20dp"/>
+            android:layout_marginHorizontal="15dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
