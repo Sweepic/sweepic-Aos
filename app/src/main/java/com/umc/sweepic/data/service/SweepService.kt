@@ -3,13 +3,17 @@ package com.umc.sweepic.data.service
 import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.request.sweep.DeleteImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.MoveTrashRequestDto
+import com.umc.sweepic.data.dto.request.sweep.TagRequestDto
 import com.umc.sweepic.data.dto.request.sweep.UpdateImageRequestDto
+import com.umc.sweepic.data.dto.response.sweep.AiTagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateImageFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateTextFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.DeleteImageResponseDto
 import com.umc.sweepic.data.dto.response.sweep.MoveTrashResponseDto
 import com.umc.sweepic.data.dto.response.sweep.SaveImageMemoResponseDto
 import com.umc.sweepic.data.dto.response.sweep.SweepMemoListResponseDto
+import com.umc.sweepic.data.dto.response.sweep.TagInfoResponseDto
+import com.umc.sweepic.data.dto.response.sweep.TagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.UpdateImageResponseDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -71,5 +75,23 @@ interface SweepService {
     suspend fun fetchSweepImages(
         @Body request: UpdateImageRequestDto
     ): BaseResponse<UpdateImageResponseDto>
+
+    // 태그 관련 API
+    @GET("tags/images/{mediaId}")
+    suspend fun fetchLoadTag(
+        @Path("mediaId") mediaId: Long
+    ): BaseResponse<TagInfoResponseDto>
+
+    @POST("tags/images/{imageId}")
+    suspend fun fetchInputTag(
+        @Path ("imageId") imageId: String,
+        @Body request: TagRequestDto
+    ): BaseResponse<TagResponseDto>
+
+    @Multipart
+    @POST("tags/ai")
+    suspend fun fetchCreateAiTag(
+        @Part image: MultipartBody.Part
+    ): BaseResponse<AiTagResponseDto>
 
 }

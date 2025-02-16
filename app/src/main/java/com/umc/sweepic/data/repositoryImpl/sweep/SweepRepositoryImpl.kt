@@ -11,13 +11,17 @@ import com.umc.sweepic.data.dto.response.sweep.UpdateImageResponseDto
 import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
 import com.umc.sweepic.domain.model.request.sweep.DeleteImageRequestModel
 import com.umc.sweepic.domain.model.request.sweep.MoveTrashRequestModel
+import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
+import com.umc.sweepic.domain.model.response.sweep.AiTagResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateImageFolderResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateTextFolderResponseModel
 import com.umc.sweepic.domain.model.response.sweep.DeleteImageResponseModel
 import com.umc.sweepic.domain.model.response.sweep.MoveTrashResponseModel
 import com.umc.sweepic.domain.model.response.sweep.SaveImageMemoResponseModel
 import com.umc.sweepic.domain.model.response.sweep.SweepMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.TagInfoResponseModel
+import com.umc.sweepic.domain.model.response.sweep.TagResponseModel
 import com.umc.sweepic.domain.model.response.sweep.UpdateImageResponseModel
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
 import okhttp3.MultipartBody
@@ -50,5 +54,17 @@ class SweepRepositoryImpl @Inject constructor(
     }
     override suspend fun fetchSweepImages(request: UpdateImageRequestModel): Result<UpdateImageResponseModel> = runCatching {
         sweepDataSource.fetchSweepImages(request.toUpdateImageRequestDto()).success.toUpdateImageResponseModel()
+    }
+
+    override suspend fun fetchLoadTag(mediaId: Long): Result<TagInfoResponseModel> = runCatching {
+        sweepDataSource.fetchLoadTag(mediaId).success.toTagInfoResponseModel()
+    }
+
+    override suspend fun fetchInputTag(imageId: String, request: TagRequestModel): Result<TagResponseModel> = runCatching {
+        sweepDataSource.fetchInputTag(imageId, request.toTagRequestDto()).success.toTagRequestModel()
+    }
+
+    override suspend fun fetchCreateAiTag(image: MultipartBody.Part): Result<AiTagResponseModel> = runCatching {
+        sweepDataSource.fetchCreateAiTag(image).success.toAiTagResponseModel()
     }
 }

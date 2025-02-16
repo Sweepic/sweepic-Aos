@@ -5,14 +5,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
 import com.umc.sweepic.domain.model.request.sweep.MoveTrashRequestModel
+import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
+import com.umc.sweepic.domain.model.response.sweep.AiTagResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateImageFolderResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateTextFolderResponseModel
 import com.umc.sweepic.domain.model.response.sweep.MoveTrashResponseModel
 import com.umc.sweepic.domain.model.response.sweep.SaveImageMemoResponseModel
 import com.umc.sweepic.domain.model.response.sweep.SweepMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.TagInfoResponseModel
+import com.umc.sweepic.domain.model.response.sweep.TagResponseModel
 import com.umc.sweepic.domain.model.response.sweep.UpdateImageResponseModel
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
@@ -39,6 +44,16 @@ class SweepViewModel @Inject constructor(
 
     private val _updateImageResult = MutableLiveData<UpdateImageResponseModel>()
     val updateImageResult: LiveData<UpdateImageResponseModel> = _updateImageResult
+
+    private val _tagResponse = MutableLiveData<TagResponseModel>()
+    val tagResponse: LiveData<TagResponseModel> = _tagResponse
+
+    private val _tagInfoResponse = MutableLiveData<BaseResponse<TagInfoResponseModel>?>()
+    val tagInfoResponse: LiveData<BaseResponse<TagInfoResponseModel>?> get() = _tagInfoResponse
+
+    private val _aiTagResponse = MutableLiveData<BaseResponse<AiTagResponseModel>?>()
+    val aiTagResponse: LiveData<BaseResponse<AiTagResponseModel>?> get() = _aiTagResponse
+
 
     fun fetchFolderList() {
         viewModelScope.launch {
@@ -106,6 +121,7 @@ class SweepViewModel @Inject constructor(
         return repository.fetchSweepMoveToTrash(request)
     }
 
+    //
     fun fetchSweepImages(request: UpdateImageRequestModel) {
         viewModelScope.launch {
             repository.fetchSweepImages(request)
@@ -115,6 +131,49 @@ class SweepViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     Log.e("fetchSweepImages", "이미지 업데이트 실패: ${exception.message}")
+                }
+        }
+    }
+
+    // 태그 입력
+    fun fetchInputTag(imageId: String, request: TagRequestModel) {
+        viewModelScope.launch {
+            repository.fetchInputTag(imageId, request)
+                .onSuccess { response ->
+                    _tagResponse.value = response
+                    Log.d("fetchInputTag", "Tag update success: ${response.tags}")
+                }
+                .onFailure { exception ->
+                    Log.e("fetchInputTag", "Tag update failed: ${exception.message}")
+                }
+        }
+    }
+
+    // 태그 정보 API
+    fun loadTagForMedia(mediaId: Long) {
+        viewModelScope.launch {
+            repository.fetchLoadTag(mediaId)
+                .onSuccess { response ->
+                    _tagInfoResponse.value = BaseResponse(resultType = "SUCCESS", error = null, success = response)
+                    Log.d("loadTagForMedia", "태그 로드 성공: ${response.tags}")
+                }
+                .onFailure { exception ->
+                    Log.e("loadTagForMedia", "태그 로드 실패: ${exception.message}")
+                    _tagInfoResponse.value = null
+                }
+        }
+    }
+
+    fun fetchCreateAiTag(imagePart: MultipartBody.Part) {
+        viewModelScope.launch {
+            repository.fetchCreateAiTag(imagePart)
+                .onSuccess { response ->
+                    _aiTagResponse.value = BaseResponse(resultType = "SUCCESS", error = null, success = response)
+                    Log.d("SweepViewModel", "AI Tag fetch success: ${response.labels}")
+                }
+                .onFailure { exception ->
+                    Log.e("SweepViewModel", "AI Tag fetch failed: ${exception.message}")
+                    _aiTagResponse.value = null
                 }
         }
     }

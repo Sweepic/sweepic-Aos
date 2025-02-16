@@ -4,13 +4,17 @@ import com.umc.sweepic.data.datasource.sweep.SweepDataSource
 import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.request.sweep.DeleteImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.MoveTrashRequestDto
+import com.umc.sweepic.data.dto.request.sweep.TagRequestDto
 import com.umc.sweepic.data.dto.request.sweep.UpdateImageRequestDto
+import com.umc.sweepic.data.dto.response.sweep.AiTagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateImageFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateTextFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.DeleteImageResponseDto
 import com.umc.sweepic.data.dto.response.sweep.MoveTrashResponseDto
 import com.umc.sweepic.data.dto.response.sweep.SaveImageMemoResponseDto
 import com.umc.sweepic.data.dto.response.sweep.SweepMemoListResponseDto
+import com.umc.sweepic.data.dto.response.sweep.TagInfoResponseDto
+import com.umc.sweepic.data.dto.response.sweep.TagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.UpdateImageResponseDto
 import com.umc.sweepic.data.service.SweepService
 import okhttp3.MultipartBody
@@ -55,4 +59,13 @@ class SweepDataSourceImpl @Inject constructor(
 
     override suspend fun fetchSweepImages(request: UpdateImageRequestDto): BaseResponse<UpdateImageResponseDto> =
         sweepService.fetchSweepImages(request)
+
+    override suspend fun fetchLoadTag(mediaId: Long): BaseResponse<TagInfoResponseDto> =
+        sweepService.fetchLoadTag(mediaId)
+
+    override suspend fun fetchInputTag(imageId: String, request: TagRequestDto): BaseResponse<TagResponseDto> =
+        sweepService.fetchInputTag(imageId, request)
+
+    override suspend fun fetchCreateAiTag(image: MultipartBody.Part): BaseResponse<AiTagResponseDto> =
+        sweepService.fetchCreateAiTag(image)
 }
