@@ -70,17 +70,17 @@ class SweepViewModel @Inject constructor(
     fun loadImages() {
         val allImages = galleryRepository.getAllGalleryImagesDesc()
 
-        // 🔥 휴지통에 있는 이미지들 가져오기
+        // 휴지통에 있는 이미지들 가져오기
         val trashedUris = TrashRepository.getAllTrashed().map { it.uri }
 
-        // 🔥 휴지통에 없는 이미지들만 필터링
+        // 휴지통에 없는 이미지들만 필터링
         _imagesLiveData.value = allImages.filterNot { trashedUris.contains(it.uri) }
     }
 
     fun refreshImages() {
         val allImages = galleryRepository.getAllGalleryImagesDesc()
 
-        // 🔥 휴지통 이미지를 제외
+        // 휴지통 이미지를 제외
         val trashedUris = TrashRepository.getAllTrashed().map { it.uri }
         _imagesLiveData.value = allImages.filterNot { trashedUris.contains(it.uri) }
     }
