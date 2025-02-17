@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.umc.sweepic.data.dto.BaseResponse
+import com.umc.sweepic.domain.model.request.sweep.CreateMemoFolderRequestModel
 import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
 import com.umc.sweepic.domain.model.request.sweep.MoveTrashRequestModel
 import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
@@ -13,6 +14,7 @@ import com.umc.sweepic.domain.model.request.sweep.TrashImageRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.response.sweep.AiTagResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateImageFolderResponseModel
+import com.umc.sweepic.domain.model.response.sweep.CreateMemoFolderResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateTextFolderResponseModel
 import com.umc.sweepic.domain.model.response.sweep.MoveTrashResponseModel
 import com.umc.sweepic.domain.model.response.sweep.SaveImageMemoResponseModel
@@ -39,6 +41,9 @@ class SweepViewModel @Inject constructor(
 ): ViewModel() {
     private val _folderList = MutableLiveData<List<SweepMemoListModel.MemoFolderModel>>()
     val folderList: LiveData<List<SweepMemoListModel.MemoFolderModel>> = _folderList
+
+    private val _createMemoFolderResult = MutableLiveData<CreateMemoFolderResponseModel>()
+    val createMemoFolderResult: LiveData<CreateMemoFolderResponseModel> = _createMemoFolderResult
 
     private val _imagesLiveData = MutableLiveData<List<Gallery>>()
     val imagesLiveData: LiveData<List<Gallery>> = _imagesLiveData
@@ -67,6 +72,19 @@ class SweepViewModel @Inject constructor(
         }
     }
 
+    fun fetchSweepCreateMemoFolder(request: CreateMemoFolderRequestModel) {
+        viewModelScope.launch {
+            repository.fetchSweepCreateMemoFolder(request)
+                .onSuccess { response ->
+                    _createMemoFolderResult.value = response
+                    Log.d("fetchCreateMemoFolder", "폴더 생성 성공: ${response.folderName}")
+                }
+                .onFailure { exception ->
+                    Log.e("fetchCreateMemoFolder", "폴더 생성 실패: ${exception.message}")
+                }
+        }
+    }
+
     // 갤러리 이미지 로드
     fun loadImages() {
         val allImages = galleryRepository.getAllGalleryImagesDesc()
@@ -85,6 +103,7 @@ class SweepViewModel @Inject constructor(
         val trashedUris = TrashRepository.getAllTrashed().map { it.uri }
         _imagesLiveData.value = allImages.filterNot { trashedUris.contains(it.uri) }
     }
+
 
     suspend fun fetchSweepCreateTextFolder(folderName: String, image: ByteArray): Result<CreateTextFolderResponseModel> {
         return try {

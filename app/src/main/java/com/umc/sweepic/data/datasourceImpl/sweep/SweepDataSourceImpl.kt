@@ -2,6 +2,7 @@ package com.umc.sweepic.data.datasourceImpl.sweep
 
 import com.umc.sweepic.data.datasource.sweep.SweepDataSource
 import com.umc.sweepic.data.dto.BaseResponse
+import com.umc.sweepic.data.dto.request.sweep.CreateMemoFolderRequestDto
 import com.umc.sweepic.data.dto.request.sweep.DeleteImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.MoveTrashRequestDto
 import com.umc.sweepic.data.dto.request.sweep.TagRequestDto
@@ -9,6 +10,7 @@ import com.umc.sweepic.data.dto.request.sweep.TrashImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.UpdateImageRequestDto
 import com.umc.sweepic.data.dto.response.sweep.AiTagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateImageFolderResponseDto
+import com.umc.sweepic.data.dto.response.sweep.CreateMemoFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateTextFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.DeleteImageResponseDto
 import com.umc.sweepic.data.dto.response.sweep.MoveTrashResponseDto
@@ -51,6 +53,9 @@ class SweepDataSourceImpl @Inject constructor(
         image: MultipartBody.Part,
     ): BaseResponse<SaveImageMemoResponseDto> =
         sweepService.fetchSweepSaveImageMemo(folderId, image)
+
+    override suspend fun fetchSweepCreateMemoFolder(request: CreateMemoFolderRequestDto): BaseResponse<CreateMemoFolderResponseDto> =
+        sweepService.fetchSweepCreateMemoFolder(request)
 
     override suspend fun fetchMoveImageToTrash(imageId: String): BaseResponse<String> =
         sweepService.fetchMoveImageToTrash(imageId)

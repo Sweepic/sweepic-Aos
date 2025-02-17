@@ -37,6 +37,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
+import com.umc.sweepic.domain.model.request.sweep.CreateMemoFolderRequestModel
 import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
 import com.umc.sweepic.domain.model.request.sweep.TrashImageRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
@@ -169,7 +170,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         viewModel.tagResponse.observe(this) { response ->
             response?.let {
                 // API 호출 성공 시 처리할 작업, 예를 들어 UI 업데이트나 토스트 메시지 표시
-                showToast("태그 업데이트 성공: ${it.tags}")
+//                showToast("태그 업데이트 성공: ${it.tags}")
                 // 필요에 따라 추가 작업 수행
             }
         }
@@ -431,8 +432,8 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         viewModel.fetchSweepImages(request)
         viewModel.updateImageResult.observe(this) { response ->
             response?.let {
-                showToast("이미지 업데이트 성공: ${it.imageId}")
-            } ?: showToast("이미지 업데이트 실패")
+//                showToast("이미지 업데이트 성공: ${it.imageId}")
+            } /*?: showToast("이미지 업데이트 실패")*/
         }
     }
 
@@ -764,11 +765,11 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
                     // folderId와 imageText가 정상적으로 왔을 때만 실행
                     deleteCurrentImage(currentPosition)
-                    Toast.makeText(
-                        this@SweepActivity,
-                        "텍스트가 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folder_id})",
-                        Toast.LENGTH_SHORT
-                    ).show()
+//                    Toast.makeText(
+//                        this@SweepActivity,
+//                        "텍스트가 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folder_id})",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
                 }.onFailure { e ->
                     Toast.makeText(
                         this@SweepActivity,
@@ -854,11 +855,11 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 viewModel.fetchSweepSaveImageMemo(folder.folderId, imagePart).onSuccess { response ->
                     // API 호출 성공 시 현재 이미지 삭제
                     deleteCurrentImage(currentPosition)
-                    Toast.makeText(
-                        this@SweepActivity,
-                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
-                        Toast.LENGTH_SHORT
-                    ).show()
+//                    Toast.makeText(
+//                        this@SweepActivity,
+//                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
                 }.onFailure { e ->
                     Toast.makeText(
                         this@SweepActivity,
@@ -906,11 +907,11 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             result.onSuccess { response ->
                 // 성공 시 → 실제 파일 OS에서 삭제
                 deleteCurrentImage(currentPosition)
-                Toast.makeText(
-                    this@SweepActivity,
-                    "폴더 생성+텍스트 저장 성공: folderId=${response.folder_id} imageText=${response.image_text}",
-                    Toast.LENGTH_SHORT
-                ).show()
+//                Toast.makeText(
+//                    this@SweepActivity,
+//                    "폴더 생성+텍스트 저장 성공: folderId=${response.folder_id} imageText=${response.image_text}",
+//                    Toast.LENGTH_SHORT
+//                ).show()
             }.onFailure { e ->
                 Toast.makeText(
                     this@SweepActivity,
@@ -939,22 +940,32 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             return
         }
 
-        lifecycleScope.launch {
-            val result = viewModel.fetchSweepCreateImageFolder(folderName, imageByteArray)
-            result.onSuccess { response ->
-                // 성공 시 이미지 삭제 및 UI 업데이트
-                deleteCurrentImage(currentPosition)
-                Toast.makeText(
-                    this@SweepActivity,
-                    "사진이 폴더 ${response.folderName}에 저장되었습니다. (ID: ${response.folderId})",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }.onFailure { e ->
-                Toast.makeText(
-                    this@SweepActivity,
-                    "폴더 생성 실패: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+        // 1. 폴더 생성 API 호출
+        val request = CreateMemoFolderRequestModel(folderName)
+        viewModel.fetchSweepCreateMemoFolder(request)
+
+        // 2. 폴더 생성 결과를 관찰 후, 이미지 저장 API 호출
+        viewModel.createMemoFolderResult.observe(this) { folderResponse ->
+            val folderId = folderResponse.id.toLong() // 폴더 ID 추출
+            val mediaType = "image/jpeg".toMediaTypeOrNull()
+            val imageRequestBody = imageByteArray.toRequestBody(mediaType)
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+
+            lifecycleScope.launch {
+                viewModel.fetchSweepSaveImageMemo(folderId, imagePart).onSuccess { response ->
+                    deleteCurrentImage(currentPosition)
+//                    Toast.makeText(
+//                        this@SweepActivity,
+//                        "사진이 폴더 ${response.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+                }.onFailure { e ->
+                    Toast.makeText(
+                        this@SweepActivity,
+                        "사진 저장 실패: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -997,18 +1008,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             // 그 밖의 오류 처리
             e.printStackTrace()
             Toast.makeText(this, "삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun convertUriToBase64(uri: Uri): String? {
-        return try {
-            contentResolver.openInputStream(uri)?.use { input ->
-                val bytes = input.readBytes()
-                android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
         }
     }
 

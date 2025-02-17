@@ -1,6 +1,7 @@
 package com.umc.sweepic.data.service
 
 import com.umc.sweepic.data.dto.BaseResponse
+import com.umc.sweepic.data.dto.request.sweep.CreateMemoFolderRequestDto
 import com.umc.sweepic.data.dto.request.sweep.DeleteImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.MoveTrashRequestDto
 import com.umc.sweepic.data.dto.request.sweep.TagRequestDto
@@ -8,6 +9,7 @@ import com.umc.sweepic.data.dto.request.sweep.TrashImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.UpdateImageRequestDto
 import com.umc.sweepic.data.dto.response.sweep.AiTagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateImageFolderResponseDto
+import com.umc.sweepic.data.dto.response.sweep.CreateMemoFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateTextFolderResponseDto
 import com.umc.sweepic.data.dto.response.sweep.DeleteImageResponseDto
 import com.umc.sweepic.data.dto.response.sweep.MoveTrashResponseDto
@@ -60,6 +62,11 @@ interface SweepService {
         @Path("folderId") folderId: Long,
         @Part image: MultipartBody.Part
     ): BaseResponse<SaveImageMemoResponseDto>
+
+    @POST("memo/folders")
+    suspend fun fetchSweepCreateMemoFolder(
+        @Body request: CreateMemoFolderRequestDto
+    ): BaseResponse<CreateMemoFolderResponseDto>
 
     // 휴지통 관련 API
     @PATCH("trash/images/{imageId}")
