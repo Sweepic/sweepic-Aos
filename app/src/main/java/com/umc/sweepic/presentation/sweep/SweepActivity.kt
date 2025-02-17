@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.RecoverableSecurityException
-import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -38,9 +37,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
-import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
-import com.umc.sweepic.domain.model.request.sweep.MoveTrashRequestModel
 import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
+import com.umc.sweepic.domain.model.request.sweep.TrashImageRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.sweep.AlbumList
 import com.umc.sweepic.domain.model.sweep.Gallery
@@ -449,25 +447,15 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                         val currentPosition = binding.vpSweepMainImg.currentItem
                         if (currentPosition in currentImages.indices) {
                             val currentImage = currentImages[currentPosition]
-
-                            // 1) MediaStore ID 확인
-                            val mediaId = currentImage.id // currentImage.id는 MediaStore의 _ID여야 함
-                            if (mediaId == null) {
-                                Toast.makeText(this@SweepActivity, "이미지 ID를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-                                return false
+                            TrashRepository.addToTrash(currentImage)
+                            removeImageWithAnimation(currentPosition)
+                            val imageId = viewModel.updateImageResult.value?.imageId
+                            if (imageId != null) {
+                                viewModel.fetchMoveImageToTrash(imageId)
+                            } else {
+                                showToast("이미지 ID를 가져오지 못했습니다.")
                             }
 
-                            // 2) MoveTrash API 호출
-                            lifecycleScope.launch {
-                                val request = MoveTrashRequestModel(mediaId = mediaId)
-                                viewModel.fetchSweepMoveToTrash(request).onSuccess {
-                                    // 성공 시 애니메이션과 삭제
-                                    Toast.makeText(this@SweepActivity, "휴지통으로 이동됨", Toast.LENGTH_SHORT).show()
-                                    removeImageWithAnimation(currentPosition)
-                                }.onFailure { e ->
-                                    Toast.makeText(this@SweepActivity, "이동 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            }
                         }
                         return true
                     }
@@ -1323,6 +1311,8 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val allTrashed = TrashRepository.getAllTrashed()
                     if (allTrashed.isNotEmpty()) {
+                        val mediaIdList = allTrashed.map { it.id.toString() } // mediaId 리스트 생성
+                        viewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList))
                         deleteImagesWithPermission(allTrashed)
                         // 만약 예외 없이 모든 이미지가 삭제되었다면
                         if (pendingTrashGalleries.isEmpty()) {
@@ -1339,7 +1329,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 }
             },
             onCancel = {
-                showToast("계속하기를 선택했습니다.")
+
             }
         ).show(supportFragmentManager, "QuitChallengeDialog")
     }

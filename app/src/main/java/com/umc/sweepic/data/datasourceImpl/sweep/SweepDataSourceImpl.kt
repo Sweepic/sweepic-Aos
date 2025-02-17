@@ -5,6 +5,7 @@ import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.request.sweep.DeleteImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.MoveTrashRequestDto
 import com.umc.sweepic.data.dto.request.sweep.TagRequestDto
+import com.umc.sweepic.data.dto.request.sweep.TrashImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.UpdateImageRequestDto
 import com.umc.sweepic.data.dto.response.sweep.AiTagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateImageFolderResponseDto
@@ -51,11 +52,14 @@ class SweepDataSourceImpl @Inject constructor(
     ): BaseResponse<SaveImageMemoResponseDto> =
         sweepService.fetchSweepSaveImageMemo(folderId, image)
 
-    override suspend fun fetchSweepDeleteImage(request: DeleteImageRequestDto): BaseResponse<DeleteImageResponseDto> =
-        sweepService.fetchSweepDeleteImage(request)
+    override suspend fun fetchMoveImageToTrash(imageId: String): BaseResponse<String> =
+        sweepService.fetchMoveImageToTrash(imageId)
 
-    override suspend fun fetchSweepMoveToTrash(request: MoveTrashRequestDto): BaseResponse<MoveTrashResponseDto> =
-        sweepService.fetchSweepMoveToTrash(request)
+    override suspend fun fetchRestoreTrashImage(request: TrashImageRequestDto): BaseResponse<String> =
+        sweepService.fetchRestoreTrashImage(request)
+
+    override suspend fun fetchDeleteTrashImage(request: TrashImageRequestDto): BaseResponse<String> =
+        sweepService.fetchDeleteTrashImage(request)
 
     override suspend fun fetchSweepImages(request: UpdateImageRequestDto): BaseResponse<UpdateImageResponseDto> =
         sweepService.fetchSweepImages(request)

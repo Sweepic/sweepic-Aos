@@ -4,6 +4,7 @@ import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.request.sweep.DeleteImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.MoveTrashRequestDto
 import com.umc.sweepic.data.dto.request.sweep.TagRequestDto
+import com.umc.sweepic.data.dto.request.sweep.TrashImageRequestDto
 import com.umc.sweepic.data.dto.request.sweep.UpdateImageRequestDto
 import com.umc.sweepic.data.dto.response.sweep.AiTagResponseDto
 import com.umc.sweepic.data.dto.response.sweep.CreateImageFolderResponseDto
@@ -20,6 +21,7 @@ import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -60,15 +62,20 @@ interface SweepService {
     ): BaseResponse<SaveImageMemoResponseDto>
 
     // 휴지통 관련 API
-    @DELETE("trust")
-    suspend fun fetchSweepDeleteImage(
-        @Body request: DeleteImageRequestDto
-    ): BaseResponse<DeleteImageResponseDto>
+    @PATCH("trash/images/{imageId}")
+    suspend fun fetchMoveImageToTrash(
+        @Path("imageId") imageId: String
+    ): BaseResponse<String>
 
-    @PATCH("trust/active")
-    suspend fun fetchSweepMoveToTrash(
-        @Body request: MoveTrashRequestDto
-    ): BaseResponse<MoveTrashResponseDto>
+    @PATCH("trash/active")
+    suspend fun fetchRestoreTrashImage(
+        @Body request: TrashImageRequestDto
+    ): BaseResponse<String>
+
+    @HTTP(method = "DELETE", path = "trash/images", hasBody = true)
+    suspend fun fetchDeleteTrashImage(
+        @Body request: TrashImageRequestDto
+    ): BaseResponse<String>
 
     // 이미지 정보 넘기기
     @POST("images")

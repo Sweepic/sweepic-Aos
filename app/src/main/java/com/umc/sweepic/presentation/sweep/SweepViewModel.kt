@@ -9,6 +9,7 @@ import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
 import com.umc.sweepic.domain.model.request.sweep.MoveTrashRequestModel
 import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
+import com.umc.sweepic.domain.model.request.sweep.TrashImageRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.response.sweep.AiTagResponseModel
 import com.umc.sweepic.domain.model.response.sweep.CreateImageFolderResponseModel
@@ -117,10 +118,6 @@ class SweepViewModel @Inject constructor(
         return repository.fetchSweepSaveImageMemo(folderId, image)
     }
 
-    suspend fun fetchSweepMoveToTrash(request: MoveTrashRequestModel): Result<MoveTrashResponseModel> {
-        return repository.fetchSweepMoveToTrash(request)
-    }
-
     //
     fun fetchSweepImages(request: UpdateImageRequestModel) {
         viewModelScope.launch {
@@ -131,6 +128,42 @@ class SweepViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     Log.e("fetchSweepImages", "이미지 업데이트 실패: ${exception.message}")
+                }
+        }
+    }
+
+    fun fetchMoveImageToTrash(imageId: String) {
+        viewModelScope.launch {
+            repository.fetchMoveImageToTrash(imageId)
+                .onSuccess { response ->
+                    Log.d("SweepViewModel", "이미지 휴지통 이동 성공: $response")
+                }
+                .onFailure { exception ->
+                    Log.e("SweepViewModel", "이미지 휴지통 이동 실패: ${exception.message}")
+                }
+        }
+    }
+
+    fun fetchRestoreTrashImage(request: TrashImageRequestModel) {
+        viewModelScope.launch {
+            repository.fetchRestoreTrashImage(request)
+                .onSuccess { response ->
+                    Log.d("SweepViewModel", "휴지통 이미지 복원 성공: $response")
+                }
+                .onFailure { exception ->
+                    Log.e("SweepViewModel", "휴지통 이미지 복원 실패: ${exception.message}")
+                }
+        }
+    }
+
+    fun fetchDeleteTrashImage(request: TrashImageRequestModel) {
+        viewModelScope.launch {
+            repository.fetchDeleteTrashImage(request)
+                .onSuccess { response ->
+                    Log.d("SweepViewModel", "휴지통 이미지 삭제 성공: $response")
+                }
+                .onFailure { exception ->
+                    Log.e("SweepViewModel", "휴지통 이미지 삭제 실패: ${exception.message}")
                 }
         }
     }
