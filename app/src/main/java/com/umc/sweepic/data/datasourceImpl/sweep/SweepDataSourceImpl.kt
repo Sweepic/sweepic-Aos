@@ -32,15 +32,15 @@ class SweepDataSourceImpl @Inject constructor(
 
     override suspend fun fetchSweepCreateTextFolder(
         folderName: RequestBody,
-        base64_image: MultipartBody.Part
+        image: MultipartBody.Part
     ): BaseResponse<CreateTextFolderResponseDto> =
-        sweepService.fetchSweepCreateTextFolder(folderName, base64_image)
+        sweepService.fetchSweepCreateTextFolder(folderName, image)
 
     override suspend fun fetchSweepSaveTextMemo(
         folderId: Long,
-        base64_image: MultipartBody.Part
+        image: MultipartBody.Part
     ): BaseResponse<CreateTextFolderResponseDto> =
-        sweepService.fetchSweepSaveTextMemo(folderId, base64_image)
+        sweepService.fetchSweepSaveTextMemo(folderId, image)
 
     override suspend fun fetchSweepCreateImageFolder(
         folderName: RequestBody,

@@ -747,7 +747,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             // MultipartBody.Part 생성
             val mediaType = "image/jpeg".toMediaTypeOrNull()
             val imageRequestBody = imageByteArray.toRequestBody(mediaType)
-            val imagePart = MultipartBody.Part.createFormData("base64_image", "image.jpg", imageRequestBody)
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
 
             // ViewModel의 API 호출 (코루틴 내에서 실행)
             lifecycleScope.launch {

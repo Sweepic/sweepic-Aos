@@ -109,7 +109,7 @@ class SweepViewModel @Inject constructor(
         return try {
             val folderRequestBody = folderName.toRequestBody("text/plain".toMediaType()) // 폴더 이름을 RequestBody로 변환
             val imageRequestBody = image.toRequestBody("image/jpeg".toMediaTypeOrNull()) // 이미지 바이트 배열을 RequestBody로 변환
-            val imagePart = MultipartBody.Part.createFormData("base64_image", "image.jpg", imageRequestBody)
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
 
             repository.fetchSweepCreateTextFolder(folderRequestBody, imagePart) // API 호출
         } catch (e: Exception) {

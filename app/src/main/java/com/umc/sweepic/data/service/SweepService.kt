@@ -39,14 +39,14 @@ interface SweepService {
     @POST("memo/text-format/folders")
     suspend fun fetchSweepCreateTextFolder(
         @Part("folder_name") folderName: RequestBody,
-        @Part base64_image: MultipartBody.Part
+        @Part image: MultipartBody.Part
     ): BaseResponse<CreateTextFolderResponseDto>
 
     @Multipart
     @PATCH("memo/text-format/folders/{folderId}")
     suspend fun fetchSweepSaveTextMemo(
         @Path("folderId") folderId: Long,
-        @Part base64_image: MultipartBody.Part
+        @Part image: MultipartBody.Part
     ): BaseResponse<CreateTextFolderResponseDto>
 
     @Multipart
