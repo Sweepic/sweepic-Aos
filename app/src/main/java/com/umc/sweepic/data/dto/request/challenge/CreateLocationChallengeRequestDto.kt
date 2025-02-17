@@ -1,7 +1,7 @@
 package com.umc.sweepic.data.dto.request.challenge
 
 data class CreateLocationChallengeRequestDto(
-    val context: String,
+    val required: Int,
     val location: String,
-    val required: Int
+    val context: String
 )

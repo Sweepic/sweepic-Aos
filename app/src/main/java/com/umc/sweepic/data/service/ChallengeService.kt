@@ -1,17 +1,20 @@
 package com.umc.sweepic.data.service
 
 import com.umc.sweepic.data.dto.BaseResponse
-import com.umc.sweepic.data.dto.request.challenge.CreateChallengeDeleteRequestDto
-import com.umc.sweepic.data.dto.request.challenge.CreateChallengeUpdateRequestDto
+import com.umc.sweepic.data.dto.request.challenge.UpdateChallengeRequestDto
 import com.umc.sweepic.data.dto.request.challenge.CreateLocationChallengeRequestDto
-import com.umc.sweepic.data.dto.request.challenge.CreateLocationLogicTestRequestDto
+import com.umc.sweepic.data.dto.request.challenge.LocationLogicRequestDto
 import com.umc.sweepic.data.dto.request.challenge.CreateWeeklyChallengeRequestDto
-import com.umc.sweepic.data.dto.response.challenge.CreateChallengeDeleteResponseDto
-import com.umc.sweepic.data.dto.response.challenge.CreateChallengeUpdateResponseDto
+import com.umc.sweepic.data.dto.response.challenge.AcceptChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.DeleteChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.UpdateChallengeResponseDto
 import com.umc.sweepic.data.dto.response.challenge.CreateLocationChallengeResponseDto
-import com.umc.sweepic.data.dto.response.challenge.CreateLocationLogicTestResponseDto
+import com.umc.sweepic.data.dto.response.challenge.LocationLogicResponseDto
 import com.umc.sweepic.data.dto.response.challenge.CreateWeeklyChallengeResponseDto
-import com.umc.sweepic.data.dto.response.challenge.ChallengeGetResponseDto
+import com.umc.sweepic.data.dto.response.challenge.GetUserChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.CompleteChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.GetLocationChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.GetWeeklyChallengeResponseDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -20,35 +23,63 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface ChallengeService {
-    @PATCH("challenge/update")
-    suspend fun fetchChallengeUpdate(
-        @Body request: CreateChallengeUpdateRequestDto
-    ): BaseResponse<CreateChallengeUpdateResponseDto>
+    //날짜 기반 챌린지
+    @POST("challenge/weekly_challenge/create")
+    suspend fun createWeeklyChallenge(
+        @Body request: CreateWeeklyChallengeRequestDto
+    ): BaseResponse<CreateWeeklyChallengeResponseDto>
 
-    @GET("challenge/get")
-    suspend fun fetchChallengeGet(
+    @GET("challenge/weekly_challenge/get/{id}")
+    suspend fun getWeeklyChallenge(
+        @Path("id") id:String
+    ): BaseResponse<GetWeeklyChallengeResponseDto>
 
-    ): BaseResponse<List<ChallengeGetResponseDto>>
-
-    @DELETE("challenge/delete")
-    suspend fun fetchChallengeDelete(
-        @Body request: CreateChallengeDeleteRequestDto
-    ): BaseResponse<CreateChallengeDeleteResponseDto>
-
+    //위치 기반 챌린지
     @POST("challenge/location_logic/test")
-    suspend fun fetchChallengeLocationLogicTestChallengeCreate(
-        @Body request: List<CreateLocationLogicTestRequestDto>
-    ): BaseResponse<List<CreateLocationLogicTestResponseDto>>
+    suspend fun getLocationLogic(
+        @Body request: List<LocationLogicRequestDto>
+    ): BaseResponse<List<LocationLogicResponseDto>>
+
+    @GET("challenge/location_challenge/get/{id}")
+    suspend fun getLocationChallenge(
+        @Path("id") id:String
+    ): BaseResponse<GetLocationChallengeResponseDto>
 
     @POST("challenge/location_challenge/create")
-    suspend fun fetchChallengeLocationChallengeCreate(
+    suspend fun createLocationChallenge(
         @Body request: CreateLocationChallengeRequestDto
     ): BaseResponse<CreateLocationChallengeResponseDto>
 
+    //챌린지 컨트롤
+    @PATCH("challenge/update")
+    suspend fun updateChallenge(
+        @Body request: UpdateChallengeRequestDto
+    ): BaseResponse<UpdateChallengeResponseDto>
+
+    @DELETE("challenge/delete")
+    suspend fun deleteChallenge(
+        @Path("id") id:String,
+    ): BaseResponse<DeleteChallengeResponseDto>
+
+    @PATCH("challenge/accept/{id}")
+    suspend fun acceptChallenge(
+        @Path("id") id:String
+    ): BaseResponse<AcceptChallengeResponseDto>
+
+    @PATCH("challenge/complete/{id}")
+    suspend fun completeChallenge(
+        @Path("id") id:String
+    ): BaseResponse<CompleteChallengeResponseDto>
+
+    @GET("challenge/get")
+    suspend fun getUserChallenge(
+    ): BaseResponse<List<GetUserChallengeResponseDto>>
 
 
-    @POST("challenge/weekly_challenge/create")
-    suspend fun fetchSweepWeeklyChallengeCreate(
-        @Body request: CreateWeeklyChallengeRequestDto
-    ): BaseResponse<CreateWeeklyChallengeResponseDto>
+
+
+
+
+
+
 }

@@ -1,22 +1,35 @@
 package com.umc.sweepic.data.datasource.challenge
 
 import com.umc.sweepic.data.dto.BaseResponse
-import com.umc.sweepic.data.dto.request.challenge.CreateChallengeUpdateRequestDto
+import com.umc.sweepic.data.dto.request.challenge.UpdateChallengeRequestDto
 import com.umc.sweepic.data.dto.request.challenge.CreateLocationChallengeRequestDto
-import com.umc.sweepic.data.dto.request.challenge.CreateLocationLogicTestRequestDto
+import com.umc.sweepic.data.dto.request.challenge.LocationLogicRequestDto
 import com.umc.sweepic.data.dto.request.challenge.CreateWeeklyChallengeRequestDto
-import com.umc.sweepic.data.dto.response.challenge.CreateChallengeUpdateResponseDto
+import com.umc.sweepic.data.dto.response.challenge.AcceptChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.CompleteChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.UpdateChallengeResponseDto
 import com.umc.sweepic.data.dto.response.challenge.CreateLocationChallengeResponseDto
-import com.umc.sweepic.data.dto.response.challenge.CreateLocationLogicTestResponseDto
+import com.umc.sweepic.data.dto.response.challenge.LocationLogicResponseDto
 import com.umc.sweepic.data.dto.response.challenge.CreateWeeklyChallengeResponseDto
-import com.umc.sweepic.data.dto.response.challenge.ChallengeGetResponseDto
+import com.umc.sweepic.data.dto.response.challenge.DeleteChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.GetLocationChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.GetUserChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.GetWeeklyChallengeResponseDto
 
 interface ChallengeDataSource {
-    suspend fun fetchChallengeUpdate(request: CreateChallengeUpdateRequestDto): BaseResponse<CreateChallengeUpdateResponseDto>
-    suspend fun fetchChallengeGet(): BaseResponse<List<ChallengeGetResponseDto>>
+    //날짜
+    suspend fun createWeeklyChallenge(requestDto: CreateWeeklyChallengeRequestDto): BaseResponse<CreateWeeklyChallengeResponseDto>
+    suspend fun getWeeklyChallenge(id: String): BaseResponse<GetWeeklyChallengeResponseDto>
 
-    suspend fun fetchChallengeLocationLogicTestChallengeCreate(request: List<CreateLocationLogicTestRequestDto>): BaseResponse<List<CreateLocationLogicTestResponseDto>>
-    suspend fun fetchChallengeLocationChallengeCreate(request: CreateLocationChallengeRequestDto): BaseResponse<CreateLocationChallengeResponseDto>
+    //위치
+    suspend fun createLocationChallenge(request: CreateLocationChallengeRequestDto): BaseResponse<CreateLocationChallengeResponseDto>
+    suspend fun getLocationChallenge(id: String): BaseResponse<GetLocationChallengeResponseDto>
+    suspend fun getLocationLogic(request: List<LocationLogicRequestDto>): BaseResponse<List<LocationLogicResponseDto>>
 
-    suspend fun fetchWeeklyChallengeCreate(requestDto: CreateWeeklyChallengeRequestDto): BaseResponse<CreateWeeklyChallengeResponseDto>
+    //컨트롤
+    suspend fun updateChallenge(request: UpdateChallengeRequestDto): BaseResponse<UpdateChallengeResponseDto>
+    suspend fun deleteChallenge(id: String): BaseResponse<DeleteChallengeResponseDto>
+    suspend fun acceptChallenge(id: String): BaseResponse<AcceptChallengeResponseDto>
+    suspend fun completeChallenge(id: String): BaseResponse<CompleteChallengeResponseDto>
+    suspend fun getUserChallenge(): BaseResponse<List<GetUserChallengeResponseDto>>
 }

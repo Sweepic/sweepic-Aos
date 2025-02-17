@@ -1,18 +1,23 @@
 package com.umc.sweepic.data.repositoryImpl.challenge
 
-import android.util.Log
 import com.umc.sweepic.data.datasource.challenge.ChallengeDataSource
-import com.umc.sweepic.data.dto.response.challenge.CreateLocationLogicTestResponseDto.Companion.toResponseModelList
-import com.umc.sweepic.domain.model.request.challenge.CreateChallengeUpdateRequestModel
+import com.umc.sweepic.data.dto.response.challenge.GetUserChallengeResponseDto.Companion.toResponseModelList
+import com.umc.sweepic.data.dto.response.challenge.LocationLogicResponseDto.Companion.toResponseModelList
+import com.umc.sweepic.domain.model.request.challenge.UpdateChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.CreateLocationChallengeRequestModel
-import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel
-import com.umc.sweepic.domain.model.request.challenge.CreateLocationLogicTestRequestModel.Companion.toDtoList
+import com.umc.sweepic.domain.model.request.challenge.LocationLogicRequestModel
+import com.umc.sweepic.domain.model.request.challenge.LocationLogicRequestModel.Companion.toDtoList
 import com.umc.sweepic.domain.model.request.challenge.CreateWeeklyChallengeRequestModel
-import com.umc.sweepic.domain.model.response.challenge.CreateChallengeUpdateResponseModel
+import com.umc.sweepic.domain.model.response.challenge.AcceptChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.CompleteChallengeResponsModel
+import com.umc.sweepic.domain.model.response.challenge.UpdateChallengeResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateLocationChallengeResponseModel
-import com.umc.sweepic.domain.model.response.challenge.CreateLocationLogicTestResponseModel
+import com.umc.sweepic.domain.model.response.challenge.LocationLogicResponseModel
 import com.umc.sweepic.domain.model.response.challenge.CreateWeeklyChallengeResponseModel
-import com.umc.sweepic.domain.model.response.challenge.ChallengeGetResponseModel
+import com.umc.sweepic.domain.model.response.challenge.DeleteChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.GetLocationChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.GetUserChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.GetWeeklyChallengeResponseModel
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
 
 import javax.inject.Inject
@@ -20,23 +25,56 @@ import javax.inject.Inject
 class ChallengeRepositoryImpl @Inject constructor(
     private val challengeDataSource: ChallengeDataSource
 ): ChallengeRepository {
-    override suspend fun fetchChallengeUpdate(request: CreateChallengeUpdateRequestModel): Result<CreateChallengeUpdateResponseModel> = runCatching {
-        challengeDataSource.fetchChallengeUpdate(request.toCreateChallengeUpdateRequestDto()).success.toCreateChallengeUpdateResponseModel()
-    }
+    //날짜 기반 챌린지
+    override suspend fun createWeeklyChallenge(request: CreateWeeklyChallengeRequestModel): Result<CreateWeeklyChallengeResponseModel> =
+        runCatching {
+            challengeDataSource.createWeeklyChallenge(request.toCreateWeeklyChallengeRequestDto()).success.toCreateWeeklyChallengeResponseModel()
+        }
 
-    override suspend fun fetchChallengeGet(): Result<List<ChallengeGetResponseModel>> = runCatching {
-        challengeDataSource.fetchChallengeGet().success.map { it.toChallengeGetResponseModel() }
-    }
+    override suspend fun getWeeklyChallenge(id: String): Result<GetWeeklyChallengeResponseModel> =
+        runCatching {
+            challengeDataSource.getWeeklyChallenge(id).success.toGetWeeklyChallengeResponseModel()
+        }
 
-    override suspend fun fetchChallengeLocationLogicTestChallengeCreate(request: List<CreateLocationLogicTestRequestModel>): Result<List<CreateLocationLogicTestResponseModel>> = runCatching {
-        challengeDataSource.fetchChallengeLocationLogicTestChallengeCreate(request.toDtoList()).success.toResponseModelList()
-    }
+    // 위치 기반 챌린지
+    override suspend fun createLocationChallenge(request: CreateLocationChallengeRequestModel): Result<CreateLocationChallengeResponseModel> =
+        runCatching {
+            challengeDataSource.createLocationChallenge(request.toCreateLocationChallengeRequestDto()).success.toCreateLocationChallengeResponseModel()
+        }
 
-    override suspend fun fetchChallengeLocationChallengeCreate(request: CreateLocationChallengeRequestModel): Result<CreateLocationChallengeResponseModel> = runCatching {
-        challengeDataSource.fetchChallengeLocationChallengeCreate(request.toCreateLocationChallengeRequestDto()).success.toCreateLocationChallengeResponseModel()
-    }
+    override suspend fun getLocationChallenge(id: String): Result<GetLocationChallengeResponseModel> =
+        runCatching {
+            challengeDataSource.getLocationChallenge(id).success.toGetLocationChallengeResponseModel()
+        }
 
-    override suspend fun fetchWeeklyChallengeCreate(request: CreateWeeklyChallengeRequestModel): Result<CreateWeeklyChallengeResponseModel> = runCatching {
-        challengeDataSource.fetchWeeklyChallengeCreate(request.toCreateWeeklyChallengeRequestDto()).success.toCreateWeeklyChallengeResponseModel()
-    }
+    override suspend fun getLocationLogic(request: List<LocationLogicRequestModel>): Result<List<LocationLogicResponseModel>> =
+        runCatching {
+            challengeDataSource.getLocationLogic(request.toDtoList()).success.toResponseModelList()
+        }
+
+    //컨트롤
+    override suspend fun updateChallenge(request: UpdateChallengeRequestModel): Result<UpdateChallengeResponseModel> =
+        runCatching {
+            challengeDataSource.updateChallenge(request.toUpdateChallengeRequestDto()).success.toUpdateChallengeResponseModel()
+        }
+
+    override suspend fun deleteChallenge(id: String): Result<DeleteChallengeResponseModel> =
+        runCatching {
+            challengeDataSource.deleteChallenge(id).success.toDeleteChallengeResponseModel()
+        }
+
+    override suspend fun acceptChallenge(id: String): Result<AcceptChallengeResponseModel> =
+        runCatching {
+            challengeDataSource.acceptChallenge(id).success.toAcceptChallengeResponseModel()
+        }
+
+    override suspend fun completeChallenge(id: String): Result<CompleteChallengeResponsModel> =
+        runCatching {
+            challengeDataSource.completeChallenge(id).success.toCompleteChallengeResponseModel()
+        }
+
+    override suspend fun getUserChallenge(): Result<List<GetUserChallengeResponseModel>> =
+        runCatching {
+            challengeDataSource.getUserChallenge().success.toResponseModelList()
+        }
 }

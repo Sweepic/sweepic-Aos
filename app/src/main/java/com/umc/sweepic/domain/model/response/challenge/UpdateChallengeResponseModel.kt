@@ -1,6 +1,6 @@
 package com.umc.sweepic.domain.model.response.challenge
 
-data class CreateChallengeUpdateResponseModel(
+data class UpdateChallengeResponseModel(
     val id : String,
     val required : String,
     val remaining : String

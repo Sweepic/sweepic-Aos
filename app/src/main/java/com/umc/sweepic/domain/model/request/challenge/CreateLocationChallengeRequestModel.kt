@@ -4,12 +4,12 @@ import com.umc.sweepic.data.dto.request.challenge.CreateLocationChallengeRequest
 import java.io.Serializable
 
 data class CreateLocationChallengeRequestModel(
-    val context: String,
+    val required: Int,
     val location: String,
-    val required: Int
+    val context: String
 ): Serializable{
     fun toCreateLocationChallengeRequestDto() =
         CreateLocationChallengeRequestDto(
-            context, location, required
+            required, location, context
         )
 }

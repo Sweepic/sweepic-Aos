@@ -1,8 +1,9 @@
 package com.umc.sweepic.data.dto.response.challenge
 
-import com.umc.sweepic.domain.model.response.challenge.CreateWeeklyChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.AcceptChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.CreateLocationChallengeResponseModel
 
-data class CreateWeeklyChallengeResponseDto(
+data class AcceptChallengeResponseDto (
     val id : String,
     val userId: String,
     val title : String,
@@ -15,8 +16,8 @@ data class CreateWeeklyChallengeResponseDto(
     val completedAt : String,
     val status : Int
 ){
-    fun toCreateWeeklyChallengeResponseModel() =
-        CreateWeeklyChallengeResponseModel(
+    fun toAcceptChallengeResponseModel() =
+        AcceptChallengeResponseModel(
             id, userId, title, context, requiredCount, remainingCount, createdAt, updatedAt, acceptedAt, completedAt, status
         )
 }

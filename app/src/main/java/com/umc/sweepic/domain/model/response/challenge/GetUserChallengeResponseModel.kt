@@ -1,6 +1,6 @@
 package com.umc.sweepic.domain.model.response.challenge
 
-data class ChallengeGetResponseModel(
+data class GetUserChallengeResponseModel(
     val id: String,
     val title: String,
     val context: String,
@@ -15,3 +15,4 @@ data class ChallengeGetResponseModel(
     val completedAt: String?,
     val status: Int
 )
+

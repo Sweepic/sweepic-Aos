@@ -1,5 +1,5 @@
 package com.umc.sweepic.domain.model.response.challenge
 
-data class CreateChallengeDeleteResponseModel(
+data class DeleteChallengeResponseModel(
     val id : String
 )
