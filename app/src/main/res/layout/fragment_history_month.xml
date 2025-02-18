@@ -16,7 +16,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="24dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
@@ -30,8 +30,7 @@
                 android:src="@drawable/ic_back"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="16dp"/>
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
             <!-- 타이틀 -->
             <TextView
@@ -45,8 +44,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="16dp"/>
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
             <!-- 수정 버튼 -->
             <TextView
@@ -54,12 +52,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="수정"
-                android:textSize="16sp"
                 android:textColor="@color/sweepic"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="16dp"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 구분선 -->

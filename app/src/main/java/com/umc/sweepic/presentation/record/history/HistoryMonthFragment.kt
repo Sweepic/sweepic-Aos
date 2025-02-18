@@ -17,11 +17,15 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
     override fun initView() {
         // UI 초기화 및 이벤트 처리
         binding.ivBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        binding.ivBack.setOnClickListener {
             findNavController().navigateUp() // 뒤로 가기 기능
         }
 
         binding.tvEdit.setOnClickListener {
-            // 수정 버튼 클릭 시 로직 추가
+            findNavController().navigate(R.id.action_historyMonthFragment_to_historyMonthChoiceFragment)
         }
     }
 

@@ -16,10 +16,18 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
         binding.ivNextMonth.setOnClickListener {
             navigateToHistoryMonthFragment()
         }
+
+        binding.ivNextLastBest.setOnClickListener {
+            navigateToHistoryLastBestFragment()
+        }
     }
 
     private fun navigateToHistoryMonthFragment() {
         findNavController().navigate(R.id.historyMonthFragment)
+    }
+
+    private fun navigateToHistoryLastBestFragment(){
+        findNavController().navigate(R.id.action_historyFragment_to_historyLastBestFragment)
     }
 
     companion object {
