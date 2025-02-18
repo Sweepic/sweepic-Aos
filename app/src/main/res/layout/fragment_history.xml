@@ -267,6 +267,7 @@
                         app:layout_constraintTop_toTopOf="@id/layout_subtitle1" />
 
                     <ImageView
+                        android:id="@+id/iv_next_month"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_next"
@@ -338,6 +339,7 @@
                         app:layout_constraintTop_toTopOf="@id/layout_subtitle2" />
 
                     <ImageView
+                        android:id="@+id/iv_next_best"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_next"

@@ -28,6 +28,7 @@
         <action
             android:id="@+id/action_recordFragment_to_tagImgFragment"
             app:destination="@id/tagImgFragment" />
+
     </fragment>
 
     <fragment
@@ -35,6 +36,13 @@
         android:name="com.umc.sweepic.presentation.record.history.HistoryTagFragment"
         android:label="HistoryTagFragment"
         tools:layout="@layout/fragment_history_tag" />
+
+    <fragment
+        android:id="@+id/historyMonthFragment"
+        android:name="com.umc.sweepic.presentation.record.history.HistoryMonthFragment"
+        android:label="HistoryMonthFragment"
+        tools:layout="@layout/fragment_history_month" />
+
 
     <fragment
         android:id="@+id/myPageFragment"
