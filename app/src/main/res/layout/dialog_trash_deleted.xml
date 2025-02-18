@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="사진이 지워졌습니다!"
-            style="@style/TextAppearance.Sweepic.Content"
+            style="@style/TextAppearance.Sweepic.Bold.Title_16sp"
             android:textSize="17sp"
             android:textColor="@color/sw_bk"
             app:layout_constraintTop_toBottomOf="@+id/iv_check"
@@ -38,7 +38,8 @@
             android:id="@+id/tv_trash_warning"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            style="@style/TextAppearance.Sweepic.Content.Light"
+            style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
+            android:textSize="15sp"
             android:text="지워진 사진들은 30일 이내에 기본 갤러리에서\n다시 복구할 수 있습니다."
             android:textColor="@color/sw_gray2"
             android:gravity="center"
@@ -49,22 +50,22 @@
             app:layout_constraintVertical_bias="0"
             android:layout_marginTop="15dp"/>
 
-        <View
-            android:id="@+id/view_div_line"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/sw_gray1"
-            android:layout_marginTop="18dp"
-            app:layout_constraintBottom_toTopOf="@+id/btn_trash_delete_confirm"/>
+<!--        <View-->
+<!--            android:id="@+id/view_div_line"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="2dp"-->
+<!--            android:background="@color/sw_gray1"-->
+<!--            android:layout_marginTop="18dp"-->
+<!--            app:layout_constraintBottom_toTopOf="@+id/btn_trash_delete_confirm"/>-->
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_trash_delete_confirm"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="확인"
-            style="@style/TextAppearance.Sweepic.Content"
-            android:background="@null"
-            android:textColor="@color/sw_bk"
+            style="@style/TextAppearance.Sweepic.Bold.Title_14sp"
+            android:background="@drawable/shape_rect_4_blue_fill"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_trash_warning"
             app:layout_constraintStart_toStartOf="parent"
