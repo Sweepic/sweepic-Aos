@@ -6,11 +6,13 @@ import com.umc.sweepic.data.datasource.GalleryDataSource
 import com.umc.sweepic.data.datasource.HistoryDataSource
 import com.umc.sweepic.data.datasource.sweep.SweepDataSource
 import com.umc.sweepic.data.datasource.MemoDataSource
+import com.umc.sweepic.data.datasource.MypageDataSource
 import com.umc.sweepic.data.datasource.OnboardingDataSource
 import com.umc.sweepic.data.datasourceImpl.sweep.GalleryDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.HistoryDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.SweepDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.MemoDataSourceImpl
+import com.umc.sweepic.data.datasourceImpl.sweep.MypageDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.OnboardingDataSourceImpl
 import dagger.Module
 import dagger.Provides
@@ -51,4 +53,9 @@ object DataSourceModule {
     @Singleton
     fun provideHistoryDataSource(historyDataSourceImpl: HistoryDataSourceImpl) : HistoryDataSource =
         historyDataSourceImpl
+
+    @Provides
+    @Singleton
+    fun provideMypageDataSource(mypageDataSourceImpl: MypageDataSourceImpl) : MypageDataSource =
+        mypageDataSourceImpl
 }

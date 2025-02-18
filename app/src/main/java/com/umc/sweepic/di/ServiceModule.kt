@@ -3,6 +3,7 @@ package com.umc.sweepic.di
 import com.umc.sweepic.data.service.HistoryService
 import com.umc.sweepic.data.service.SweepService
 import com.umc.sweepic.data.service.MemoService
+import com.umc.sweepic.data.service.MypageService
 import com.umc.sweepic.data.service.OnboardingService
 import com.umc.sweepic.data.service.TestService
 import dagger.Module
@@ -48,4 +49,11 @@ object ServiceModule {
     fun provideHistoryService(retrofit: Retrofit) : HistoryService {
         return retrofit.buildService()
     }
+
+    @Provides
+    @Singleton
+    fun provideMypageService(retrofit: Retrofit) : MypageService{
+        return retrofit.buildService()
+    }
+
 }
