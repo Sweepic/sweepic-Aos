@@ -5,8 +5,8 @@ import com.umc.sweepic.data.datasource.MemoDataSource
 import com.umc.sweepic.data.dto.request.DeleteImagesRequestDto
 import com.umc.sweepic.data.dto.request.MoveImagesRequestDto
 import com.umc.sweepic.data.dto.response.DeleteImagesResponseDto
-import com.umc.sweepic.domain.model.MemoFolderDetailModel
-import com.umc.sweepic.domain.model.RecordMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.MemoFolderDetailModel
+import com.umc.sweepic.domain.model.response.sweep.RecordMemoListModel
 import com.umc.sweepic.domain.repository.sweep.MemoRepository
 import javax.inject.Inject
 

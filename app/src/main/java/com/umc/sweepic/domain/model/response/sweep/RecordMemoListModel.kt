@@ -1,4 +1,4 @@
-package com.umc.sweepic.domain.model
+package com.umc.sweepic.domain.model.response.sweep
 
 data class RecordMemoListModel(
     val data: List<MemoFolderModel>

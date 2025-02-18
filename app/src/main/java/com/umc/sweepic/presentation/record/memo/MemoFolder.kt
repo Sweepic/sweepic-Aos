@@ -1,7 +1,7 @@
 package com.umc.sweepic.presentation.record.memo
 
 import android.os.Parcelable
-import com.umc.sweepic.domain.model.RecordMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.RecordMemoListModel
 import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
 import java.util.Locale

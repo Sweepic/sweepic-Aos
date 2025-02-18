@@ -1,5 +1,6 @@
 package com.umc.sweepic.di
 
+import com.umc.sweepic.data.service.LoginService
 import com.umc.sweepic.data.service.SweepService
 import com.umc.sweepic.data.service.MemoService
 import com.umc.sweepic.data.service.OnboardingService
@@ -39,6 +40,12 @@ object ServiceModule {
     @Provides
     @Singleton
     fun provideOnboardingService(retrofit: Retrofit) : OnboardingService {
+        return retrofit.buildService()
+    }
+
+    @Provides
+    @Singleton
+    fun provideLoginService(retrofit: Retrofit) : LoginService {
         return retrofit.buildService()
     }
 }

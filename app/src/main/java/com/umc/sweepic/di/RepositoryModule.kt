@@ -4,10 +4,12 @@ import android.app.Application
 import android.content.Context
 import com.umc.sweepic.data.repositoryImpl.TestRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.GalleryRepositoryImpl
+import com.umc.sweepic.data.repositoryImpl.sweep.LoginRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.SweepRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.MemoRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.OnboardingRepositoryImpl
 import com.umc.sweepic.data.service.TestService
+import com.umc.sweepic.domain.repository.LoginRepository
 import com.umc.sweepic.domain.repository.TestRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
@@ -61,4 +63,10 @@ object RepositoryModule {
     fun providesOnboardingRepository(
         onboardingRepositoryImpl: OnboardingRepositoryImpl
     ): OnboardingRepository = onboardingRepositoryImpl
+
+    @Singleton
+    @Provides
+    fun providesLoginRepository(
+        loginRepositoryImpl: LoginRepositoryImpl
+    ): LoginRepository = loginRepositoryImpl
 }
