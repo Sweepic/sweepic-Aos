@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="#장소 입력하기"
-            style="@style/TextAppearance.Sweepic.Content"
+            style="@style/TextAppearance.Sweepic.Bold.Title_16sp"
             android:textSize="17sp"
             android:textColor="@color/sw_bk"
             app:layout_constraintTop_toTopOf="parent"
@@ -28,7 +28,7 @@
             android:id="@+id/et_sweep_input_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            style="@style/TextAppearance.Sweepic.Content.Light"
+            style="@style/TextAppearance.Sweepic.Regular.Body_16_R"
             android:hint="장소를 입력해주세요."
             android:textColorHint="@color/sw_gray2"
             android:textColor="@color/sw_bk"
@@ -38,37 +38,141 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_bias="0"
             android:layout_marginTop="20dp"/>
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/et_sweep_input_location"
+            app:layout_constraintEnd_toEndOf="@+id/et_sweep_input_location"
+            app:layout_constraintBottom_toBottomOf="@id/et_sweep_input_location">
+
+            <TextView
+                android:id="@+id/tv_tag_name_length"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
+                android:layout_gravity="center"
+                android:text="1"
+                android:textColor="@color/sw_gray2" />
+
+            <TextView
+                android:id="@+id/tv_tag_full_length"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
+                android:layout_gravity="center"
+                android:text="/10"
+                android:textColor="@color/sw_gray2" />
+
+            <ImageView
+                android:id="@+id/iv_tag_length_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_error"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_ai_recommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI가 태그를 추천해드려요."
+            style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
+            android:textColor="@color/sweepic"
+            android:textSize="13sp"
+            android:layout_marginStart="5dp"
+            app:layout_constraintTop_toBottomOf="@+id/et_sweep_input_location"
+            app:layout_constraintStart_toStartOf="@id/et_sweep_input_location"/>
+
+        <LinearLayout
+            android:id="@+id/layout_ai_tag_recommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.Sweepic.Content.Light"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_ai_recommend"
+            app:layout_constraintStart_toStartOf="@id/tv_ai_recommend">
+
+            <TextView
+                android:id="@+id/tv_ai_tag1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Medium.Body_14_M"
+                android:text="#태그추천"
+                android:textColor="@color/sweepic"
+                android:paddingStart="8dp"
+                android:paddingEnd="9dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginEnd="5dp"
+                android:visibility="invisible"
+                android:background="@drawable/shape_rect_16_blue_line"/>
+
+            <TextView
+                android:id="@+id/tv_ai_tag2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Medium.Body_14_M"
+                android:text="#태그추천"
+                android:textColor="@color/sweepic"
+                android:paddingStart="8dp"
+                android:paddingEnd="9dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginEnd="5dp"
+                android:visibility="invisible"
+                android:background="@drawable/shape_rect_16_blue_line"/>
+
+            <TextView
+                android:id="@+id/tv_ai_tag3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Sweepic.Medium.Body_14_M"
+                android:text="#태그추천"
+                android:textColor="@color/sweepic"
+                android:paddingStart="8dp"
+                android:paddingEnd="9dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginEnd="5dp"
+                android:visibility="invisible"
+                android:background="@drawable/shape_rect_16_blue_line"/>
+
+        </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_input_location_cancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="취소"
-            style="@style/TextAppearance.Sweepic.Content"
-            android:background="@null"
+            style="@style/TextAppearance.Sweepic.Bold.Title_14sp"
+            android:background="@drawable/shape_rect_4_gray_line"
             android:textColor="@color/sw_gray2"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/et_sweep_input_location"
+            app:layout_constraintTop_toBottomOf="@id/layout_ai_tag_recommend"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btn_input_location_confirm"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="27dp"
-            android:layout_marginHorizontal="20dp"/>
+            android:layout_marginHorizontal="15dp"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_input_location_confirm"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="완성"
-            style="@style/TextAppearance.Sweepic.Content"
+            style="@style/TextAppearance.Sweepic.Bold.Title_14sp"
+            android:textColor="@color/white"
             android:background="@drawable/shape_rect_4_blue_fill"
             app:layout_constraintStart_toEndOf="@id/btn_input_location_cancel"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/et_sweep_input_location"
+            app:layout_constraintTop_toBottomOf="@id/layout_ai_tag_recommend"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="27dp"
-            android:layout_marginHorizontal="20dp"/>
+            android:layout_marginHorizontal="15dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

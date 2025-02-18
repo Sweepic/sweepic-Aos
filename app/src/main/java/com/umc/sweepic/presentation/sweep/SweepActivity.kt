@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.RecoverableSecurityException
-import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -38,7 +37,10 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivitySweepBinding
-import com.umc.sweepic.domain.model.request.sweep.CreateTextFolderRequestModel
+import com.umc.sweepic.domain.model.request.sweep.CreateMemoFolderRequestModel
+import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
+import com.umc.sweepic.domain.model.request.sweep.TrashImageRequestModel
+import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.sweep.AlbumList
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
@@ -132,6 +134,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                         } else {
                             // 만약 리스트에 없는 경우, 새 Gallery 객체를 생성해서 리스트의 맨 앞에 추가
                             val newGallery = Gallery(
+                                id = 0,
                                 uri = uri,
                                 name = "",
                                 fullName = "",
@@ -146,6 +149,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                             pagerAdapter.notifyDataSetChanged()
                             binding.vpSweepMainImg.setCurrentItem(0, false)
                             updatePageInfo(0)
+                            fetchSweepImagesForCurrentPage(newGallery)
                         }
                         // 한 번 적용한 후에는 selectedUri 초기화
                         selectedUri = null
@@ -154,18 +158,33 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                         val newPage = binding.vpSweepMainImg.currentItem.coerceAtMost(currentImages.size - 1)
                         binding.vpSweepMainImg.setCurrentItem(newPage, false)
                         updatePageInfo(newPage)
+                        fetchSweepImagesForCurrentPage(currentImages[newPage])
                     }
                 }
             } else {
                 displayNoImagesState()
             }
         }
+
+        // 태그 입력 옵저버
+        viewModel.tagResponse.observe(this) { response ->
+            response?.let {
+                // API 호출 성공 시 처리할 작업, 예를 들어 UI 업데이트나 토스트 메시지 표시
+//                showToast("태그 업데이트 성공: ${it.tags}")
+                // 필요에 따라 추가 작업 수행
+            }
+        }
+
+        // 태그 정보 옵저버
+        observeTagResponse()
+        observeAiTagResponse()
+
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun initView() {
         requestPermissionsAndLoadImages()
-        setupSwitchToggle()
+//        setupSwitchToggle()
         setupButtons()
         initializeViewPager()
         setupBackPressHandler()
@@ -376,6 +395,11 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     updatePageInfo(position)
+
+                    currentImages.getOrNull(position)?.let { image ->
+                        fetchSweepImagesForCurrentPage(image)
+                        viewModel.loadTagForMedia(image.id.toLong())
+                    }
                 }
             }
         )
@@ -398,6 +422,21 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
+    private fun fetchSweepImagesForCurrentPage(image: Gallery) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale("ko","KR"))
+        val dateString = dateFormat.format(image.addedDate)
+        val request = UpdateImageRequestModel(
+            timestamp = dateString.toString(),
+            mediaId = image.id.toString()
+        )
+        viewModel.fetchSweepImages(request)
+        viewModel.updateImageResult.observe(this) { response ->
+            response?.let {
+//                showToast("이미지 업데이트 성공: ${it.imageId}")
+            } /*?: showToast("이미지 업데이트 실패")*/
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSwipeToTrashGesture() {
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
@@ -409,12 +448,15 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                         val currentPosition = binding.vpSweepMainImg.currentItem
                         if (currentPosition in currentImages.indices) {
                             val currentImage = currentImages[currentPosition]
-
-                            // 1) 휴지통으로 이동 (TrashRepository 추가)
                             TrashRepository.addToTrash(currentImage)
-
-                            // 2) 현재 리스트/어댑터에서 제거 & 애니메이션
                             removeImageWithAnimation(currentPosition)
+                            val imageId = viewModel.updateImageResult.value?.imageId
+                            if (imageId != null) {
+                                viewModel.fetchMoveImageToTrash(imageId)
+                            } else {
+                                showToast("이미지 ID를 가져오지 못했습니다.")
+                            }
+
                         }
                         return true
                     }
@@ -504,18 +546,23 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         }
     }
 
-    private fun setupSwitchToggle() {
-        binding.switchSweepAiBtn.setOnCheckedChangeListener { _, isChecked ->
-            binding.tvSweepAiOn.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
-    }
+    //AI 버튼 삭제로 인해 표시 안함
+//    private fun setupSwitchToggle() {
+//        binding.switchSweepAiBtn.setOnCheckedChangeListener { _, isChecked ->
+//            binding.tvSweepAiOn.visibility = if (isChecked) View.VISIBLE else View.GONE
+//        }
+//    }
 
-    private fun setupTagClickListener(textView: TextView, dialogTag: String, title: String, hint: String, onSave: (String) -> Unit) {
+    private fun setupTagClickListener(
+        textView: TextView,
+        title: String,
+        hint: String,
+        categoryId: String,
+        onSave: (String) -> Unit
+    ) {
         textView.setOnClickListener {
             // TextView의 현재 상태 저장
-            val originalText = textView.text.toString()
-            val originalTextColor = textView.currentTextColor
-            val originalBackground = textView.background
+            val originalText = textView.tag?.toString() ?: "" // tag 속성에서 기본 텍스트 가져오기
 
             val dialog = SweepTagDialog(
                 title = title,
@@ -525,16 +572,22 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                     textView.text = inputText
                     textView.setTextColor(ContextCompat.getColor(this, R.color.sweepic))
                     textView.setBackgroundResource(R.drawable.shape_rect_16_blue_line)
-                    onSave(inputText)
+                    callInputTagApiForCategory(categoryId, inputText)
                 },
                 onCancel = {
                     // 취소 시 TextView 복원
-                    textView.text = originalText
-                    textView.setTextColor(originalTextColor)
-                    textView.background = originalBackground
+                    textView.text = originalText // tag로 저장된 원래 텍스트 복원
+                    textView.setTextColor(ContextCompat.getColor(this, R.color.sw_gray2))
+                    textView.setBackgroundResource(R.drawable.shape_rect_16_gray_line) // ← 기본 배경
+                    textView.invalidate()  // UI 강제 갱신
                 }
             )
-            dialog.show(supportFragmentManager, dialogTag)
+            dialog.show(supportFragmentManager, "SweepTagDialog")
+
+            // 다이얼로그가 완전히 붙은 후, 현재 뷰페이저의 이미지를 대상으로 AI 태그 API 호출
+            binding.root.postDelayed({
+                callAiTagApiForCurrentImage()
+            }, 100) // 약간의 딜레이 (예: 100ms) 후 호출
         }
     }
 
@@ -672,18 +725,71 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         // RecyclerView 설정
         val recyclerView: RecyclerView = view.findViewById(R.id.rv_add_memo_folder_list)
         val adapter = SweepMemoFolderRVA { folder ->
-            // 선택한 폴더 처리 동작
-            showToast("${folder.folderName} 선택됨")
+            // 폴더 선택 시 처리
+            bottomSheetDialog.dismiss()
+
+            // 현재 뷰페이저의 선택된 이미지 가져오기
+            val currentPosition = binding.vpSweepMainImg.currentItem
+            if (currentPosition !in currentImages.indices) {
+                Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return@SweepMemoFolderRVA
+            }
+            val currentImage = currentImages[currentPosition]
+            val imageUri = currentImage.uri
+
+            // 이미지 URI를 ByteArray로 변환 (Activity에 있는 헬퍼 함수 사용)
+            val imageByteArray = convertUriToByteArray(imageUri)
+            if (imageByteArray == null) {
+                Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
+                return@SweepMemoFolderRVA
+            }
+
+            // MultipartBody.Part 생성
+            val mediaType = "image/jpeg".toMediaTypeOrNull()
+            val imageRequestBody = imageByteArray.toRequestBody(mediaType)
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+
+            // ViewModel의 API 호출 (코루틴 내에서 실행)
+            lifecycleScope.launch {
+                viewModel.fetchSweepSaveTextMemo(folder.folderId, imagePart).onSuccess { response ->
+                    if (response.folder_id == null) {
+                        Toast.makeText(this@SweepActivity, "폴더 ID가 없습니다.", Toast.LENGTH_SHORT).show()
+                        return@onSuccess
+                    }
+
+                    // imageText가 없는 경우도 대비 (그냥 저장만 하고 이미지 삭제 안 함)
+                    if (response.image_text == null) {
+                        Toast.makeText(this@SweepActivity, "이미지에서 텍스트를 추출하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        return@onSuccess
+                    }
+
+                    // folderId와 imageText가 정상적으로 왔을 때만 실행
+                    deleteCurrentImage(currentPosition)
+//                    Toast.makeText(
+//                        this@SweepActivity,
+//                        "텍스트가 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folder_id})",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+                }.onFailure { e ->
+                    Toast.makeText(
+                        this@SweepActivity,
+                        "폴더 저장 실패: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
         }
+
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 🔥 ViewModel의 데이터를 관찰하여 RecyclerView 업데이트
+        // ViewModel의 데이터를 관찰하여 RecyclerView 업데이트
         viewModel.folderList.observe(this) { folderList ->
             adapter.submitList(folderList)
         }
 
-        // 🔥 API 호출하여 폴더 목록 가져오기
+        // API 호출하여 폴더 목록 가져오기
         viewModel.fetchFolderList()
 
         bottomSheetDialog.show()
@@ -749,11 +855,11 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 viewModel.fetchSweepSaveImageMemo(folder.folderId, imagePart).onSuccess { response ->
                     // API 호출 성공 시 현재 이미지 삭제
                     deleteCurrentImage(currentPosition)
-                    Toast.makeText(
-                        this@SweepActivity,
-                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
-                        Toast.LENGTH_SHORT
-                    ).show()
+//                    Toast.makeText(
+//                        this@SweepActivity,
+//                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
                 }.onFailure { e ->
                     Toast.makeText(
                         this@SweepActivity,
@@ -766,12 +872,12 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 🔥 ViewModel의 데이터를 관찰하여 RecyclerView 업데이트
+        // ViewModel의 데이터를 관찰하여 RecyclerView 업데이트
         viewModel.folderList.observe(this) { folderList ->
             adapter.submitList(folderList)
         }
 
-        // 🔥 API 호출하여 폴더 목록 가져오기
+        // API 호출하여 폴더 목록 가져오기
         viewModel.fetchFolderList()
 
         bottomSheetDialog.show()
@@ -779,7 +885,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun createTextFolderAndDeleteImage(folderName: String) {
-        // 1) 현재 뷰페이저의 이미지를 구한다 (ex. currentImages[currentPosition])
+        //  현재 뷰페이저의 이미지를 구한다
         val currentPosition = binding.vpSweepMainImg.currentItem
         if (currentPosition !in currentImages.indices) {
             Toast.makeText(this, "이미지를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -788,31 +894,24 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         val currentImage = currentImages[currentPosition]
         val imageUri = currentImage.uri
 
-        // 2) 이미지 -> Base64 변환
-        val base64Image = convertUriToBase64(imageUri)
-        if (base64Image == null) {
+        // 이미지 URI를 ByteArray로 변환
+        val imageByteArray = convertUriToByteArray(imageUri)
+        if (imageByteArray == null) {
             Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 3) API 요청 모델 생성
-        val requestModel = CreateTextFolderRequestModel(
-            base64_image = base64Image,
-            user_id = 12L, // 실제 유저 ID
-            folder_name = folderName
-        )
-
-        // 4) ViewModel (or Repository directly) 통해 API 호출
+        // ViewModel (or Repository directly) 통해 API 호출
         lifecycleScope.launch {
-            val result = viewModel.fetchSweepCreateTextFolder(requestModel)
+            val result = viewModel.fetchSweepCreateTextFolder(folderName, imageByteArray)
             result.onSuccess { response ->
                 // 성공 시 → 실제 파일 OS에서 삭제
                 deleteCurrentImage(currentPosition)
-                Toast.makeText(
-                    this@SweepActivity,
-                    "폴더 생성+텍스트 저장 성공: folderId=${response.folderId}",
-                    Toast.LENGTH_SHORT
-                ).show()
+//                Toast.makeText(
+//                    this@SweepActivity,
+//                    "폴더 생성+텍스트 저장 성공: folderId=${response.folder_id} imageText=${response.image_text}",
+//                    Toast.LENGTH_SHORT
+//                ).show()
             }.onFailure { e ->
                 Toast.makeText(
                     this@SweepActivity,
@@ -834,29 +933,39 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         val currentImage = currentImages[currentPosition]
         val imageUri = currentImage.uri
 
-        // 🛠 이미지 URI를 ByteArray로 변환
+        // 이미지 URI를 ByteArray로 변환
         val imageByteArray = convertUriToByteArray(imageUri)
         if (imageByteArray == null) {
             Toast.makeText(this, "이미지 변환 실패", Toast.LENGTH_SHORT).show()
             return
         }
 
-        lifecycleScope.launch {
-            val result = viewModel.fetchSweepCreateImageFolder(folderName, imageByteArray)
-            result.onSuccess { response ->
-                // 🔥 성공 시 이미지 삭제 및 UI 업데이트
-                deleteCurrentImage(currentPosition)
-                Toast.makeText(
-                    this@SweepActivity,
-                    "사진이 폴더 ${response.folderName}에 저장되었습니다. (ID: ${response.folderId})",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }.onFailure { e ->
-                Toast.makeText(
-                    this@SweepActivity,
-                    "폴더 생성 실패: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+        // 1. 폴더 생성 API 호출
+        val request = CreateMemoFolderRequestModel(folderName)
+        viewModel.fetchSweepCreateMemoFolder(request)
+
+        // 2. 폴더 생성 결과를 관찰 후, 이미지 저장 API 호출
+        viewModel.createMemoFolderResult.observe(this) { folderResponse ->
+            val folderId = folderResponse.id.toLong() // 폴더 ID 추출
+            val mediaType = "image/jpeg".toMediaTypeOrNull()
+            val imageRequestBody = imageByteArray.toRequestBody(mediaType)
+            val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+
+            lifecycleScope.launch {
+                viewModel.fetchSweepSaveImageMemo(folderId, imagePart).onSuccess { response ->
+                    deleteCurrentImage(currentPosition)
+//                    Toast.makeText(
+//                        this@SweepActivity,
+//                        "사진이 폴더 ${response.folderName}에 저장되었습니다. (ID: ${response.folderId})",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+                }.onFailure { e ->
+                    Toast.makeText(
+                        this@SweepActivity,
+                        "사진 저장 실패: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -899,18 +1008,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             // 그 밖의 오류 처리
             e.printStackTrace()
             Toast.makeText(this, "삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun convertUriToBase64(uri: Uri): String? {
-        return try {
-            contentResolver.openInputStream(uri)?.use { input ->
-                val bytes = input.readBytes()
-                android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
         }
     }
 
@@ -1213,6 +1310,8 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val allTrashed = TrashRepository.getAllTrashed()
                     if (allTrashed.isNotEmpty()) {
+                        val mediaIdList = allTrashed.map { it.id.toString() } // mediaId 리스트 생성
+                        viewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList))
                         deleteImagesWithPermission(allTrashed)
                         // 만약 예외 없이 모든 이미지가 삭제되었다면
                         if (pendingTrashGalleries.isEmpty()) {
@@ -1229,7 +1328,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 }
             },
             onCancel = {
-                showToast("계속하기를 선택했습니다.")
+
             }
         ).show(supportFragmentManager, "QuitChallengeDialog")
     }
@@ -1239,34 +1338,112 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         // 장소 태그
         setupTagClickListener(
             binding.tvSweepLocationTag,
-            "LocationTagDialog",
             title = "#장소 입력하기",
-            hint = "장소를 입력해주세요."
+            hint = "장소를 입력해주세요.",
+            categoryId = "1"
         ) { locationTag = it }
 
         // 사람 태그
         setupTagClickListener(
             binding.tvSweepPeopleTag,
-            "PeopleTagDialog",
             title = "#사람 입력하기",
-            hint = "사람 이름을 입력해주세요."
+            hint = "사람 이름을 입력해주세요.",
+            categoryId = "2"
         ) { peopleTag = it }
 
         // 음식 태그
         setupTagClickListener(
             binding.tvSweepFoodTag,
-            "FoodTagDialog",
             title = "#음식 입력하기",
-            hint = "음식을 입력해주세요."
+            hint = "음식을 입력해주세요.",
+            categoryId = "3"
         ) { foodTag = it }
 
         // 기타 태그
         setupTagClickListener(
             binding.tvSweepEtcTag,
-            "EtcTagDialog",
             title = "#기타 입력하기",
-            hint = "기타 내용을 입력해주세요."
+            hint = "기타 내용을 입력해주세요.",
+            categoryId = "4"
         ) { etcTag = it }
+    }
+
+    private fun callInputTagApiForCategory(categoryId: String, content: String) {
+        val updatedImageId = viewModel.updateImageResult.value?.imageId
+        if (updatedImageId != null) {
+            val tagRequest = TagRequestModel(
+                tags = listOf(TagRequestModel.TagContentModel(categoryId, content))
+            )
+            viewModel.fetchInputTag(updatedImageId, tagRequest)
+        } else {
+            showToast("업데이트된 이미지 ID를 찾을 수 없습니다.")
+        }
+    }
+
+    private fun observeTagResponse() {
+        viewModel.tagInfoResponse.observe(this) { baseResponse ->
+            // API 응답이 성공하지 않았거나 success 데이터가 null인 경우
+            if (baseResponse == null || baseResponse.resultType != "SUCCESS" || baseResponse.success == null) {
+                // 기본 스타일로 업데이트
+                updateTagViewDefault(binding.tvSweepLocationTag)
+                updateTagViewDefault(binding.tvSweepPeopleTag)
+                updateTagViewDefault(binding.tvSweepFoodTag)
+                updateTagViewDefault(binding.tvSweepEtcTag)
+                Log.d("SweepActivity", "태그 정보 없음 또는 API 실패")
+                return@observe
+            }
+            // 성공 응답인 경우 각 텍스트뷰 업데이트
+            val tagInfo = baseResponse.success
+            updateTagView(binding.tvSweepLocationTag, tagInfo.tags.find { it.tagCategory.id == "1" }?.content)
+            updateTagView(binding.tvSweepPeopleTag, tagInfo.tags.find { it.tagCategory.id == "2" }?.content)
+            updateTagView(binding.tvSweepFoodTag, tagInfo.tags.find { it.tagCategory.id == "3" }?.content)
+            updateTagView(binding.tvSweepEtcTag, tagInfo.tags.find { it.tagCategory.id == "4" }?.content)
+        }
+    }
+
+    private fun updateTagView(textView: TextView, content: String?) {
+        if (!content.isNullOrEmpty()) {
+            textView.text = content
+            textView.setTextColor(ContextCompat.getColor(this, R.color.sweepic))
+            textView.setBackgroundResource(R.drawable.shape_rect_16_blue_line)
+        } else {
+            updateTagViewDefault(textView)
+        }
+    }
+
+    private fun updateTagViewDefault(textView: TextView) {
+        textView.text = textView.tag?.toString() ?: ""
+        textView.setTextColor(ContextCompat.getColor(this, R.color.sw_gray2))
+        textView.setBackgroundResource(R.drawable.shape_rect_16_gray_line)
+    }
+
+    private fun callAiTagApiForCurrentImage() {
+        // 현재 뷰페이저에서 보여지는 이미지 선택
+        val currentImage = currentImages.getOrNull(binding.vpSweepMainImg.currentItem)
+        if (currentImage != null) {
+            val imageBytes = convertUriToByteArray(currentImage.uri)
+            if (imageBytes != null) {
+                val imageRequestBody = imageBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                val imagePart = MultipartBody.Part.createFormData("image", "image.jpg", imageRequestBody)
+                viewModel.fetchCreateAiTag(imagePart)
+            } else {
+                showToast("이미지 변환 실패")
+            }
+        } else {
+            showToast("현재 이미지가 없습니다.")
+        }
+    }
+
+    private fun observeAiTagResponse() {
+        viewModel.aiTagResponse.observe(this) { baseResponse ->
+            // API 응답이 성공적이고 success 데이터가 null이 아닐 때 업데이트
+            if (baseResponse != null && baseResponse.resultType == "SUCCESS" && baseResponse.success != null) {
+                val labels = baseResponse.success.labels
+                // 다이얼로그가 현재 표시 중인지 확인 (예: tag "SweepTagDialog"로 찾기)
+                val dialogFragment = supportFragmentManager.findFragmentByTag("SweepTagDialog") as? SweepTagDialog
+                dialogFragment?.updateAiTags(labels)
+            }
+        }
     }
 
     override fun onDestroy() {

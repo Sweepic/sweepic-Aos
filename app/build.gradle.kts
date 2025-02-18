@@ -108,5 +108,7 @@ dependencies {
     //splash 화면 구성
     implementation("androidx.core:core-splashscreen:1.0.1")
 
+    implementation ("androidx.gridlayout:gridlayout:1.0.0")
+
 
 }

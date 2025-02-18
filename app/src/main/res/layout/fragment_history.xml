@@ -7,384 +7,293 @@
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp"
+        android:fillViewport="true"
+        android:overScrollMode="never">
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white">
 
-        <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="16dp"
-            android:fillViewport="true"
-            android:overScrollMode="never"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
+            <!--인기 태그 모아보기-->
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="30dp"
                 android:id="@+id/layout_record_mainhistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 >
-                <!--월별 태그 리스트-->
                 <!--월 타이틀-->
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:orientation="horizontal"
                     android:id="@+id/layout_monthtitle"
                     android:layout_width="match_parent"
-                    android:layout_height="24dp"
-                    android:layout_centerHorizontal="true"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:layout_marginEnd="16dp">
 
                     <TextView
                         android:id="@+id/tv_record_monthtitle"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2.5dp"
-                        android:layout_marginBottom="2.5dp"
+
                         android:text="12월"
-                        android:textColor="@color/black"
+                        android:textColor="@color/sw_bk"
                         android:textSize="16sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="@id/layout_monthtitle"
-                        app:layout_constraintStart_toStartOf="@id/layout_monthtitle"
-                        app:layout_constraintTop_toTopOf="@id/layout_monthtitle" />
+                        android:textStyle="bold" />
 
                     <ImageView
                         android:id="@+id/ic_next"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_next"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-                    </ImageView>
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        android:src="@drawable/ic_next" />
+
+                </LinearLayout>
 
                 <!--카드형태 태그리스트-->
-                <!--가장 많이간 장소-->
-                <View
+
+                <!-- 가장 많이 간 장소 -->
+                <androidx.cardview.widget.CardView
                     android:id="@+id/cv_record_place"
-                    android:layout_width="156dp"
-                    android:layout_height="57dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="5dp"
+                    app:cardElevation="2dp"
                     android:layout_marginStart="16dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="10dp"
-                    android:layout_marginEnd="188dp"
-                    android:background="@drawable/bg_record_mostbackground"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/cv_record_people"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_monthtitle" />
+                    app:layout_constraintTop_toBottomOf="@id/layout_monthtitle">
 
-                <TextView
-                    android:id="@+id/tv_record_place"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="가장 많이 간 장소"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:textSize="13sp"
-                    app:layout_constraintTop_toTopOf="@id/cv_record_place"
-                    app:layout_constraintStart_toStartOf="@id/cv_record_place"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="10dp">
 
+                        <TextView
+                            android:id="@+id/tv_record_place"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="가장 많이 간 장소"
+                            android:textColor="@color/sw_bk"
+                            android:textSize="13sp"/>
 
-                <TextView
-                    android:id="@+id/tv_record_visittag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="인하대학교"
-                    app:layout_constraintStart_toStartOf="@id/cv_record_place"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    app:layout_constraintTop_toBottomOf="@id/tv_record_place"
-                    app:layout_constraintBottom_toBottomOf="@id/cv_record_place">
+                        <TextView
+                            android:id="@+id/tv_record_visittag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="#인하대학교"
+                            android:textColor="@color/sw_bk"
+                            android:textStyle="bold"
+                            android:textSize="14sp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
-                </TextView>
-
-
-                <!--가장 많이 만난 사람-->
-                <View
+                <!-- 가장 많이 만난 사람 -->
+                <androidx.cardview.widget.CardView
                     android:id="@+id/cv_record_people"
-                    android:layout_width="156dp"
-                    android:layout_height="58dp"
-                    android:layout_marginStart="188dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="5dp"
+                    app:cardElevation="2dp"
                     android:layout_marginTop="10dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginEnd="16dp"
-                    android:background="@drawable/bg_record_mostbackground"
+                    app:layout_constraintStart_toEndOf="@id/cv_record_place"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_monthtitle" />
+                    app:layout_constraintTop_toBottomOf="@id/layout_monthtitle">
 
-                <TextView
-                    android:id="@+id/tv_record_people"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="가장 많이 만난 사람"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:textSize="13sp"
-                    app:layout_constraintTop_toTopOf="@id/cv_record_people"
-                    app:layout_constraintStart_toStartOf="@id/cv_record_people"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="10dp">
 
+                        <TextView
+                            android:id="@+id/tv_record_people"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="가장 많이 만난 사람"
+                            android:textColor="@color/sw_bk"
+                            android:textSize="13sp"/>
 
-                <TextView
-                    android:id="@+id/tv_record_peopletag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="유진언니"
-                    app:layout_constraintStart_toStartOf="@id/cv_record_people"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    app:layout_constraintTop_toBottomOf="@id/tv_record_people"
-                    app:layout_constraintBottom_toBottomOf="@id/cv_record_people" />
+                        <TextView
+                            android:id="@+id/tv_record_peopletag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="#유진언니"
+                            android:textColor="@color/sw_bk"
+                            android:textStyle="bold"
+                            android:textSize="14sp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
-                <!--가장 많이 먹은 음식-->
-                <View
+                <!-- 가장 많이 먹은 음식 -->
+                <androidx.cardview.widget.CardView
                     android:id="@+id/cv_record_food"
-                    android:layout_width="156dp"
-                    android:layout_height="58dp"
-                    android:layout_marginStart="16dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="5dp"
+                    app:cardElevation="2dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginEnd="188dp"
-                    android:background="@drawable/bg_record_mostbackground"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/cv_record_place" />
-
-                <TextView
-                    android:id="@+id/tv_record_food"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="가장 많이 먹은 음식"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp"
-                    android:textSize="13sp"
-                    app:layout_constraintTop_toTopOf="@id/cv_record_food"
-                    app:layout_constraintStart_toStartOf="@id/cv_record_food"/>
-
-
-                <TextView
-                    android:id="@+id/tv_record_foodtag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="아메리카노"
-                    app:layout_constraintStart_toStartOf="@id/cv_record_food"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    app:layout_constraintTop_toBottomOf="@id/tv_record_food"
-                    app:layout_constraintBottom_toBottomOf="@id/cv_record_food" />
-
-                <!--수집한 카드-->
-                <!--수집한 카드 타이틀-->
-                <TextView
-                    android:id="@+id/tv_record_cardtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="25dp"
-                    android:text="수집한 카드"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/cv_record_food" />
-
-                <!--수집한 카드이미지-->
-                <ImageView
-                    android:id="@+id/iv_record_collectcard1"
-                    android:layout_width="148dp"
-                    android:layout_height="180dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_record_cardtitle"
-                    app:layout_constraintEnd_toStartOf="@id/iv_record_collectcard2"
                     android:layout_marginEnd="16dp"
-                    android:src="@drawable/img_record_collectcard1"/>
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/cv_record_people"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/cv_record_place"
+                    >
 
-                <ImageView
-                    android:id="@+id/iv_record_collectcard2"
-                    android:layout_width="148dp"
-                    android:layout_height="180dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    app:layout_constraintStart_toEndOf="@id/iv_record_collectcard1"
-                    android:layout_marginStart="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_record_cardtitle"
-                    android:src="@drawable/img_record_collectcard2"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:id="@+id/tv_record_food"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="가장 많이 먹은 음식"
+                            android:textColor="@color/sw_bk"
+                            android:textSize="13sp"/>
+
+                        <TextView
+                            android:id="@+id/tv_record_foodtag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="#아메리카노"
+                            android:textColor="@color/sw_bk"
+                            android:textStyle="bold"
+                            android:textSize="14sp"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
 
                 <!--어워드-->
                 <!--어워드 타이틀-->
-                <TextView
-                    android:id="@+id/tv_record_awardtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="25.27dp"
-                    android:text="어워드"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/iv_record_collectcard1" />
+        <!--월 타이틀-->
+        <LinearLayout
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="horizontal"
+            android:id="@+id/layout_awardtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
 
-                <!--월 베스트 사진 Top5 타이틀-->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_subtitle1"
-                    android:layout_width="match_parent"
-                    android:layout_height="24dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_record_awardtitle">
+            <TextView
+                android:id="@+id/tv_record_awardtitle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="어워드"
+                android:textColor="@color/sw_bk"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/tv_record_subtitle1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2.5dp"
-                        android:layout_marginBottom="2.5dp"
-                        android:text="12월 베스트 사진 Top5"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="@id/layout_subtitle1"
-                        app:layout_constraintStart_toStartOf="@id/layout_subtitle1"
-                        app:layout_constraintTop_toTopOf="@id/layout_subtitle1" />
+        </LinearLayout>
+        <!-- 12월 베스트 사진 Top5 -->
+        <LinearLayout
+            android:id="@+id/layout_subtitle1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_next"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-                    </ImageView>
+            <TextView
+                android:id="@+id/tv_record_subtitle1"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="12월 베스트 사진 Top5"
+                android:textColor="@color/sw_bk"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_next" />
+        </LinearLayout>
 
-                <!--사진 리스트-->
-                <LinearLayout
-                    android:id="@+id/layout_record_bestpic"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/layout_subtitle1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintStart_toEndOf="parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginTop="8dp">
+        <!-- 사진 리스트 (12월 베스트 사진 Top5) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_best_pictures"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:overScrollMode="never"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-                    <ImageView
-                        android:layout_width="108dp"
-                        android:layout_height="108dp"
-                        android:layout_margin="2px"
-                        android:layout_weight="1"
-                        android:src="@drawable/img_record_ex" />
+        <!-- 지난 베스트 사진 타이틀 -->
+        <LinearLayout
+            android:id="@+id/layout_subtitle2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="2px"
-                        android:layout_weight="1"
-                        android:src="@drawable/img_record_ex" />
+            <TextView
+                android:id="@+id/tv_record_subtitle2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="지난 베스트 사진"
+                android:textColor="@color/sw_bk"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="2px"
-                        android:layout_weight="1"
-                        android:src="@drawable/img_record_ex" />
-                </LinearLayout>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_next" />
+        </LinearLayout>
 
-                <!--지난 베스트 사진 타이틀-->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_subtitle2"
-                    android:layout_width="match_parent"
-                    android:layout_height="24dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_record_bestpic">
+        <!-- 사진 리스트 (지난 베스트 사진) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_best_pictures_past"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:overScrollMode="never"
+            android:paddingBottom="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:orientation="horizontal"
+            app:spanCount="3" />
 
-                    <TextView
-                        android:id="@+id/tv_record_subtitle2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2.5dp"
-                        android:layout_marginBottom="2.5dp"
-                        android:text="지난 베스트 사진"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="@id/layout_subtitle2"
-                        app:layout_constraintStart_toStartOf="@id/layout_subtitle2"
-                        app:layout_constraintTop_toTopOf="@id/layout_subtitle2" />
+    </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_next"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                    </ImageView>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <!--사진 리스트-->
-                <LinearLayout
-                    android:id="@+id/layout_record_bestpic2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/layout_subtitle2"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintStart_toEndOf="parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginTop="8dp">
-
-                    <ImageView
-                        android:layout_width="108dp"
-                        android:layout_height="108dp"
-                        android:layout_margin="2px"
-                        android:layout_weight="1"
-                        android:src="@drawable/img_record_ex" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="2px"
-                        android:layout_weight="1"
-                        android:src="@drawable/img_record_ex" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="2px"
-                        android:layout_weight="1"
-                        android:src="@drawable/img_record_ex" />
-                </LinearLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.core.widget.NestedScrollView>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
 </layout>

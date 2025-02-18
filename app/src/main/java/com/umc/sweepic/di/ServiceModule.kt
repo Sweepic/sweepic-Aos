@@ -1,5 +1,6 @@
 package com.umc.sweepic.di
 
+import com.umc.sweepic.data.service.HistoryService
 import com.umc.sweepic.data.service.SweepService
 import com.umc.sweepic.data.service.MemoService
 import com.umc.sweepic.data.service.MypageService
@@ -40,6 +41,12 @@ object ServiceModule {
     @Provides
     @Singleton
     fun provideOnboardingService(retrofit: Retrofit) : OnboardingService {
+        return retrofit.buildService()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryService(retrofit: Retrofit) : HistoryService {
         return retrofit.buildService()
     }
 

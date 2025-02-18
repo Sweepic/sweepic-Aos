@@ -31,7 +31,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="앨범 이름"
-        style="@style/TextAppearance.Sweepic.Content.Light"
+        style="@style/TextAppearance.Sweepic.Medium.Body_13_M"
         android:textColor="@color/sw_bk"
         app:layout_constraintStart_toEndOf="@id/iv_album_folder"
         app:layout_constraintTop_toTopOf="parent"
