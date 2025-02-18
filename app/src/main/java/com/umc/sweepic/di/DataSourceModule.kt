@@ -2,10 +2,12 @@ package com.umc.sweepic.di
 
 import android.content.ContentResolver
 import android.content.Context
+import com.umc.sweepic.data.datasource.AwardDataSource
 import com.umc.sweepic.data.datasource.GalleryDataSource
 import com.umc.sweepic.data.datasource.sweep.SweepDataSource
 import com.umc.sweepic.data.datasource.MemoDataSource
 import com.umc.sweepic.data.datasource.OnboardingDataSource
+import com.umc.sweepic.data.datasourceImpl.sweep.AwardDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.GalleryDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.SweepDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.MemoDataSourceImpl
@@ -44,4 +46,9 @@ object DataSourceModule {
     @Singleton
     fun provideOnboardingDataSource(onboardingDataSourceImpl: OnboardingDataSourceImpl) : OnboardingDataSource =
         onboardingDataSourceImpl
+
+    @Provides
+    @Singleton
+    fun provideAwardDataSource(awardDataSourceImpl: AwardDataSourceImpl) : AwardDataSource =
+        awardDataSourceImpl
 }

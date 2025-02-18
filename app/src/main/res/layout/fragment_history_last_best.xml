@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.umc.sweepic.presentation.record.history.HistoryLastBestViewModel" />
+            type="com.umc.sweepic.presentation.record.history.award.HistoryLastBestViewModel" />
     </data>
 
     <androidx.core.widget.NestedScrollView

@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation.record.history
+package com.umc.sweepic.presentation.record.history.award
 
 data class ItemHistoryLastBest(
     val date: String,       // 예: "2024년 11월"

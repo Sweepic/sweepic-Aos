@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.umc.sweepic.presentation.record.history.HistoryMonthChoiceViewModel"/>
+            type="com.umc.sweepic.presentation.record.history.award.HistoryMonthChoiceViewModel"/>
     </data>
 
     <androidx.core.widget.NestedScrollView

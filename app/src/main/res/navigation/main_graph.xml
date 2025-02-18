@@ -39,7 +39,7 @@
 
     <fragment
         android:id="@+id/historyMonthFragment"
-        android:name="com.umc.sweepic.presentation.record.history.HistoryMonthFragment"
+        android:name="com.umc.sweepic.presentation.record.history.award.HistoryMonthFragment"
         android:label="HistoryMonthFragment"
         tools:layout="@layout/fragment_history_month">
         <action
@@ -49,7 +49,7 @@
 
     <fragment
         android:id="@+id/historyLastBestFragment"
-        android:name="com.umc.sweepic.presentation.record.history.HistoryLastBestFragment"
+        android:name="com.umc.sweepic.presentation.record.history.award.HistoryLastBestFragment"
         android:label="HistoryLastBestFragment"
         tools:layout="@layout/fragment_history_last_best" />
 
@@ -60,7 +60,7 @@
 
     <fragment
         android:id="@+id/historyMonthChoiceFragment"
-        android:name="com.umc.sweepic.presentation.record.history.HistoryMonthChoiceFragment"
+        android:name="com.umc.sweepic.presentation.record.history.award.HistoryMonthChoiceFragment"
         android:label="HistoryMonthChoiceFragment"
         tools:layout="@layout/fragment_history_month_choice" />
 

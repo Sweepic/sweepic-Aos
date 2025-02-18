@@ -10,10 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
 import com.umc.sweepic.presentation.record.Adapter.HistoryTagAdapter
+import dagger.hilt.android.AndroidEntryPoint
 
 
-
-
+@AndroidEntryPoint
 class HistoryTagFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView

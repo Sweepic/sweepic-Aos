@@ -1,13 +1,14 @@
-package com.umc.sweepic.presentation.record.history
+package com.umc.sweepic.presentation.record.history.award
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentHistoryLastBestBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HistoryLastBestFragment : Fragment() {
 
     private var _binding: FragmentHistoryLastBestBinding? = null
