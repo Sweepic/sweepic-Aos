@@ -37,7 +37,6 @@ class MemoAdapter(
 
         fun bind(memoFolder: MemoFolder) {
             binding.tvMemoFolderTitle.text = memoFolder.title
-            binding.tvMemoDate.text = memoFolder.date
 
 
             //사진 수 표시

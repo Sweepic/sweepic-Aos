@@ -63,12 +63,18 @@
         android:layout_height="1dp"
         android:background="@color/sweepic" />
 
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:overScrollMode="never"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true" >
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
 
         <!-- 메모장 내용-->
         <LinearLayout
@@ -107,4 +113,5 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>
