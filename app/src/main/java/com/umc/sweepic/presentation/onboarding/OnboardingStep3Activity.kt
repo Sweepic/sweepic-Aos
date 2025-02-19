@@ -28,7 +28,7 @@ class OnboardingStep3Activity : AppCompatActivity() {
         setContentView(binding.root)
 
         val name = intent.getStringExtra("name") ?: ""
-        binding.tvOnboardingTitle.text = "$name 님,\n사진을 몇 장까지 정리하고 싶으세요?"
+        binding.tvOnboardingTitle.text = "$name"+"님,\n사진을 몇 장까지 정리하고 싶으세요?"
 
         imageCount = getImageCount(this)
 
