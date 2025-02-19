@@ -2,8 +2,10 @@ package com.umc.sweepic.presentation.record.history
 
 
 import android.content.Context
+import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -29,6 +31,18 @@ import java.util.Locale
 class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_history) {
 
     private val viewModel: HistoryViewModel by viewModels()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        initObserver()
+        initView()
+
+        fetchLastMonthPhotos(requireContext())
+        loadPhotosFromJson(requireContext())
+        viewModel.loadSelectedBestPhotos(requireContext())
+    }
+
 
     override fun initObserver() {
         viewModel.bestPhotos.observe(viewLifecycleOwner) { photos ->
@@ -157,25 +171,29 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
     private fun loadPhotosFromJson(context: Context) {
         try {
             val file = File(context.filesDir, "last_month_photos.json")
+
             if (!file.exists()) {
-                Log.e("HistoryFragment", "❌ JSON 파일이 존재하지 않음")
+                Log.e("HistoryFragment", "❌ JSON 파일이 존재하지 않음! 갤러리에서 불러옵니다.")
+                val photos = getLastMonthPhotos(context) // ✅ 파일이 없으면 갤러리에서 다시 가져옴
+                savePhotosToJson(context, photos) // ✅ JSON 파일 다시 저장
+                displayPhotos(photos) // ✅ UI 업데이트
                 return
             }
 
-            val json = FileReader(file).use { reader ->
-                reader.readText()
-            }
-
+            val json = FileReader(file).use { reader -> reader.readText() }
             val type = object : TypeToken<List<String>>() {}.type
             val photos: List<String> = Gson().fromJson(json, type)
 
             if (photos.isNotEmpty()) {
                 displayPhotos(photos)
+            } else {
+                Log.e("HistoryFragment", "❌ JSON 파일은 있지만 사진 리스트가 비어 있음!")
             }
         } catch (e: Exception) {
             Log.e("HistoryFragment", "❌ JSON 로드 실패: ${e.message}")
         }
     }
+
 
     private fun displayPhotos(photos: List<String>) {
         binding.apply {

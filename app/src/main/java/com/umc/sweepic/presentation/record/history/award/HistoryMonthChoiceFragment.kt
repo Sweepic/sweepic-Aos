@@ -112,14 +112,19 @@ class HistoryMonthChoiceFragment :
     private fun setupRecyclerView() {
         photoAdapter = ChoicePhotoAdapter(
             onPhotoSelected = { photo -> viewModel.togglePhotoSelection(photo) },
-            itemLayoutResId = R.layout.item_choice_photo // ✅ 기존 레이아웃 유지
-        )
+            itemLayoutResId = R.layout.item_choice_photo, // ✅ 기존 레이아웃 유지
+            selectedPhotos = { viewModel.selectedPhotos.value ?: emptyList() }
+            )
 
         binding.rvPhotoGrid.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = photoAdapter
         }
+        viewModel.selectedPhotos.observe(viewLifecycleOwner) {
+            photoAdapter.notifyDataSetChanged()
+        }
     }
+
 
     companion object {
         fun newInstance(): HistoryMonthChoiceFragment {

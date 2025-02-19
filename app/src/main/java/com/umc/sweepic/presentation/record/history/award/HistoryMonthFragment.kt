@@ -1,5 +1,6 @@
 package com.umc.sweepic.presentation.record.history.award
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,6 +11,7 @@ import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentHistoryMonthBinding
 import com.umc.sweepic.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 
 @AndroidEntryPoint
 class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.fragment_history_month) {
@@ -24,18 +26,23 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
         initObserver()
         initView()
 
-        //viewModel.loadLastMonthPhotos(requireContext())
-        viewModel.loadSelectedBestPhotos(requireContext())
+        if (isSelectedPhotosJsonExists(requireContext())) {
+            Log.d("HistoryMonthFragment", "✅ 기존 선택된 사진이 있음 → loadSelectedBestPhotos() 실행")
+            viewModel.loadSelectedBestPhotos(requireContext())
+        } else {
+            Log.d("HistoryMonthFragment", "🚀 처음 실행 → loadLastMonthPhotos() 실행")
+            viewModel.loadLastMonthPhotos(requireContext())
+        }
     }
 
     override fun initObserver() {
-       /* viewModel.bestPhotos.observe(viewLifecycleOwner) { photoPaths ->
-            val selectedPhotos = photoPaths.map { path ->
-                SelectedPhoto(mediaId = "", timestamp = "", photoPath = path)
-            }
-            photoAdapter.submitList(selectedPhotos)
+        /* viewModel.bestPhotos.observe(viewLifecycleOwner) { photoPaths ->
+             val selectedPhotos = photoPaths.map { path ->
+                 SelectedPhoto(mediaId = "", timestamp = "", photoPath = path)
+             }
+             photoAdapter.submitList(selectedPhotos)
 
-        }*/
+         }*/
         viewModel.bestPhotos.observe(viewLifecycleOwner) { photoPaths ->
             Log.d("HistoryMonthFragment", "📸 업데이트된 사진 리스트: $photoPaths")
 
@@ -63,8 +70,8 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
     /** 📌 RecyclerView 설정 */
     private fun setupRecyclerView() {
         photoAdapter = ChoicePhotoAdapter(
-            onPhotoSelected = { /* 선택 이벤트 없음 */ },
-            itemLayoutResId = R.layout.item_best_photo // ✅ `item_best_photo` 사용
+            onPhotoSelected = {  },
+            itemLayoutResId = R.layout.item_best_photo, // ✅ `item_best_photo` 사용
         )
         binding.rvMonthBestPhotos.apply {
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -94,6 +101,11 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
             photoAdapter.submitList(selectedPhotos.toMutableList()) // ✅ 새로운 리스트 적용
             photoAdapter.notifyDataSetChanged() // ✅ UI 강제 갱신
         }
+    }
+
+    private fun isSelectedPhotosJsonExists(context: Context): Boolean {
+        val file = File(context.filesDir, "selected_best_photos.json")
+        return file.exists()
     }
 
 }

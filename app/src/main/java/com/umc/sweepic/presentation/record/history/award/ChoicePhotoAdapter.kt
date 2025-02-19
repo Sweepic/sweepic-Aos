@@ -15,7 +15,8 @@ import com.umc.sweepic.databinding.ItemChoicePhotoBinding
 /** 📌 RecyclerView에서 사진을 표시하는 Adapter */
 class ChoicePhotoAdapter(
     private val onPhotoSelected: (SelectedPhoto) -> Unit,
-    private val itemLayoutResId: Int // ✅ 레이아웃 리소스 ID 추가
+    private val itemLayoutResId: Int, // ✅ 레이아웃 리소스 ID 추가
+    private val selectedPhotos: (() -> List<SelectedPhoto>)? = null
 ) : ListAdapter<SelectedPhoto, ChoicePhotoAdapter.PhotoViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -36,6 +37,8 @@ class ChoicePhotoAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(photo: SelectedPhoto) {
+            val isSelected = selectedPhotos?.invoke()?.any { it.mediaId == photo.mediaId } ?: false // ✅ 현재 선택된 사진인지 확인
+
             // ✅ ViewBinding 타입에 따라 처리 방식 변경
             when (binding) {
                 is ItemBestPhotoBinding -> {
@@ -47,12 +50,17 @@ class ChoicePhotoAdapter(
                     Glide.with(binding.root.context)
                         .load(photo.photoPath)
                         .into(binding.ivPhoto)
+
+                    binding.ivPhoto.alpha = if (isSelected) 0.5f else 1.0f
+
                 }
             }
 
             binding.root.setOnClickListener {
                 Log.d("PhotoAdapter", "📌 사진 클릭됨: ${photo.photoPath}")
                 onPhotoSelected(photo)
+
+                notifyItemChanged(adapterPosition)
             }
         }
     }
