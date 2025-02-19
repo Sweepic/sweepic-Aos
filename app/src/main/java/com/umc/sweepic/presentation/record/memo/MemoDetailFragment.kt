@@ -4,6 +4,7 @@ import MemoDetailImageAdapter
 import android.app.AlertDialog
 import android.content.res.Resources
 import android.os.Bundle
+import android.text.Selection.setSelection
 import android.util.Log
 import android.util.Log.*
 import android.view.Gravity
@@ -12,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.PopupMenu
 import android.widget.PopupWindow
 import android.widget.TextView
@@ -51,6 +53,69 @@ class MemoDetailFragment : Fragment() {
         // 뷰모델에서 폴더 상세 데이터 가져오기
         memoFolderViewModel.fetchMemoFolderDetails(folderId)
 
+        binding.tvMemoDetailFolderTitle.setOnClickListener {
+            binding.etMemoDetailFolderTitle.setText(binding.tvMemoDetailFolderTitle.text.toString())
+            binding.tvMemoDetailFolderTitle.visibility = View.GONE
+            binding.etMemoDetailFolderTitle.visibility = View.VISIBLE
+            binding.etMemoDetailFolderTitle.requestFocus()
+        }
+
+        binding.etMemoDetailFolderTitle.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val newName = binding.etMemoDetailFolderTitle.text.toString().trim()
+                val folderId = arguments?.getLong("folderId")?.toString() ?: return@setOnFocusChangeListener
+
+                if (newName.isEmpty()) {
+                    Toast.makeText(requireContext(), "폴더 제목을 입력해주세요.", Toast.LENGTH_SHORT).show()
+
+                    binding.etMemoDetailFolderTitle.setText(binding.tvMemoDetailFolderTitle.text.toString())
+                    binding.tvMemoDetailFolderTitle.visibility = View.VISIBLE
+                    binding.etMemoDetailFolderTitle.visibility = View.GONE
+
+                    return@setOnFocusChangeListener
+                }
+
+                memoFolderViewModel.updateFolderName(folderId, newName,
+                    onSuccess = {
+                        binding.tvMemoDetailFolderTitle.text = newName
+                        binding.tvMemoDetailFolderTitle.visibility = View.VISIBLE
+                        binding.etMemoDetailFolderTitle.visibility = View.GONE
+                    },
+
+                    onFailure = { errorMessage ->
+                        if (errorMessage.contains("409")) {
+                            Toast.makeText(requireContext(), "이미 존재하는 폴더명입니다.", Toast.LENGTH_SHORT).show()
+                        }
+
+                        binding.etMemoDetailFolderTitle.setText(binding.tvMemoDetailFolderTitle.text.toString())
+                        binding.tvMemoDetailFolderTitle.visibility = View.VISIBLE
+                        binding.etMemoDetailFolderTitle.visibility = View.GONE
+                    }
+                )
+            }
+        }
+
+        binding.tvMemoDetailFolderContent.setOnClickListener {
+            binding.etMemoDetailFolderContent.setText(binding.tvMemoDetailFolderContent.text.toString())
+            binding.tvMemoDetailFolderContent.visibility = View.GONE
+            binding.etMemoDetailFolderContent.visibility = View.VISIBLE
+            binding.etMemoDetailFolderContent.requestFocus()
+        }
+
+        binding.etMemoDetailFolderContent.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val newText = binding.etMemoDetailFolderContent.text.toString()
+                val folderId = arguments?.getLong("folderId")?.toString() ?: return@setOnFocusChangeListener
+
+                memoFolderViewModel.updateMemoText(folderId, newText)
+
+                binding.tvMemoDetailFolderContent.text = newText
+                binding.tvMemoDetailFolderContent.visibility = View.VISIBLE
+                binding.etMemoDetailFolderContent.visibility = View.GONE
+            }
+        }
+        
+
         // RecyclerView 설정
         imageAdapter = MemoDetailImageAdapter(emptyList())
         binding.rvMemoDetailImages.layoutManager =
@@ -71,9 +136,9 @@ class MemoDetailFragment : Fragment() {
                 } else {
                     binding.rvMemoDetailImages.visibility = View.GONE
                 }
+
             }
         }
-
 
         // 뒤로 가기 버튼 설정
         binding.btnBack.setOnClickListener {
@@ -111,11 +176,13 @@ class MemoDetailFragment : Fragment() {
             popupWindow.dismiss()
         }
 
+
         //사진 선택
         popupView.findViewById<TextView>(R.id.select_photo)?.setOnClickListener {
             handlePhotoSelect()
             popupWindow.dismiss()
         }
+     
 
         //사진 삭제
         popupView.findViewById<TextView>(R.id.delete_photo)?.setOnClickListener {
@@ -260,9 +327,6 @@ class MemoDetailFragment : Fragment() {
             .show()
     }
 
-
-
-
     //다이얼로그 창 닫을때 실행되는 메서드
     private fun resetToDefaultState() {
         isSelectionMode = false
@@ -270,9 +334,22 @@ class MemoDetailFragment : Fragment() {
         binding.btnMenu.setImageResource(R.drawable.ic_menu)
     }
 
-    //사진 선택 버튼 누르고 -> 취소버튼 누르면
     private fun handleCancelSelection() {
         resetToDefaultState()
+    }
+
+    private fun showFolderRenameDialog(folderId: String, currentName: String) {
+        val editText = EditText(requireContext()).apply {
+            setText(currentName)
+            setSelection(currentName.length)
+        }
+    }
+
+    private fun showMemoTextEditDialog(folderId: Long, currentText: String) {
+        val editText = EditText(requireContext()).apply {
+            setText(currentText)
+            setPadding(32, 32, 32, 32)
+        }
     }
 
     override fun onDestroyView() {

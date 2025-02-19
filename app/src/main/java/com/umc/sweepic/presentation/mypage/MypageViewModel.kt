@@ -1,6 +1,9 @@
 package com.umc.sweepic.presentation.mypage
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,14 +12,19 @@ import com.umc.sweepic.data.dto.request.GoalCountRequestDto
 import com.umc.sweepic.data.dto.request.NameRequestDto
 import com.umc.sweepic.domain.model.response.sweep.GetUserInformationResponseModel
 import com.umc.sweepic.domain.repository.sweep.MypageRepository
+import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MypageViewModel @Inject constructor(
+    application: Application,
     private val repository: MypageRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
+
+    private val sharedPreferences = application.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+
     private val _nameUpdateStatus = MutableLiveData<Boolean>()
     val nameUpdateStatus: LiveData<Boolean> = _nameUpdateStatus
 
@@ -85,19 +93,44 @@ class MypageViewModel @Inject constructor(
         }
     }
 
-    // 로그아웃 요청
     fun logout() {
         viewModelScope.launch {
-            repository.logoutUser()
-                .onSuccess {
-                    _logoutStatus.value = true
-                    Log.d("MypageViewModel", "로그아웃 성공")
-                }
-                .onFailure { exception ->
+            try {
+                val sharedPreferences = getApplication<Application>().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                val sessionId = sharedPreferences.getString("SESSION_ID", null)
+
+                // 현재 저장된 세션 ID 로그로 출력해서 확인!!
+                Log.d("MypageViewModel", "현재 세션 ID: $sessionId")
+
+                if (sessionId.isNullOrEmpty()) {
+                    Log.e("MypageViewModel", "로그아웃 실패: 세션 ID 없음")
                     _logoutStatus.value = false
-                    Log.e("MypageViewModel", "로그아웃 실패: ${exception.message}")
+                    return@launch
                 }
+
+                repository.logoutUser()
+                    .onSuccess {
+                        _logoutStatus.value = true
+                        Log.d("MypageViewModel", "로그아웃 성공")
+                        clearSession()
+                    }
+                    .onFailure { exception ->
+                        _logoutStatus.value = false
+                        Log.e("MypageViewModel", "로그아웃 실패: ${exception.message}")
+                    }
+            } catch (e: Exception) {
+                _logoutStatus.value = false
+                Log.e("MypageViewModel", "로그아웃 요청 실패", e)
+            }
         }
+    }
+    private fun clearSession() {
+        val sharedPreferences = getApplication<Application>().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            remove("SESSION_ID")
+            apply()
+        }
+        Log.d("MypageViewModel", "세션 정보 삭제 완료")
     }
 
     // 회원 탈퇴 요청

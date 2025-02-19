@@ -107,5 +107,31 @@ class MemoFolderViewModel @Inject constructor(
         }
     }
 
+    fun updateFolderName(folderId: String, newName: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            memoRepository.updateFolderName(folderId, newName)
+                .onSuccess {
+                    onSuccess()
+                }
+                .onFailure { error ->
+                    onFailure(error.message ?: "폴더 이름 변경오류")
+                }
+        }
+    }
+
+
+    fun updateMemoText(folderId: String, newText: String) {
+        viewModelScope.launch {
+            memoRepository.updateMemoText(folderId, newText)
+                .onSuccess {
+                    Log.d("MemoFolderViewModel", "폴더 이름 수정 성공: $newText")
+                    fetchMemoFolderDetails(folderId.toLong())
+                }
+                .onFailure {
+                    Log.e("MemoFolderViewModel", "폴더 이름 수정 실패: ${it.message}")
+                }
+        }
+    }
+
     }
 
