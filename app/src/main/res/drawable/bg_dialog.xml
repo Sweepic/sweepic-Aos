@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@color/white" /> <!-- 다이얼로그 배경색 -->
-    <corners android:radius="16dp" /> <!-- 모서리 둥글기 -->
+    <corners android:radius="10dp" /> <!-- 모서리 둥글기 -->
     <padding
         android:left="16dp"
         android:top="16dp"

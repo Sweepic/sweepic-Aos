@@ -2,16 +2,21 @@ package com.umc.sweepic.presentation.record.memo
 
 import MemoDetailImageAdapter
 import android.app.AlertDialog
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.util.Log.*
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.PopupWindow
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.util.TypedValueCompat.dpToPx
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -77,76 +82,89 @@ class MemoDetailFragment : Fragment() {
 
         // 메뉴 버튼 클릭 시 팝업 메뉴 표시
         binding.btnMenu.setOnClickListener { view ->
-            showPopupMenu(view)
+            showCustomPopupMenu(view)
         }
     }
 
+    private fun showCustomPopupMenu(view: View) {
+        val inflater = LayoutInflater.from(requireContext())
 
-
-    private fun showPopupMenu(view: View) {
-        val popup = PopupMenu(requireContext(), view)
-
-        if (isSelectionMode) {
-            // 사진 선택 누르면 -> 사진 삭제, 사진 이동, 취소 메뉴가 뜸
-            popup.inflate(R.menu.menu_selection_mode)
+        val popupView = if (isSelectionMode) {
+            inflater.inflate(R.layout.popup_selection_memo, null)
         } else {
-            // 사진 선택 탭 안누른 경우 -> 폴더 삭제, 사진 선택 메뉴가 뜸
-            popup.inflate(R.menu.menu_memo_popup)
+            inflater.inflate(R.layout.popup_memo_menu, null)
         }
 
-        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-            when (menuItem.itemId) {
-                R.id.delete_folder -> {
-                    // 폴더 삭제
-                    handleFolderDelete()
-                    true
-                }
-                R.id.select_photo -> {
-                    // 사진 선택
-                    handlePhotoSelect()
-                    true
-                }
-                R.id.delete_photo -> {
-                    // 선택된 사진 삭제
-                    handlePhotoDelete()
-                    true
-                }
-                R.id.move_photo -> {
-                    // 선택된 사진 이동
-                    handlePhotoMove()
-                    true
-                }
-                R.id.cancel_selection -> {
-                    // 다 취소하고 처음 메뉴로 돌아감
-                    handleCancelSelection()
-                    true
-                }
-                else -> false
-            }
+        val popupWindow = PopupWindow(
+            popupView,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        )
+
+        popupWindow.elevation = 10f
+
+
+        //폴더 삭제
+        popupView.findViewById<TextView>(R.id.delete_folder)?.setOnClickListener {
+            handleFolderDelete()
+            popupWindow.dismiss()
         }
-        popup.show()
+
+        //사진 선택
+        popupView.findViewById<TextView>(R.id.select_photo)?.setOnClickListener {
+            handlePhotoSelect()
+            popupWindow.dismiss()
+        }
+
+        //사진 삭제
+        popupView.findViewById<TextView>(R.id.delete_photo)?.setOnClickListener {
+            handlePhotoDelete()
+            popupWindow.dismiss()
+        }
+
+        //사진 이동
+        popupView.findViewById<TextView>(R.id.move_photo)?.setOnClickListener {
+            handlePhotoMove()
+            popupWindow.dismiss()
+        }
+
+        //취소
+        popupView.findViewById<TextView>(R.id.cancel_selection)?.setOnClickListener {
+            handleCancelSelection()
+            popupWindow.dismiss()
+        }
+
+        //팝업 창 위치 조정...
+        val location = IntArray(2)
+        view.getLocationOnScreen(location)
+
+        val xOffset = location[0] - dpToPx(50)
+        val yOffset = location[1] + view.height + dpToPx(8)
+
+        popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, xOffset, yOffset)
     }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
+    }
+
+
 
     private fun handleFolderDelete() {
         val folderId = arguments?.getLong("folderId") ?: return
-        val folderName = binding.tvMemoDetailFolderTitle.text.toString() // ✅ 현재 폴더 이름 가져오기
-        showDeleteConfirmationDialog(folderId, folderName) // ✅ 폴더 이름 전달
+        val folderName = binding.tvMemoDetailFolderTitle.text.toString()
+        showDeleteConfirmationDialog(folderId, folderName)
     }
 
     // 폴더 삭제 다이얼로그 창
     private fun showDeleteConfirmationDialog(folderId: Long, folderName: String) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("폴더 삭제")
-            .setMessage("[$folderName] 폴더를 정말 삭제하시겠어요?\n지금 폴더를 삭제하면 다시 복구할 수 없어요.")
-            .setPositiveButton("삭제") { _, _ ->
-                memoFolderViewModel.deleteMemoFolder(folderId)
-                Toast.makeText(requireContext(), "폴더가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack() // 이전 화면으로 이동
-            }
-            .setNegativeButton("취소", null) // 취소 버튼 누르면 아무 동작 없음
-            .show()
+        val dialog = FolderDeleteDialog(folderName) { // ✅ 폴더 이름을 전달
+            memoFolderViewModel.deleteMemoFolder(folderId)
+            parentFragmentManager.popBackStack()
+        }
+        dialog.show(parentFragmentManager, "FolderDeleteDialog")
     }
-
 
     //사진 선택 (누르면 다른 메뉴 뜨게)
     private fun handlePhotoSelect() {
@@ -169,24 +187,19 @@ class MemoDetailFragment : Fragment() {
 
         Log.d("MemoDetailFragment", "삭제 요청: folderId=$folderId, imageIds=$selectedImageIds")
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("사진 삭제")
-            .setMessage("선택한 사진을 삭제하시겠습니까?")
-            .setPositiveButton("삭제") { _, _ ->
-                memoFolderViewModel.deleteImages(folderId, selectedImageIds)
+        val dialog = PhotoDeleteDialog {
+            memoFolderViewModel.deleteImages(folderId, selectedImageIds)
 
-                isSelectionMode = false
-                imageAdapter.setSelectionMode(false) // 선택 모드 비활성화
-                binding.btnMenu.setImageResource(R.drawable.ic_menu) // 기존 메뉴 버튼으로 변경
-                memoFolderViewModel.fetchMemoFolderDetails(folderId.toLong())
-                Toast.makeText(requireContext(), "사진이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("취소", null)
-            .show()
+            isSelectionMode = false
+            imageAdapter.setSelectionMode(false) // 선택 모드 비활성화
+            binding.btnMenu.setImageResource(R.drawable.ic_menu) // 기존 메뉴 버튼으로 변경
+            memoFolderViewModel.fetchMemoFolderDetails(folderId.toLong())
+        }
+        dialog.show(parentFragmentManager, "PhotoDeleteDialog")
     }
 
     private fun handlePhotoMove() {
-        val selectedItems = imageAdapter.getSelectedItems() // 선택된 사진 가져오기
+        val selectedItems = imageAdapter.getSelectedItems()
 
         if (selectedItems.isEmpty()) {
             Toast.makeText(requireContext(), "이동할 사진을 선택해주세요.", Toast.LENGTH_SHORT).show()
@@ -196,7 +209,7 @@ class MemoDetailFragment : Fragment() {
         val currentFolderId = arguments?.getLong("folderId") ?: return
 
         val folderSelectDialog = FolderSelectDialog(
-            currentFolderId = currentFolderId, // ✅ 현재 폴더 ID 전달
+            currentFolderId = currentFolderId, //현재 폴더 ID 전달
             onMoveButtonClick = { selectedFolder ->
                 movePhotosToFolder(selectedFolder)
             },
