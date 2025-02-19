@@ -18,7 +18,6 @@ class OnboardingStep1Activity : AppCompatActivity() {
     private lateinit var binding: ActivityOnboardingStep1Binding
     private var isValidName = true
 
-    // ✅ ViewModel 주입
     private val onboardingViewModel: OnboardingViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,8 +76,6 @@ class OnboardingStep1Activity : AppCompatActivity() {
             if (!isValidName) {
             } else {
                 val name = binding.etOnboardingName.text.toString().trim()
-
-                // ✅ ViewModel을 통해 API 호출
                 onboardingViewModel.updateUserName(name)
             }
         }
@@ -87,7 +84,6 @@ class OnboardingStep1Activity : AppCompatActivity() {
     private fun observeViewModel() {
         onboardingViewModel.nameUpdateResult.observe(this, Observer { result ->
             result.onSuccess { updatedName ->
-                // ✅ 성공하면 STEP2로 이동
                 val intent = Intent(this, OnboardingStep2Activity::class.java)
                 intent.putExtra("name", updatedName)
                 startActivity(intent)

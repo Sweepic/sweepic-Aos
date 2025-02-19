@@ -4,13 +4,13 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".SweepicApplication"
@@ -25,23 +25,23 @@
         android:theme="@style/Theme.Sweepic"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-<!--        <service-->
-<!--            android:name=".data.service.OnboardingService"-->
-<!--            android:exported="false"></service>-->
+        <activity
+            android:name=".presentation.login.WebViewActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
-<!--        <activity-->
-<!--            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"-->
-<!--            android:exported="true">-->
-<!--&lt;!&ndash;            <intent-filter>&ndash;&gt;-->
-<!--&lt;!&ndash;                <action android:name="android.intent.action.VIEW" />&ndash;&gt;-->
-<!--&lt;!&ndash;                <category android:name="android.intent.category.DEFAULT" />&ndash;&gt;-->
-<!--&lt;!&ndash;                <category android:name="android.intent.category.BROWSABLE" />&ndash;&gt;-->
-<!--&lt;!&ndash;                &lt;!&ndash; Redirect URI: "kakao${NATIVE_APP_KEY}://oauth" &ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                <data android:host="oauth2/callback/kakao"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:scheme="kakao${kakao_native_app_key}" />&ndash;&gt;-->
-<!--&lt;!&ndash;            </intent-filter>&ndash;&gt;-->
-<!--        </activity>-->
-
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Redirect URI: "kakao${NATIVE_APP_KEY}://oauth" -->
+                <data
+                    android:host="oauth"
+                    android:scheme="kakao${kakao_native_app_key}" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".presentation.onboarding.OnboardingStep4Activity"
             android:exported="false" />
@@ -61,19 +61,17 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Sweepic">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
-        <intent-filter>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.DEFAULT" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <data
-                android:scheme="sweepic.store"
-                android:host="oauth2/callback/kakao" />
-        </intent-filter>
-        </activity>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-
-            /> <!-- 스플래쉬 화면 -->
+                <data
+                    android:host="oauth2/callback/kakao"
+                    android:scheme="sweepic.store" />
+            </intent-filter>
+        </activity> <!-- 스플래쉬 화면 -->
         <activity
             android:name=".presentation.SplashActivity"
             android:exported="true">

@@ -1,5 +1,7 @@
 package com.umc.sweepic.presentation.login
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginRepository: LoginRepository
+    private val loginRepository: LoginRepository,
+    application: Application
 ) : ViewModel() {
 
     private val _loginUrl = MutableLiveData<String>()
@@ -24,6 +27,11 @@ class LoginViewModel @Inject constructor(
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
 
+
+    private val sharedPreferences =
+        application.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+
+    //카카오 로그인 요청하는 함수
     fun fetchKakaoLoginUrl() {
         viewModelScope.launch {
             loginRepository.getKakaoLoginUrl()
@@ -32,18 +40,12 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun requestSessionId() {
-        viewModelScope.launch {
-            loginRepository.kakaoLoginCallback()
-                .onSuccess { response ->
-                    val sessionId = response.token
-                    if (sessionId.isNotEmpty()) {
-                        _sessionId.postValue(sessionId)
-                    } else {
-                        _error.postValue("세션 ID 없음")
-                    }
-                }
-                .onFailure { _error.postValue(it.message) }
+    //세션 아이디를 저장하는 함수
+    fun setSessionId(sessionId: String) {
+        _sessionId.postValue(sessionId)
+        with(sharedPreferences.edit()) {
+            putString("SESSION_ID", sessionId)
+            apply()
         }
     }
 }
