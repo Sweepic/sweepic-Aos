@@ -16,6 +16,9 @@ import com.umc.sweepic.presentation.record.history.HistoryViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.FileWriter
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @AndroidEntryPoint
 class HistoryMonthChoiceFragment :
@@ -32,6 +35,7 @@ class HistoryMonthChoiceFragment :
         setupSelectedRecyclerView()
         initObserver()
         initView()
+        updateTitle()
     }
 
     override fun initObserver() {
@@ -123,6 +127,17 @@ class HistoryMonthChoiceFragment :
         viewModel.selectedPhotos.observe(viewLifecycleOwner) {
             photoAdapter.notifyDataSetChanged()
         }
+    }
+
+    private fun updateTitle() {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MONTH, -1) // ✅ 저번 달 설정
+        val lastMonth = SimpleDateFormat("M", Locale.getDefault()).format(calendar.time)
+
+        val titleText = "${lastMonth}월 베스트 사진 Top5"
+        binding.tvTitle.text = titleText // ✅ TextView 업데이트
+
+        Log.d("HistoryMonthChoiceFragment", "✅ 업데이트된 타이틀: $titleText")
     }
 
 

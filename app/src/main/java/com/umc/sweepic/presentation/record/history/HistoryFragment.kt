@@ -37,6 +37,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
 
         initObserver()
         initView()
+        updateSubtitle()
 
         fetchLastMonthPhotos(requireContext())
         loadPhotosFromJson(requireContext())
@@ -194,7 +195,6 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
         }
     }
 
-
     private fun displayPhotos(photos: List<String>) {
         binding.apply {
             if (photos.isNotEmpty()) {
@@ -207,6 +207,17 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
                 Glide.with(requireContext()).load(photos[2]).into(ivMonthBestPhoto3)
             }
         }
+    }
+
+    private fun updateSubtitle() {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MONTH, -1) // 저번달 설정
+        val lastMonth = SimpleDateFormat("M", Locale.getDefault()).format(calendar.time) // 1~12월 숫자로 가져옴
+
+        val subtitleText = "${lastMonth}월 베스트 사진 Top5"
+        binding.tvRecordSubtitle1.text = subtitleText // ✅ TextView 업데이트
+
+        Log.d("HistoryFragment", "✅ 업데이트된 타이틀: $subtitleText")
     }
 
 

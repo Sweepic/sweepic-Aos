@@ -12,6 +12,9 @@ import com.umc.sweepic.databinding.FragmentHistoryMonthBinding
 import com.umc.sweepic.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @AndroidEntryPoint
 class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.fragment_history_month) {
@@ -25,6 +28,7 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
         setupRecyclerView()
         initObserver()
         initView()
+        updateTitles()
 
         if (isSelectedPhotosJsonExists(requireContext())) {
             Log.d("HistoryMonthFragment", "✅ 기존 선택된 사진이 있음 → loadSelectedBestPhotos() 실행")
@@ -106,6 +110,17 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
     private fun isSelectedPhotosJsonExists(context: Context): Boolean {
         val file = File(context.filesDir, "selected_best_photos.json")
         return file.exists()
+    }
+
+    private fun updateTitles() {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MONTH, -1) // ✅ 저번 달 설정
+        val lastMonth = SimpleDateFormat("M", Locale.getDefault()).format(calendar.time)
+
+        val titleText = "${lastMonth}월 베스트 사진 Top5"
+        binding.tvBestPhotosTitle.text = titleText // ✅ TextView 업데이트
+
+        Log.d("HistoryMonthFragment", "✅ 업데이트된 타이틀: $titleText")
     }
 
 }
