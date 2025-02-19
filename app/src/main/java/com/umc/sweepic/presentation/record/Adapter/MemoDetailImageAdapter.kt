@@ -20,9 +20,9 @@ class MemoDetailImageAdapter(private var images: List<Pair<String, String>>) :  
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val (imageId, imageUrl) = images[position] // imageId, imageUrl 가져오기
+        val (imageId, imageUrl) = images[position]
 
-        Log.d("MemoDetailImageAdapter", "이미지 로드: $imageUrl") // ✅ 로드되는 이미지 확인
+        Log.d("MemoDetailImageAdapter", "이미지 로드: $imageUrl")
 
         // 이미지 로드
         Glide.with(holder.imageView.context)

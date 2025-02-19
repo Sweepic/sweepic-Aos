@@ -10,8 +10,8 @@ class HistoryDataSourceImpl @Inject constructor(
     private val historyService: HistoryService
 ) : HistoryDataSource {
 
-    override suspend fun getMostTagged(): BaseResponse<List<GetMostTaggedResponseDto>> =
-        historyService.getMostTagged()
+    override suspend fun getMostTagged(year: Double, month: Double): BaseResponse<List<GetMostTaggedResponseDto>> =
+        historyService.getMostTagged(year, month)
 
 }
 

@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
 
 class HistoryBestPicAdapter(
-    private var imageResIds: List<Int> // 🔹 Drawable 리소스 ID 리스트 사용
+    private var imageResIds: List<Int>
 ) : RecyclerView.Adapter<HistoryBestPicAdapter.BestPictureViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BestPictureViewHolder {
@@ -23,7 +23,7 @@ class HistoryBestPicAdapter(
 
     override fun getItemCount(): Int = imageResIds.size
 
-    fun updateData(newImages: List<Int>) { // 🔹 Drawable ID 업데이트 가능
+    fun updateData(newImages: List<Int>) {
         imageResIds = newImages
         notifyDataSetChanged()
     }
@@ -32,7 +32,7 @@ class HistoryBestPicAdapter(
         private val imageView: ImageView = view.findViewById(R.id.iv_best_picture)
 
         fun bind(imageResId: Int) {
-            imageView.setImageResource(imageResId) // 🔹 Drawable 이미지 설정
+            imageView.setImageResource(imageResId)
         }
     }
 }
