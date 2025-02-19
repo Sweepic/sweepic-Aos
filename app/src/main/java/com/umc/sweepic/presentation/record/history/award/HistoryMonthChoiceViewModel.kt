@@ -15,6 +15,8 @@ import com.umc.sweepic.domain.model.request.award.ModifyAwardRequestModel
 import com.umc.sweepic.domain.repository.sweep.AwardRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -35,37 +37,36 @@ class HistoryMonthChoiceViewModel @Inject constructor(
     private val _selectedPhotos = MutableLiveData<List<SelectedPhoto>>(emptyList())
     val selectedPhotos: LiveData<List<SelectedPhoto>> get() = _selectedPhotos
 
+    private val _bestPhotos = MutableLiveData<List<String>>()
+    val bestPhotos: LiveData<List<String>> get() = _bestPhotos
+
     fun processAwardFlow(selectedPhotos: List<SelectedPhoto>, onComplete: () -> Unit) {
         viewModelScope.launch {
             try {
-                val imageIds = mutableListOf<String>()
+                // ✅ 1. 병렬 처리로 imageIdCheck 실행
+                val imageIdResults = selectedPhotos.map { photo ->
+                    async {
+                        awardRepository.imageIdCheck(
+                            ImageIdCheckRequestModel(timestamp = photo.timestamp, mediaId = photo.mediaId)
+                        ).getOrNull()?.imageId
+                    }
+                }.awaitAll()
 
-                for (photo in selectedPhotos) {
-                    val response = awardRepository.imageIdCheck(
-                        ImageIdCheckRequestModel(timestamp = photo.timestamp, mediaId = photo.mediaId)
-                    ).getOrNull()
+                val imageIds = imageIdResults.filterNotNull()
 
-                    response?.imageId?.let { imageIds.add(it) }
-                }
-
-                if (imageIds.isEmpty()) {
-                    Log.e("Award", "❌ imageIdCheck 실패: 유효한 imageId 없음")
+                if (imageIds.size != selectedPhotos.size) {
+                    Log.e("Award", "❌ 일부 사진의 imageId 확인 실패: $imageIdResults")
                     return@launch
                 }
 
                 val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
 
-                // 1️⃣ 기존 어워드 확인 (awardMonth 값에서 연-월 부분만 추출)
+                // ✅ 2. 기존 어워드 조회
                 val awardsResponseList = awardRepository.getAwards().getOrNull()
-                var awardId = awardsResponseList?.find {
-                    it.awardMonth.substring(0, 7) == currentMonth
-                }?.id
+                var awardId = awardsResponseList?.find { it.awardMonth.substring(0, 7) == currentMonth }?.id
 
-                // 2️⃣ 어워드가 존재하면 기존 어워드 사용
-                if (awardId != null) {
-                    Log.d("Award", "✅ 기존 어워드 사용 (awardId=$awardId)")
-                } else {
-                    // 3️⃣ 기존 어워드가 없을 경우에만 새 어워드 생성
+                // ✅ 3. 어워드 생성이 필요한 경우
+                if (awardId == null) {
                     val createResponse = awardRepository.createAward().getOrNull()
                     awardId = createResponse?.id
 
@@ -75,8 +76,11 @@ class HistoryMonthChoiceViewModel @Inject constructor(
                     }
 
                     Log.d("Award", "✅ 새 어워드 생성 완료 (awardId=$awardId)")
+                } else {
+                    Log.d("Award", "✅ 기존 어워드 사용 (awardId=$awardId)")
                 }
 
+                // ✅ 4. modifyAward API 호출하여 새로운 사진 등록
                 val requestBody = imageIds.map { ModifyAwardRequestModel(it) }
                 val modifyResponse = awardRepository.modifyAward(awardId, requestBody).getOrNull()
 
@@ -85,10 +89,13 @@ class HistoryMonthChoiceViewModel @Inject constructor(
                     return@launch
                 }
 
+                Log.d("Award", "✅ modifyAward API 호출 성공")
                 onComplete()
 
             } catch (e: Exception) {
                 Log.e("Award", "❌ 예외 발생: ${e.message}")
+            }finally {
+                onComplete()
             }
         }
     }
@@ -193,5 +200,11 @@ class HistoryMonthChoiceViewModel @Inject constructor(
         sdf.timeZone = TimeZone.getTimeZone("UTC") // ✅ UTC 기준으로 변환
         return sdf.format(Date(timestampMillis))
     }
+
+    fun updateBestPhotos(photoPaths: List<String>) {
+        _bestPhotos.postValue(photoPaths) // ✅ UI 업데이트
+    }
+
+
 
 }

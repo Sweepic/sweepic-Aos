@@ -1,6 +1,7 @@
 package com.umc.sweepic.presentation.record.history.award
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -23,16 +24,27 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
         initObserver()
         initView()
 
-        // 🔥 JSON 파일에서 데이터 불러오기
-        viewModel.loadLastMonthPhotos(requireContext())
+        //viewModel.loadLastMonthPhotos(requireContext())
+        viewModel.loadSelectedBestPhotos(requireContext())
     }
 
     override fun initObserver() {
-        viewModel.bestPhotos.observe(viewLifecycleOwner) { photoPaths ->
+       /* viewModel.bestPhotos.observe(viewLifecycleOwner) { photoPaths ->
             val selectedPhotos = photoPaths.map { path ->
                 SelectedPhoto(mediaId = "", timestamp = "", photoPath = path)
             }
             photoAdapter.submitList(selectedPhotos)
+
+        }*/
+        viewModel.bestPhotos.observe(viewLifecycleOwner) { photoPaths ->
+            Log.d("HistoryMonthFragment", "📸 업데이트된 사진 리스트: $photoPaths")
+
+            if (photoPaths.isEmpty()) {
+                Log.e("HistoryMonthFragment", "❌ 사진 리스트가 비어 있음! UI 업데이트 불가")
+                return@observe
+            }
+
+            updateRecyclerView(photoPaths)
         }
     }
 
@@ -44,14 +56,41 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
         binding.tvEdit.setOnClickListener {
             findNavController().navigate(R.id.action_historyMonthFragment_to_historyMonthChoiceFragment)
         }
+
+
     }
 
     /** 📌 RecyclerView 설정 */
     private fun setupRecyclerView() {
         photoAdapter = ChoicePhotoAdapter { /* 선택 이벤트 없음 */ }
         binding.rvMonthBestPhotos.apply {
-            layoutManager = LinearLayoutManager(requireContext())
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
             adapter = photoAdapter
+            setHasFixedSize(true)
+            itemAnimator = null
+        }
+
+        // ✅ 초기 빈 리스트 설정 (강제 리프레시 유도)
+        photoAdapter.submitList(emptyList())
+    }
+
+    private fun updateRecyclerView(photoPaths: List<String>) {
+        Log.d("HistoryMonthFragment", "📸 RecyclerView 업데이트 실행됨: $photoPaths")
+
+        if (photoPaths.isEmpty()) {
+            Log.e("HistoryMonthFragment", "❌ 사진 리스트가 비어 있음! UI 업데이트 불가")
+            return
+        }
+
+        val selectedPhotos = photoPaths.map { path ->
+            SelectedPhoto(mediaId = "", timestamp = "", photoPath = path)
+        }
+
+        binding.rvMonthBestPhotos.post {
+            photoAdapter.submitList(emptyList()) // 🔥 기존 리스트 초기화 (강제 리프레시)
+            photoAdapter.submitList(selectedPhotos.toMutableList()) // ✅ 새로운 리스트 적용
+            photoAdapter.notifyDataSetChanged() // ✅ UI 강제 갱신
         }
     }
+
 }

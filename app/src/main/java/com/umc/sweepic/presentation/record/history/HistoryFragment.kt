@@ -31,7 +31,11 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
     private val viewModel: HistoryViewModel by viewModels()
 
     override fun initObserver() {
-        // 필요하면 데이터 관찰 추가
+        viewModel.bestPhotos.observe(viewLifecycleOwner) { photos ->
+            if (photos.isNotEmpty()) {
+                displayPhotos(photos)
+            }
+        }
     }
 
     override fun initView() {
@@ -46,12 +50,37 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
 
         //viewModel.imageIdCheck("2025-02-19T04:07:08.911Z", "image_123")
 
-        viewModel.getAwards()
+        //viewModel.getAwards()
 
-        fetchLastMonthPhotos(requireContext())
+        //loadSelectedBestPhotos(requireContext())
 
-        loadPhotosFromJson(requireContext())
+        //fetchLastMonthPhotos(requireContext())
 
+        //loadPhotosFromJson(requireContext())
+        viewModel.loadSelectedBestPhotos(requireContext())
+
+    }
+    private fun loadSelectedBestPhotos(context: Context) {
+        try {
+            val file = File(context.filesDir, "selected_best_photos.json")
+            if (!file.exists()) {
+                Log.e("HistoryFragment", "❌ 선택된 사진 JSON이 존재하지 않음")
+                return
+            }
+
+            val json = FileReader(file).use { reader ->
+                reader.readText()
+            }
+
+            val type = object : TypeToken<List<String>>() {}.type
+            val photos: List<String> = Gson().fromJson(json, type)
+
+            if (photos.isNotEmpty()) {
+                displayPhotos(photos)
+            }
+        } catch (e: Exception) {
+            Log.e("HistoryFragment", "❌ 선택된 사진 JSON 로드 실패: ${e.message}")
+        }
     }
 
     private fun navigateToHistoryMonthFragment() {

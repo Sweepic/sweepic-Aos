@@ -41,6 +41,7 @@ class ChoicePhotoAdapter(
 
     }
 
+
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<SelectedPhoto>() { // ✅ 타입 변경
             override fun areItemsTheSame(oldItem: SelectedPhoto, newItem: SelectedPhoto): Boolean {

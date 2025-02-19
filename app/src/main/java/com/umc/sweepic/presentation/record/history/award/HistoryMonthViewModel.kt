@@ -43,4 +43,28 @@ class HistoryMonthViewModel @Inject constructor() : ViewModel() {
             emptyList()
         }
     }
+
+    fun updateBestPhotos(photoPaths: List<String>) {
+        Log.d("HistoryMonthViewModel", "🔥 bestPhotos 업데이트: $photoPaths") // ✅ 값이 반영되는지 확인
+        _bestPhotos.value = photoPaths // ✅ 즉시 UI 업데이트
+    }
+
+    fun loadSelectedBestPhotos(context: Context) {
+        val file = File(context.filesDir, "selected_best_photos.json")
+        if (!file.exists()) {
+            _bestPhotos.postValue(emptyList())
+            return
+        }
+
+        val json = FileReader(file).use { it.readText() }
+        val type = object : TypeToken<List<String>>() {}.type
+        val photos: List<String> = Gson().fromJson(json, type)
+
+        _bestPhotos.postValue(photos)
+        Log.d("HistoryMonthViewModel", "✅ 선택된 사진 불러오기 성공: $photos")
+    }
+
+
+
+
 }
