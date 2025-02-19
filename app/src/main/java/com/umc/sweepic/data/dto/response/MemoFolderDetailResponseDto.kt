@@ -1,6 +1,6 @@
 package com.umc.sweepic.data.dto.response
 
-import com.umc.sweepic.domain.model.MemoFolderDetailModel
+import com.umc.sweepic.domain.model.response.sweep.MemoFolderDetailModel
 
 data class MemoFolderDetailResponseDto(
     val folderId: Long,

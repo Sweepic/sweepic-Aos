@@ -5,14 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.umc.sweepic.domain.model.MemoFolderDetailModel
-import com.umc.sweepic.domain.model.RecordMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.MemoFolderDetailModel
 import com.umc.sweepic.domain.repository.sweep.MemoRepository
 import com.umc.sweepic.presentation.record.memo.MemoFolder.Companion.toMemoFolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
