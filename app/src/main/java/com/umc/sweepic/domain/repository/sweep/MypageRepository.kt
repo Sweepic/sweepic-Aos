@@ -9,7 +9,6 @@ interface MypageRepository {
     suspend fun getUserInformation(): Result<GetUserInformationResponseModel>
     suspend fun withdrawal(): Result<Unit>
     suspend fun logoutUser(): Result<Unit>
-
     suspend fun updateUserName(request: NameRequestDto): Result<Unit>
     suspend fun updateGoalCount(request: GoalCountRequestDto): Result<Unit>
 }

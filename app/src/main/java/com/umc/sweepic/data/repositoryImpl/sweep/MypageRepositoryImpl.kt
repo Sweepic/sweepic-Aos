@@ -53,18 +53,19 @@ class MypageRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun getUserInformation(): Result<GetUserInformationResponseModel> = withContext(Dispatchers.IO) {
-        runCatching {
-            val response = mypageDataSource.getUserInformation()
+    override suspend fun getUserInformation(): Result<GetUserInformationResponseModel> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val response = mypageDataSource.getUserInformation()
 
-            if (response.resultType == "SUCCESS") {
-                response.success?.toGetUserInformationResponseModel()
-                    ?: throw Exception("사용자 정보가 없습니다.")
-            } else {
-                throw Exception("사용자 정보 요청 실패: ${response.error ?: "알 수 없는 오류"}")
+                if (response.resultType == "SUCCESS") {
+                    response.success?.toGetUserInformationResponseModel()
+                        ?: throw Exception("사용자 정보가 없습니다.")
+                } else {
+                    throw Exception("사용자 정보 요청 실패: ${response.error ?: "알 수 없는 오류"}")
+                }
             }
         }
-    }
 
     override suspend fun withdrawal(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
@@ -82,10 +83,11 @@ class MypageRepositoryImpl @Inject constructor(
         runCatching {
             val response = mypageDataSource.logoutUser()
 
-            if (response.resultType == "SUCCESS") {
+            if (response.isSuccessful) { // ✅ 204 No Content 성공 처리
+                Log.d("MypageRepositoryImpl", "✅ 로그아웃 성공")
                 Unit
             } else {
-                throw Exception("로그아웃 실패: ${response.error ?: "알 수 없는 오류"}")
+                throw Exception("🚨 로그아웃 실패: ${response.code()} ${response.message()}")
             }
         }
     }
