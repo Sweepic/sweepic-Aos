@@ -22,27 +22,7 @@ class HistoryMonthChoiceFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("HistoryMonthChoiceFragment", "✅ onViewCreated 실행됨")
 
-        binding.tvComplete.post {
-            Log.d("HistoryMonthChoiceFragment", "✅ tvComplete 뷰가 존재함")
-
-            binding.tvComplete.setOnClickListener {
-                Log.d("HistoryMonthChoiceFragment", "✅ 완료 버튼 클릭됨")
-
-                val selectedPhotos = viewModel.selectedPhotos.value ?: emptyList()
-
-                if (selectedPhotos.isEmpty()) {
-                    Log.d("HistoryMonthChoiceFragment", "⚠️ 선택된 사진이 없습니다.")
-                    return@setOnClickListener
-                }
-
-                viewModel.processAwardFlow(selectedPhotos) {
-                    Log.d("HistoryMonthChoiceFragment", "✅ 모든 API 요청 완료, 화면 이동")
-                    findNavController().navigateUp() // ✅ 모든 요청 완료 후 화면 이동
-                }
-            }
-        }
         setupRecyclerView()
         setupSelectedRecyclerView()
         initObserver()
@@ -76,15 +56,13 @@ class HistoryMonthChoiceFragment :
                 return@setOnClickListener
             }
 
-            // ✅ 순차적으로 API 호출 실행
             viewModel.processAwardFlow(selectedPhotos) {
                 Log.d("HistoryMonthChoiceFragment", "✅ 모든 API 요청 완료, 화면 이동")
-                findNavController().navigateUp() // ✅ 모든 요청 완료 후 화면 이동
+                findNavController().navigateUp()
             }
         }
     }
-
-    /** 선택된 사진 RecyclerView 설정 */
+        /** 선택된 사진 RecyclerView 설정 */
     private fun setupSelectedRecyclerView() {
         selectedPhotoAdapter = ChoicePhotoAdapter { photo  ->
             viewModel.togglePhotoSelection(photo )

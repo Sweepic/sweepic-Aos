@@ -38,13 +38,14 @@ class HistoryMonthChoiceViewModel @Inject constructor(
     fun processAwardFlow(selectedPhotos: List<SelectedPhoto>, onComplete: () -> Unit) {
         viewModelScope.launch {
             try {
-                // 1️⃣ imageIdCheck API 호출 -> 모든 요청이 끝나면 다음 단계로
-                val imageIds = selectedPhotos.mapNotNull { photo ->
+                val imageIds = mutableListOf<String>()
+
+                for (photo in selectedPhotos) {
                     val response = awardRepository.imageIdCheck(
                         ImageIdCheckRequestModel(timestamp = photo.timestamp, mediaId = photo.mediaId)
                     ).getOrNull()
 
-                    response?.imageId // 성공하면 imageId 저장
+                    response?.imageId?.let { imageIds.add(it) }
                 }
 
                 if (imageIds.isEmpty()) {
@@ -52,37 +53,31 @@ class HistoryMonthChoiceViewModel @Inject constructor(
                     return@launch
                 }
 
-                Log.d("Award", "✅ imageIdCheck API 호출 완료, 획득한 imageIds: $imageIds")
-
-                // 2️⃣ getAwards() API 호출 -> 기존 어워드 확인
-                val awardsResponseList = awardRepository.getAwards().getOrNull()
-                Log.d("Award", "✅ getAwards API 호출 완료, 응답: $awardsResponseList")
-
-                // ✅ 현재 날짜를 yyyy-MM 형식으로 변환
                 val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
 
-                // ✅ 기존 어워드의 awardMonth 값을 yyyy-MM 형식으로 변환 후 비교
-                val existingAward = awardsResponseList?.find { award ->
-                    val awardMonthFormatted = award.awardMonth.substring(0, 7) // "2025-03"
-                    Log.d("Award", "📌 확인 중: awardMonth=$awardMonthFormatted, currentMonth=$currentMonth")
+                // 1️⃣ 기존 어워드 확인 (awardMonth 값에서 연-월 부분만 추출)
+                val awardsResponseList = awardRepository.getAwards().getOrNull()
+                var awardId = awardsResponseList?.find {
+                    it.awardMonth.substring(0, 7) == currentMonth
+                }?.id
 
-                    // ✅ 현재 달보다 크거나 같은 어워드가 존재하면 사용
-                    awardMonthFormatted >= currentMonth
+                // 2️⃣ 어워드가 존재하면 기존 어워드 사용
+                if (awardId != null) {
+                    Log.d("Award", "✅ 기존 어워드 사용 (awardId=$awardId)")
+                } else {
+                    // 3️⃣ 기존 어워드가 없을 경우에만 새 어워드 생성
+                    val createResponse = awardRepository.createAward().getOrNull()
+                    awardId = createResponse?.id
+
+                    if (awardId == null) {
+                        Log.e("Award", "❌ 어워드 생성 실패")
+                        return@launch
+                    }
+
+                    Log.d("Award", "✅ 새 어워드 생성 완료 (awardId=$awardId)")
                 }
 
-                // ❌ createAward() 호출 제거 -> 기존 어워드가 없으면 종료
-                if (existingAward == null) {
-                    Log.e("Award", "❌ 해당 월의 어워드가 존재하지 않음")
-                    return@launch
-                }
-
-                val awardId = existingAward.id
-                Log.d("Award", "✅ 기존 어워드 사용, Award ID: $awardId")
-
-                // 3️⃣ modifyAward API 호출 (어워드 수정)
                 val requestBody = imageIds.map { ModifyAwardRequestModel(it) }
-                Log.d("Award", "📌 modifyAward API 요청 시작: Award ID=$awardId, 요청 데이터=$requestBody")
-
                 val modifyResponse = awardRepository.modifyAward(awardId, requestBody).getOrNull()
 
                 if (modifyResponse == null) {
@@ -90,9 +85,6 @@ class HistoryMonthChoiceViewModel @Inject constructor(
                     return@launch
                 }
 
-                Log.d("Award", "✅ modifyAward API 호출 성공, 응답: $modifyResponse")
-
-                // ✅ 모든 작업이 완료되면 화면 이동
                 onComplete()
 
             } catch (e: Exception) {
@@ -100,8 +92,6 @@ class HistoryMonthChoiceViewModel @Inject constructor(
             }
         }
     }
-
-
 
     fun imageIdCheck(photo: SelectedPhoto, onComplete: (String?) -> Unit) {
         viewModelScope.launch {

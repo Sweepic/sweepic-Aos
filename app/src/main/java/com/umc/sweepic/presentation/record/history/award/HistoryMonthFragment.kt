@@ -28,8 +28,11 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
     }
 
     override fun initObserver() {
-        viewModel.bestPhotos.observe(viewLifecycleOwner) { photos ->
-            //photoAdapter.submitList(photos)
+        viewModel.bestPhotos.observe(viewLifecycleOwner) { photoPaths ->
+            val selectedPhotos = photoPaths.map { path ->
+                SelectedPhoto(mediaId = "", timestamp = "", photoPath = path)
+            }
+            photoAdapter.submitList(selectedPhotos)
         }
     }
 

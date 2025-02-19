@@ -4,12 +4,11 @@ import com.umc.sweepic.data.datasource.AwardDataSource
 import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.request.ImageIdCheckRequestDto
 import com.umc.sweepic.data.dto.request.ModifyAwardRequestDto
+import com.umc.sweepic.data.dto.response.CreateAwardResponseDto
 import com.umc.sweepic.data.dto.response.ImageIdCheckResponseDto
 import com.umc.sweepic.data.dto.response.ModifyAwardResponseDto
-import com.umc.sweepic.data.dto.response.CreateAwardResponseDto
 import com.umc.sweepic.data.dto.response.GetAwardResponseDto
 import com.umc.sweepic.data.service.AwardService
-import com.umc.sweepic.domain.model.request.award.ModifyAwardRequestModel
 import javax.inject.Inject
 
 class AwardDataSourceImpl @Inject constructor(
