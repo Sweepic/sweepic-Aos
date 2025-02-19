@@ -1,42 +1,118 @@
 package com.umc.sweepic.presentation.challenge
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import android.util.Log
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
+import com.umc.sweepic.databinding.FragmentChallengeListBinding
+import com.umc.sweepic.domain.model.request.challenge.LocationChallengeRequestModel
+import com.umc.sweepic.domain.model.request.challenge.LocationInfoRequestModel
+import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
+import com.umc.sweepic.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
-class NewChallengeFragment : Fragment() {
+@AndroidEntryPoint
+class NewChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.layout.fragment_challenge_list){
+    private lateinit var challengeAdapter: ChallengeAdapter
+    private val viewModel: ChallengeViewModel by viewModels()
 
-    private lateinit var viewModel: ChallengeViewModel
-    private lateinit var adapter: ChallengeAdapter
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.fragment_challenge_list, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        viewModel = ViewModelProvider(requireActivity()).get(ChallengeViewModel::class.java)
-
-        adapter = ChallengeAdapter { challenge ->
-            viewModel.moveToInProgress(challenge)
+    override fun initObserver() {
+        viewModel.locationInfoList.observe(viewLifecycleOwner) { locationList ->
+            if (!locationList.isNullOrEmpty()) {
+                createLocationChallenge(locationList)
+            }
         }
 
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = adapter
+        viewModel.challengeList.observe(viewLifecycleOwner) { challenges ->
+            challengeAdapter.submitList(challenges)
+        }
 
-        viewModel.newChallenges.observe(viewLifecycleOwner) { challenges ->
-            adapter.setChallenges(challenges)
+        viewModel.challengeCreated.observe(viewLifecycleOwner) { isCreated ->
+            if (isCreated) {
+                viewModel.fetchGetChallenge()
+            }
+        }
+
+    }
+
+    override fun initView() {
+        setupRecyclerView()
+        loadGalleryImagesAndCallApi()
+        viewModel.fetchGetChallenge()
+    }
+
+    private fun setupRecyclerView() {
+        challengeAdapter = ChallengeAdapter(
+            onAcceptChallenge = { challengeId ->
+                viewModel.fetchAcceptChallenge(challengeId) // 챌린지 수락 API 호출
+            }
+        )
+        binding.rvChallengeContainer.layoutManager = LinearLayoutManager(context)  // 레이아웃 매니저 설정
+        binding.rvChallengeContainer.adapter = challengeAdapter
+    }
+
+    private fun loadGalleryImagesAndCallApi() {
+        val galleryImages = viewModel.loadImages() // 갤러리에서 모든 이미지 불러오기
+
+        val now = Calendar.getInstance() // 현재 시간 가져오기
+        val currentHour = now.get(Calendar.HOUR_OF_DAY)
+        val currentMinute = now.get(Calendar.MINUTE)
+
+        // 30분 단위로 최근 시간 계산
+        val startMinute = if (currentMinute < 30) 0 else 30
+        val startTime = Calendar.getInstance().apply {
+            set(Calendar.MINUTE, startMinute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis // 밀리초 단위 변환
+
+        val endTime = startTime + (30 * 60 * 1000) // 30분 후의 밀리초 값
+
+        Log.d("ChallengeViewModel", "필터링할 시간 범위: ${Date(startTime)} ~ ${Date(endTime)}")
+        Log.d(
+            "ChallengeViewModel",
+            "필터링 기준: startTime=${Date(startTime)}, endTime=${Date(endTime)}"
+        )
+
+        // `finalDate` 기준으로 필터링
+        val filteredImages = galleryImages.filter { image ->
+            Log.d("GalleryFilter", "사진 ID=${image.id}, finalDate=${Date(image.addedDate.time)}, 밀리초=${image.addedDate.time}")
+            image.addedDate.time in startTime..endTime // **밀리초 단위 비교**
+        }
+
+        if (filteredImages.isNotEmpty()) {
+            val requestList = filteredImages.map { image ->
+                LocationInfoRequestModel(
+                    timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale("ko", "KR")).format(Date(image.addedDate.time)),
+                    latitude = image.latitude,
+                    longitude = image.longitude,
+                    displayName = image.name,
+                    id = image.id.toString()
+                )
+            }
+            viewModel.imageListForChallenge = galleryImages  // ViewModel에 이미지 리스트 저장
+            Log.d("ChallengeViewModel", "최근 30분 사진 ${requestList.size}개 API 요청")
+            viewModel.fetchObserveLocationChallenge(requestList) // API 호출
+        } else {
+            Log.d("ChallengeViewModel", "최근 30분 동안 찍힌 사진이 없음")
         }
     }
+
+    private fun createLocationChallenge(locationResponse: List<LocationInfoResponseModel>) {
+        val requiredCount = locationResponse.size
+        val location = locationResponse[0].location
+
+        val request = LocationChallengeRequestModel(
+            required = requiredCount,
+            location = location,
+            context = "여행 위치 챌린지 생성"
+        )
+
+        viewModel.fetchCreateLocationChallenge(request)
+    }
+
 }

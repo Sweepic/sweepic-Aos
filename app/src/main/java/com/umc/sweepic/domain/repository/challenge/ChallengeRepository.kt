@@ -5,6 +5,7 @@ import com.umc.sweepic.domain.model.request.challenge.LocationChallengeRequestMo
 import com.umc.sweepic.domain.model.request.challenge.LocationInfoRequestModel
 import com.umc.sweepic.domain.model.request.challenge.WeekChallengeRequestModel
 import com.umc.sweepic.domain.model.response.challenge.CommonChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.GetChallengeResponseModel
 import com.umc.sweepic.domain.model.response.challenge.GoalChallengeResponseModel
 import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
 
@@ -23,6 +24,6 @@ interface ChallengeRepository {
     suspend fun fetchDeleteChallenge(id: String): Result<String>
     suspend fun fetchAcceptChallenge(id: String): Result<CommonChallengeResponseModel>
     suspend fun fetchCompleteChallenge(id: String): Result<CommonChallengeResponseModel>
-    suspend fun fetchGetChallenge(): Result<CommonChallengeResponseModel>
+    suspend fun fetchGetChallenge(): Result<List<GetChallengeResponseModel>>
     suspend fun fetchGeoCode(hashedLocation: String): Result<String>
 }

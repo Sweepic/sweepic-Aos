@@ -1,40 +1,35 @@
 package com.umc.sweepic.presentation.challenge
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
+import com.umc.sweepic.databinding.FragmentChallengeListBinding
+import com.umc.sweepic.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
-class InProgressChallengeFragment : Fragment() {
+@AndroidEntryPoint
+class InProgressChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.layout.fragment_challenge_list){
+    private lateinit var challengeAdapter: ChallengeAdapter
+    private val viewModel: ChallengeViewModel by viewModels()
 
-    private lateinit var viewModel: ChallengeViewModel
-    private lateinit var adapter: ChallengeAdapter
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.fragment_challenge_list, container, false)
+    override fun initObserver() {
+        viewModel.inProgressChallengeList.observe(viewLifecycleOwner) { challenges ->
+            challengeAdapter.submitList(challenges)
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun initView() {
+        setupRecyclerView()
+        viewModel.fetchGetChallenge()
+    }
 
-        viewModel = ViewModelProvider(requireActivity()).get(ChallengeViewModel::class.java)
-
-        adapter = ChallengeAdapter {}
-
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = adapter
-
-        viewModel.inProgressChallenges.observe(viewLifecycleOwner) { challenges ->
-            adapter.setChallenges(challenges)
-        }
+    private fun setupRecyclerView() {
+        challengeAdapter = ChallengeAdapter(
+            onAcceptChallenge = { challengeId ->
+                viewModel.fetchAcceptChallenge(challengeId) // 챌린지 수락 API 호출
+            }
+        )
+        binding.rvChallengeContainer.layoutManager = LinearLayoutManager(context)
+        binding.rvChallengeContainer.adapter = challengeAdapter
     }
 }

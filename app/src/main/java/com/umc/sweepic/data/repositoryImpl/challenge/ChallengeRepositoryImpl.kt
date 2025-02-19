@@ -6,6 +6,7 @@ import com.umc.sweepic.domain.model.request.challenge.LocationChallengeRequestMo
 import com.umc.sweepic.domain.model.request.challenge.LocationInfoRequestModel
 import com.umc.sweepic.domain.model.request.challenge.WeekChallengeRequestModel
 import com.umc.sweepic.domain.model.response.challenge.CommonChallengeResponseModel
+import com.umc.sweepic.domain.model.response.challenge.GetChallengeResponseModel
 import com.umc.sweepic.domain.model.response.challenge.GoalChallengeResponseModel
 import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
@@ -50,8 +51,8 @@ class ChallengeRepositoryImpl @Inject constructor(
         challengeService.fetchCompleteChallenge(id).success.toCommonChallengeResponseModel()
     }
 
-    override suspend fun fetchGetChallenge(): Result<CommonChallengeResponseModel> = runCatching {
-        challengeService.fetchGetChallenge().success.toCommonChallengeResponseModel()
+    override suspend fun fetchGetChallenge(): Result<List<GetChallengeResponseModel>> = runCatching {
+        challengeService.fetchGetChallenge().success.map { it.toGetChallengeResponseModel() }
     }
 
     override suspend fun fetchGeoCode(hashedLocation: String): Result<String> = runCatching {

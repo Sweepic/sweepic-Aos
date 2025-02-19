@@ -1,55 +1,53 @@
 package com.umc.sweepic.presentation.challenge
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.umc.sweepic.R
-import com.umc.sweepic.domain.model.Challenge
+import com.bumptech.glide.Glide
+import com.umc.sweepic.databinding.ItemVpBinding
 
 class ChallengeAdapter(
-    private val onChallengeButtonClick: (Challenge) -> Unit
-) : RecyclerView.Adapter<ChallengeAdapter.ChallengeViewHolder>() {
+    private val onAcceptChallenge: (String) -> Unit // 챌린지 수락 콜백 추가
+) : ListAdapter<ChallengeWithImages, ChallengeAdapter.ViewHolder>(DiffCallback()) {
 
-    private val challengeList = mutableListOf<Challenge>() // MutableList로 변경
-
-    // 데이터 설정 (중복 방지)
-    fun setChallenges(challenges: List<Challenge>) {
-        challengeList.clear() // 기존 데이터 초기화
-        challengeList.addAll(challenges) // 새 데이터 추가
-        notifyDataSetChanged() // 전체 업데이트
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemVpBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
-    inner class ChallengeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val numPhoto: TextView = view.findViewById(R.id.tv_numphoto)
-        val title: TextView = view.findViewById(R.id.tv_challenge_title)
-        val image: ImageView = view.findViewById(R.id.iv_challenge_img)
-        val button: Button = view.findViewById(R.id.btn_challenge_start)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
 
-        // 데이터 바인딩
-        fun bind(challenge: Challenge) {
-            numPhoto.text = challenge.num_photo
-            title.text = challenge.title
-            image.setImageResource(challenge.imageResId)
+    inner class ViewHolder(
+        private val binding: ItemVpBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: ChallengeWithImages) {
+            val challenge = item.challenge
 
-            button.setOnClickListener {
-                onChallengeButtonClick(challenge) // 버튼 클릭 이벤트 콜백 호출
+            binding.tvNumphoto.text = "${challenge.requiredCount}장"
+            binding.tvChallengeTitle.text = challenge.title.substring(3)
+
+            val images = item.images
+            Glide.with(binding.ivChallengeImg.context).load(images.getOrNull(0)?.uri).into(binding.ivChallengeImg)
+            Glide.with(binding.ivChallengeImg2.context).load(images.getOrNull(1)?.uri).into(binding.ivChallengeImg2)
+            Glide.with(binding.ivChallengeImg3.context).load(images.getOrNull(2)?.uri).into(binding.ivChallengeImg3)
+
+            binding.btnChallengeStart.setOnClickListener {
+                onAcceptChallenge(challenge.id) // challenge.id를 사용하여 API 호출
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChallengeViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_vp, parent, false)
-        return ChallengeViewHolder(view)
-    }
+    class DiffCallback : DiffUtil.ItemCallback<ChallengeWithImages>() {
+        override fun areItemsTheSame(oldItem: ChallengeWithImages, newItem: ChallengeWithImages): Boolean {
+            return oldItem.challenge.id == newItem.challenge.id
+        }
 
-    override fun onBindViewHolder(holder: ChallengeViewHolder, position: Int) {
-        holder.bind(challengeList[position]) // 데이터 바인딩 호출
+        override fun areContentsTheSame(oldItem: ChallengeWithImages, newItem: ChallengeWithImages): Boolean {
+            return oldItem == newItem
+        }
     }
-
-    override fun getItemCount(): Int = challengeList.size
 }

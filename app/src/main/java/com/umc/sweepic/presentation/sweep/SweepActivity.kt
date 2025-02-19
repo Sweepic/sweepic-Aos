@@ -143,7 +143,9 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                                 folder = "",
                                 size = 0L,
                                 width = 0,
-                                height = 0
+                                height = 0,
+                                latitude = 0.0,
+                                longitude = 0.0
                             )
                             currentImages.add(0, newGallery)
                             pagerAdapter.notifyDataSetChanged()

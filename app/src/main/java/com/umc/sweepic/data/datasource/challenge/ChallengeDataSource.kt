@@ -6,6 +6,7 @@ import com.umc.sweepic.data.dto.request.challenge.LocationChallengeRequestDto
 import com.umc.sweepic.data.dto.request.challenge.LocationInfoRequestDto
 import com.umc.sweepic.data.dto.request.challenge.WeekChallengeRequestDto
 import com.umc.sweepic.data.dto.response.challenge.CommonChallengeResponseDto
+import com.umc.sweepic.data.dto.response.challenge.GetChallengeResponseDto
 import com.umc.sweepic.data.dto.response.challenge.GoalChallengeResponseDto
 import com.umc.sweepic.data.dto.response.challenge.LocationInfoResponseDto
 
@@ -25,6 +26,6 @@ interface ChallengeDataSource {
     suspend fun fetchDeleteChallenge(id: String): BaseResponse<String>
     suspend fun fetchAcceptChallenge(id: String): BaseResponse<CommonChallengeResponseDto>
     suspend fun fetchCompleteChallenge(id: String): BaseResponse<CommonChallengeResponseDto>
-    suspend fun fetchGetChallenge(): BaseResponse<CommonChallengeResponseDto>
+    suspend fun fetchGetChallenge(): BaseResponse<List<GetChallengeResponseDto>>
     suspend fun fetchGeoCode(hashedLocation: String): BaseResponse<String>
 }

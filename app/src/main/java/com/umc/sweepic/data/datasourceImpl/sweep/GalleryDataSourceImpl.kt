@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.umc.sweepic.data.datasource.GalleryDataSource
 import com.umc.sweepic.domain.model.sweep.GalleryModel
+import com.umc.sweepic.util.extension.getLatLongFromImage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -32,7 +33,7 @@ class GalleryDataSourceImpl @Inject constructor(
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Images.Media.SIZE,
             MediaStore.Images.Media.WIDTH,
-            MediaStore.Images.Media.HEIGHT,
+            MediaStore.Images.Media.HEIGHT
         )
         val galleryImage = mutableListOf<GalleryModel>()
         val selection =
@@ -94,6 +95,8 @@ class GalleryDataSourceImpl @Inject constructor(
                 }
                 val actualId = cursor.getLong(idColumn)
 
+                val uri = Uri.withAppendedPath(contentUri, actualId.toString())
+                val (latitude, longitude) = getLatLongFromImage(uri, contentResolver) ?: Pair(0.0, 0.0)
 
                 galleryImage.add(
                     GalleryModel(
@@ -111,6 +114,8 @@ class GalleryDataSourceImpl @Inject constructor(
                         size = cursor.getLong(sizeColumn),
                         width = cursor.getInt(widthColumn),
                         height = cursor.getInt(heightColumn),
+                        latitude = latitude,
+                        longitude = longitude
                     )
                 )
                 Log.d("GalleryDataSourceImpl", "dateTaken=$dateTaken, dateAdded=$dateAdded, finalDate=$finalDate, actualId=$actualId")
@@ -139,7 +144,9 @@ class GalleryDataSourceImpl @Inject constructor(
             MediaStore.Images.Media.SIZE,
             MediaStore.Images.Media.WIDTH,
             MediaStore.Images.Media.HEIGHT,
-            MediaStore.Images.Media.IS_TRASHED
+            MediaStore.Images.Media.IS_TRASHED,
+            MediaStore.Images.Media.LATITUDE,
+            MediaStore.Images.Media.LONGITUDE
         )
 
         // Android 30 이상에서 IS_TRASHED를 필터링
@@ -207,7 +214,9 @@ class GalleryDataSourceImpl @Inject constructor(
                             folder = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)),
                             size = cur.getLong(cur.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)),
                             width = cur.getInt(cur.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)),
-                            height = cur.getInt(cur.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT))
+                            height = cur.getInt(cur.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)),
+                            latitude = cur.getDouble(cur.getColumnIndexOrThrow(MediaStore.Images.Media.LATITUDE)),
+                            longitude = cur.getDouble(cur.getColumnIndexOrThrow(MediaStore.Images.Media.LONGITUDE))
                         )
                     )
                 }
