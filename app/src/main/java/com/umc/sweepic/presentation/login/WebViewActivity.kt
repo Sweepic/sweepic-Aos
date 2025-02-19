@@ -57,6 +57,8 @@ class WebViewActivity : AppCompatActivity() {
         val cookieManager = CookieManager.getInstance()
         val cookies = cookieManager.getCookie(url) ?: ""
 
+        Log.d("WebViewActivity", "쿠키 확인: $cookies") // 로그 추가!
+
         cookies.split(";").forEach {
             val cookie = it.trim()
             if (cookie.startsWith("connect.sid=")) {
@@ -67,6 +69,7 @@ class WebViewActivity : AppCompatActivity() {
                     putExtra("SESSION_ID", sessionId)
                 }
                 setResult(RESULT_OK, resultIntent)
+                Log.d("WebViewActivity", "setResult 실행됨") // 추가!
                 finish()
             }
         }

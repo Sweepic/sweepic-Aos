@@ -34,8 +34,11 @@ class LoginViewModel @Inject constructor(
     //카카오 로그인 요청하는 함수
     fun fetchKakaoLoginUrl() {
         viewModelScope.launch {
+            Log.d("LoginViewModel", "카카오 로그인 요청 시작") // 추가
             loginRepository.getKakaoLoginUrl()
-                .onSuccess { _loginUrl.postValue(it) }
+                .onSuccess {
+                    Log.d("LoginViewModel", "카카오 로그인 URL: $it") // 추가
+                    _loginUrl.postValue(it) }
                 .onFailure { _error.postValue(it.message) }
         }
     }
