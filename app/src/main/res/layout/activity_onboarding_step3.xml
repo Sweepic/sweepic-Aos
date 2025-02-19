@@ -52,7 +52,7 @@
         android:id="@+id/tv_onboarding_targetnum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="목표 장수 설정"
+        android:text="목표 장수 설정 *백단위 아래는 0으로 설정해 주세요."
         android:textColor="@color/sw_gray2"
         android:textSize="13sp"
         android:layout_marginStart="16dp"
