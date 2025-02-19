@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.umc.sweepic.domain.model.request.award.ImageIdCheckRequestModel
 import com.umc.sweepic.domain.model.request.award.ModifyAwardRequestModel
 import com.umc.sweepic.domain.repository.sweep.AwardRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,20 @@ class HistoryViewModel  @Inject constructor(
     private val spf: SharedPreferences,
     private val awardRepository: AwardRepository
 ): ViewModel(){
+    fun imageIdCheck(timestamp: String, mediaId: String){
+        viewModelScope.launch {
+            val request = ImageIdCheckRequestModel(timestamp = timestamp, mediaId = mediaId)
+
+            Log.d("API_DEBUG", "요청 데이터: $request")
+
+            awardRepository.imageIdCheck(request).onSuccess { response ->
+                Log.d("Award", "imageIdCheck Api 호출 성공: $response")
+            }.onFailure { error->
+                Log.e("Award", "imageIdCheck Api 호출 실패: $error")
+            }
+        }
+    }
+
     fun createAward(){
         viewModelScope.launch {
             awardRepository.createAward().onSuccess { response ->

@@ -28,7 +28,7 @@ import java.util.Locale
 @AndroidEntryPoint
 class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_history) {
 
-    private val viewModel: HistoryMonthViewModel by viewModels()
+    private val viewModel: HistoryViewModel by viewModels()
 
     override fun initObserver() {
         // 필요하면 데이터 관찰 추가
@@ -43,6 +43,10 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
         binding.ivNextLastBest.setOnClickListener {
             navigateToHistoryLastBestFragment()
         }
+
+        //viewModel.imageIdCheck("2025-02-19T04:07:08.911Z", "image_123")
+
+        viewModel.getAwards()
 
         fetchLastMonthPhotos(requireContext())
 

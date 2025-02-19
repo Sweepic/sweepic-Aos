@@ -29,7 +29,7 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
 
     override fun initObserver() {
         viewModel.bestPhotos.observe(viewLifecycleOwner) { photos ->
-            photoAdapter.submitList(photos)
+            //photoAdapter.submitList(photos)
         }
     }
 
@@ -45,7 +45,7 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
 
     /** 📌 RecyclerView 설정 */
     private fun setupRecyclerView() {
-        photoAdapter = ChoicePhotoAdapter()
+        photoAdapter = ChoicePhotoAdapter { /* 선택 이벤트 없음 */ }
         binding.rvMonthBestPhotos.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = photoAdapter
