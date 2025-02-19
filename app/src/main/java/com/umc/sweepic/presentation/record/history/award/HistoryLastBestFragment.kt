@@ -1,10 +1,15 @@
 package com.umc.sweepic.presentation.record.history.award
 
+import HistoryLastBestAdapter
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.databinding.FragmentHistoryLastBestBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -13,6 +18,8 @@ class HistoryLastBestFragment : Fragment() {
 
     private var _binding: FragmentHistoryLastBestBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: HistoryLastBestViewModel by viewModels()
+    private lateinit var adapter: HistoryLastBestAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,7 +36,22 @@ class HistoryLastBestFragment : Fragment() {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
-        // TODO: API 연동 후 날짜와 사진 ID를 불러와서 UI 업데이트
+        setupRecyclerView()
+        observeViewModel()
+
+        viewModel.getAwards() // API 호출
+    }
+
+    private fun setupRecyclerView() {
+        adapter = HistoryLastBestAdapter()
+        binding.rvLastBestPhotos.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvLastBestPhotos.adapter = adapter
+    }
+
+    private fun observeViewModel() {
+        viewModel.awards.observe(viewLifecycleOwner, Observer { awards ->
+            adapter.submitList(awards) // RecyclerView 업데이트
+        })
     }
 
     override fun onDestroyView() {
