@@ -1,9 +1,12 @@
 package com.umc.sweepic.presentation.mypage
 
 import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -17,6 +20,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.umc.sweepic.R
 import com.umc.sweepic.presentation.MainActivity
+import com.umc.sweepic.presentation.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DecimalFormat
 
@@ -85,8 +89,19 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
             showLogoutDialog()
         }
 
+        // 탈퇴 버튼 클릭 이벤트
         view.findViewById<View>(R.id.btn_withdrawal).setOnClickListener{
             showWithdrawalDialog()
+        }
+
+        // 로그아웃 상태 감지
+        mypageViewModel.logoutStatus.observe(viewLifecycleOwner) { success ->
+            if (success) {
+                Log.d("MyPageFragment", "로그아웃 성공")
+                navigateToLogin()
+            } else {
+                Toast.makeText(requireContext(), "로그아웃 실패. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
@@ -247,12 +262,15 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
         // 확인 버튼 클릭 이벤트
         confirmButton.setOnClickListener {
             dialog.dismiss()
+            checkSessionId()
             mypageViewModel.logout()
-            performLogout()
+
         }
 
         dialog.show()
     }
+
+
 
     private fun showWithdrawalDialog() {
         // 다이얼로그 레이아웃을 가져옴
@@ -280,20 +298,24 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page) {
         dialog.show()
     }
 
-    private fun performLogout() {
-        // 로그아웃 처리 로직
-        Toast.makeText(requireContext(), "로그아웃되었습니다.", Toast.LENGTH_SHORT).show()
-
-        // 예: 로그인 화면으로 이동
-        //findNavController().navigate(R.id.action_myPageFragment_to_loginFragment)
-    }
-
     private fun performWithdrawal() {
-        // 로그아웃 처리 로직
+        // 탈퇴 처리 로직
         Toast.makeText(requireContext(), "탈퇴되었습니다.", Toast.LENGTH_SHORT).show()
 
         // 예: 처음 화면으로 이동
         //findNavController().navigate(R.id.action_myPageFragment_to_loginFragment)
+    }
+
+    private fun checkSessionId() {
+        val sharedPreferences = requireContext().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val sessionId = sharedPreferences.getString("SESSION_ID", "null")
+        Log.d("MyPageFragment", "현재 세션 ID: $sessionId")
+    }
+
+    private fun navigateToLogin() {
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        startActivity(intent)
+        requireActivity().finish()
     }
 
 
