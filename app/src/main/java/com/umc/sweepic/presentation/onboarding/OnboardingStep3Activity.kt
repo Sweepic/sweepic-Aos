@@ -28,7 +28,7 @@ class OnboardingStep3Activity : AppCompatActivity() {
         setContentView(binding.root)
 
         val name = intent.getStringExtra("name") ?: ""
-        binding.tvOnboardingTitle.text = "$name 님,\n사진을 몇 장까지 정리하고 싶으세요?"
+        binding.tvOnboardingTitle.text = "$name"+"님,\n사진을 몇 장까지 정리하고 싶으세요?"
 
         imageCount = getImageCount(this)
 
@@ -68,6 +68,7 @@ class OnboardingStep3Activity : AppCompatActivity() {
                 } else {
                     resetErrorUI()
                 }
+
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -94,6 +95,10 @@ class OnboardingStep3Activity : AppCompatActivity() {
                     showError("현재 사진 수보다 많은 목표는 설정할 수 없습니다.")
                 }
 
+                inputNumber % 100 != 0 -> {
+                    showError("목표 장수를 설정할 때 백단위 아래는 0으로 설정해 주세요.")
+                }
+
                 else -> {
                     updateGoalCount(inputNumber) // ✅ 목표 개수 변경 API 호출
                 }
@@ -104,7 +109,7 @@ class OnboardingStep3Activity : AppCompatActivity() {
     }
 
     private fun updateGoalCount(targetNumber: Int) {
-        viewModel.updateGoalCount(targetNumber) // ✅ ViewModel에 목표 개수 업데이트 요청
+        viewModel.updateGoalCount(targetNumber)
     }
 
     private fun observeViewModel() {
