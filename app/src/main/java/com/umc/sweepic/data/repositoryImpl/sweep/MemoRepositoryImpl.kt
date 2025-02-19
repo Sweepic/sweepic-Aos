@@ -4,6 +4,8 @@ import android.util.Log
 import com.umc.sweepic.data.datasource.MemoDataSource
 import com.umc.sweepic.data.dto.request.DeleteImagesRequestDto
 import com.umc.sweepic.data.dto.request.MoveImagesRequestDto
+import com.umc.sweepic.data.dto.request.UpdateFolderNameRequestDto
+import com.umc.sweepic.data.dto.request.UpdateMemoTextRequestDto
 import com.umc.sweepic.data.dto.response.DeleteImagesResponseDto
 import com.umc.sweepic.domain.model.response.sweep.MemoFolderDetailModel
 import com.umc.sweepic.domain.model.response.sweep.RecordMemoListModel
@@ -82,7 +84,7 @@ class MemoRepositoryImpl @Inject constructor(
 
             if (response.resultType == "SUCCESS") {
                 Log.d("MemoRepositoryImpl", "사진 삭제 성공")
-                response.success // BaseResponse의 success 필드 반환
+                response.success
             } else {
                 val errorMessage = response.error ?: "알 수 없는 오류"
                 Log.e("MemoRepositoryImpl", "사진 삭제 실패: $errorMessage")
@@ -91,6 +93,32 @@ class MemoRepositoryImpl @Inject constructor(
         }.onFailure {
             Log.e("MemoRepositoryImpl", "사진 삭제 오류: ${it.message}")
         }
+
+    override suspend fun updateFolderName(folderId: String, newName: String): Result<Unit> = runCatching {
+        val response = memoDataSource.updateFolderName(folderId, UpdateFolderNameRequestDto(newName))
+
+        if (response.resultType == "SUCCESS") {
+            response.success
+        } else {
+            val errorMessage = response.error?.toString() ?: "알 수 없는 오류"
+            throw Exception("폴더 이름 수정 실패: $errorMessage")
+        }
+    }.onFailure {
+        Log.e("MemoRepositoryImpl", "폴더 이름 수정 오류: ${it.message}")
+    }
+
+    override suspend fun updateMemoText(folderId: String, newText: String): Result<Unit> = runCatching {
+        val response = memoDataSource.updateMemoText(folderId, UpdateMemoTextRequestDto(newText))
+
+        if (response.resultType == "SUCCESS") {
+            response.success
+        } else {
+            val errorMessage = response.error?.toString() ?: "알 수 없는 오류"
+            throw Exception("폴더 내용 수정 실패: $errorMessage")
+        }
+    }.onFailure {
+        Log.e("MemoRepositoryImpl", "폴더 내용 수정 오류: ${it.message}")
+    }
 
 }
 
