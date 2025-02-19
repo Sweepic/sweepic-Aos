@@ -70,6 +70,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
+
     fun provideAuthInterceptor(@ApplicationContext context: Context): AuthInterceptor {
         return AuthInterceptor(context)
     }

@@ -1,4 +1,4 @@
-package com.umc.sweepic.data.dto.request
+package com.umc.sweepic.data.dto.request.sweep
 
 data class CreateTextFolderRequestDto(
     val base64_image: String,
