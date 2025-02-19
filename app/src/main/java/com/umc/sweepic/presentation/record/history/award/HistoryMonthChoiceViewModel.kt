@@ -59,29 +59,32 @@ class HistoryMonthChoiceViewModel @Inject constructor(
                     return@launch
                 }
 
-                val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+                // ✅ 2. 어워드 생성 API 호출 (먼저 시도)
+                val createResponse = awardRepository.createAward().getOrNull()
+                var awardId = createResponse?.id
 
-                // ✅ 2. 기존 어워드 조회
-                val awardsResponseList = awardRepository.getAwards().getOrNull()
-                var awardId = awardsResponseList?.find { it.awardMonth.substring(0, 7) == currentMonth }?.id
-
-                // ✅ 3. 어워드 생성이 필요한 경우
-                if (awardId == null) {
-                    val createResponse = awardRepository.createAward().getOrNull()
-                    awardId = createResponse?.id
-
-                    if (awardId == null) {
-                        Log.e("Award", "❌ 어워드 생성 실패")
-                        return@launch
-                    }
-
+                if (awardId != null) {
                     Log.d("Award", "✅ 새 어워드 생성 완료 (awardId=$awardId)")
                 } else {
-                    Log.d("Award", "✅ 기존 어워드 사용 (awardId=$awardId)")
+                    Log.e("Award", "❌ 어워드 생성 실패, 기존 어워드 조회 시도")
+
+                    // ✅ 3. 기존 어워드 조회 (어워드 생성 실패한 경우)
+                    val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+                    val awardsResponseList = awardRepository.getAwards().getOrNull()
+                    awardId = awardsResponseList?.find { it.awardMonth.substring(0, 7) == currentMonth }?.id
+
+                    if (awardId == null) {
+                        Log.e("Award", "❌ 기존 어워드 조회 실패: 어워드 ID 없음")
+                        return@launch
+                    } else {
+                        Log.d("Award", "✅ 기존 어워드 사용 (awardId=$awardId)")
+                    }
                 }
 
                 // ✅ 4. modifyAward API 호출하여 새로운 사진 등록
                 val requestBody = imageIds.map { ModifyAwardRequestModel(it) }
+                Log.d("Award", "📌 modifyAward 요청 데이터: $requestBody")
+
                 val modifyResponse = awardRepository.modifyAward(awardId, requestBody).getOrNull()
 
                 if (modifyResponse == null) {
@@ -94,31 +97,8 @@ class HistoryMonthChoiceViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 Log.e("Award", "❌ 예외 발생: ${e.message}")
-            }finally {
+            } finally {
                 onComplete()
-            }
-        }
-    }
-
-    fun imageIdCheck(photo: SelectedPhoto, onComplete: (String?) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val request = ImageIdCheckRequestModel(timestamp = photo.timestamp, mediaId = photo.mediaId)
-
-                Log.d("API_DEBUG", "📌 요청 데이터 확인: timestamp=${photo.timestamp}, mediaId=${photo.mediaId}")
-
-                val result = awardRepository.imageIdCheck(request)
-
-                result.onSuccess { response ->
-                    Log.d("Award", "✅ imageIdCheck API 호출 성공: $response")
-                    onComplete(response.imageId) // ✅ imageId 반환
-                }.onFailure { error ->
-                    Log.e("Award", "❌ imageIdCheck API 호출 실패: ${error.message}")
-                    onComplete(null)
-                }
-            } catch (e: Exception) {
-                Log.e("Award", "❌ imageIdCheck 예외 발생: ${e.message}")
-                onComplete(null)
             }
         }
     }
@@ -128,19 +108,21 @@ class HistoryMonthChoiceViewModel @Inject constructor(
         val currentList = _selectedPhotos.value?.toMutableList() ?: mutableListOf()
 
         if (currentList.any { it.mediaId == photo.mediaId }) {
+            // ✅ 이미 선택된 경우 제거
             currentList.removeAll { it.mediaId == photo.mediaId }
             Log.d("PhotoSelection", "📌 사진 선택 해제: ${photo.photoPath}")
         } else {
-            if (currentList.size < 5) {
-                currentList.add(photo)
-                Log.d("PhotoSelection", "✅ 사진 선택됨: ${photo.photoPath}")
-            } else {
+            if (currentList.size >= 5) {
                 Log.d("PhotoSelection", "⚠️ 최대 5장까지만 선택 가능합니다.")
+                return // ✅ 선택 불가 (최대 5개 초과)
             }
+
+            currentList.add(photo)
+            Log.d("PhotoSelection", "✅ 사진 선택됨: ${photo.photoPath}")
         }
 
-        _selectedPhotos.value = currentList
-        Log.d("PhotoSelection", "📷 현재 선택된 사진 리스트: $currentList")
+        _selectedPhotos.value = currentList // ✅ UI 즉시 반영
+        Log.d("PhotoSelection", "📷 현재 선택된 사진 리스트: ${currentList.map { it.photoPath }}")
     }
 
 

@@ -96,10 +96,12 @@ class HistoryMonthChoiceFragment :
 
         /** 선택된 사진 RecyclerView 설정 */
     private fun setupSelectedRecyclerView() {
-        selectedPhotoAdapter = ChoicePhotoAdapter { photo  ->
-            viewModel.togglePhotoSelection(photo )
-        }
-        binding.rvSelectedPhotos.apply {
+            selectedPhotoAdapter = ChoicePhotoAdapter(
+                onPhotoSelected = { photo -> viewModel.togglePhotoSelection(photo) },
+                itemLayoutResId = R.layout.item_choice_photo
+            )
+
+            binding.rvSelectedPhotos.apply {
             layoutManager =
                 LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             adapter = selectedPhotoAdapter
@@ -108,9 +110,11 @@ class HistoryMonthChoiceFragment :
 
     /** 전체 사진 RecyclerView 설정 */
     private fun setupRecyclerView() {
-        photoAdapter = ChoicePhotoAdapter { photo  ->
-            viewModel.togglePhotoSelection(photo )
-        }
+        photoAdapter = ChoicePhotoAdapter(
+            onPhotoSelected = { photo -> viewModel.togglePhotoSelection(photo) },
+            itemLayoutResId = R.layout.item_choice_photo // ✅ 기존 레이아웃 유지
+        )
+
         binding.rvPhotoGrid.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = photoAdapter

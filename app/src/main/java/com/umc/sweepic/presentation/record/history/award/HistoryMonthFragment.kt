@@ -62,7 +62,10 @@ class HistoryMonthFragment : BaseFragment<FragmentHistoryMonthBinding>(R.layout.
 
     /** 📌 RecyclerView 설정 */
     private fun setupRecyclerView() {
-        photoAdapter = ChoicePhotoAdapter { /* 선택 이벤트 없음 */ }
+        photoAdapter = ChoicePhotoAdapter(
+            onPhotoSelected = { /* 선택 이벤트 없음 */ },
+            itemLayoutResId = R.layout.item_best_photo // ✅ `item_best_photo` 사용
+        )
         binding.rvMonthBestPhotos.apply {
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
             adapter = photoAdapter
