@@ -35,11 +35,11 @@
         android:layout_height="40dp"
         android:background="@drawable/shape_rect_4_gray_line"
         app:layout_constraintTop_toBottomOf="@+id/iv_login_logo"
-        app:layout_constraintBottom_toTopOf="@id/naverLoginLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:layout_marginTop="257dp"
-        android:layout_marginBottom="15dp">
+        android:layout_marginTop="280dp"
+        android:layout_marginBottom="10dp">
 
     <ImageView
         android:id="@+id/iv_login_kakao"
@@ -66,85 +66,7 @@
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- 네이버 로그인 버튼 -->
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        app:layout_constraintTop_toBottomOf="@id/kakaoLoginLayout"
-        app:layout_constraintBottom_toTopOf="@id/googleLoginLayout"
-        android:id="@+id/naverLoginLayout"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/shape_rect_4_gray_line"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:layout_marginBottom="15dp">
-
-        <ImageView
-            android:id="@+id/iv_login_naver"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_naver"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toStartOf="@id/tv_login_naver"
-            app:layout_constraintTop_toTopOf="@id/naverLoginLayout"
-            app:layout_constraintBottom_toBottomOf="@id/naverLoginLayout"/>
-
-        <TextView
-            android:id="@+id/tv_login_naver"
-            android:layout_width="wrap_content"
-            android:gravity="center"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="네이버로 시작하기"
-            android:textColor="@color/sw_bk"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="@id/naverLoginLayout"
-            app:layout_constraintEnd_toEndOf="@id/naverLoginLayout"
-            app:layout_constraintTop_toTopOf="@id/naverLoginLayout"
-            app:layout_constraintBottom_toBottomOf="@id/naverLoginLayout"
-            android:textStyle="bold" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <!-- 구글 로그인 버튼 -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        app:layout_constraintTop_toBottomOf="@id/naverLoginLayout"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:id="@+id/googleLoginLayout"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/shape_rect_4_gray_line"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:layout_marginBottom="45dp">
-
-        <ImageView
-            android:id="@+id/iv_login_google"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_google"
-            app:layout_constraintEnd_toStartOf="@id/tv_login_google"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintTop_toTopOf="@id/googleLoginLayout"
-            app:layout_constraintBottom_toBottomOf="@id/googleLoginLayout"/>
-
-        <TextView
-            android:id="@+id/tv_login_google"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="구글로 시작하기"
-            android:gravity="center"
-            android:textColor="@color/sw_bk"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="@id/googleLoginLayout"
-            app:layout_constraintEnd_toEndOf="@id/googleLoginLayout"
-            app:layout_constraintTop_toTopOf="@id/googleLoginLayout"
-            app:layout_constraintBottom_toBottomOf="@id/googleLoginLayout"
-            android:textStyle="bold" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

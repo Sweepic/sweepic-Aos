@@ -46,17 +46,19 @@ class OnboardingStep2Activity : AppCompatActivity() {
     }
 
     private fun checkMediaPermission() {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            isPermissionGranted =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED
         } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            isPermissionGranted =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         }
 
-        isPermissionGranted = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
         if (isPermissionGranted) {
             isPermissionDenied = false
         }
     }
+
     private fun requestMediaPermission() {
         val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_IMAGES
@@ -75,7 +77,6 @@ class OnboardingStep2Activity : AppCompatActivity() {
                 }
                 startActivity(intent)
             }
-
             else -> {
                 ActivityCompat.requestPermissions(this, arrayOf(permission), REQUEST_PERMISSION_CODE)
             }
@@ -85,8 +86,9 @@ class OnboardingStep2Activity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                isPermissionGranted = true
+            isPermissionGranted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+
+            if (isPermissionGranted) {
                 goToStep3()
             } else {
                 isPermissionDenied = true
