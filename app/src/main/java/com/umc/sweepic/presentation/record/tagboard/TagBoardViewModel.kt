@@ -37,16 +37,27 @@ class TagBoardViewModel @Inject constructor(
         }
     }
 
-    fun fetchDateTags(year: Double, month: Double, date: Double) {
+    fun fetchDateTags(year: Double, month: Double, date: Double, callback: (List<String>) -> Unit) {
         viewModelScope.launch {
             tagboardRepository.getDateTags(year, month, date)
                 .onSuccess { response ->
                     _imageDateTags.postValue(response)
                     Log.d("tagboard", "날짜 기반 태그 조회 성공: $response")
+
+                    val tags = response.tags
+                    if (tags.isNotEmpty()) {
+                        Log.d("tagboard", "날짜: $year-$month-$date, 태그: $tags")
+                    } else {
+                        Log.d("tagboard", "날짜: $year-$month-$date, 태그가 없음")
+                    }
+                    callback(tags) // 태그 리스트 반환
                 }
                 .onFailure { error ->
                     Log.e("tagboard", "날짜 기반 태그 조회 실패: ${error.message}")
+                    callback(emptyList()) // 실패 시 빈 리스트 반환
                 }
         }
     }
+
+
 }
