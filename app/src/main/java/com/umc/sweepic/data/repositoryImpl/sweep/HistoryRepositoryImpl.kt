@@ -9,7 +9,9 @@ class HistoryRepositoryImpl @Inject constructor(
     private val historyDataSource: HistoryDataSource
 ) : HistoryRepository {
 
-    override suspend fun getMostTagged(): Result<GetMostTaggedModel> = runCatching {
-        GetMostTaggedModel(historyDataSource.getMostTagged().success.map { it.toMostTaggedModel() })
+    override suspend fun getMostTagged(year: Double, month: Double): Result<GetMostTaggedModel> = runCatching {
+        GetMostTaggedModel(historyDataSource.getMostTagged(year, month).success.map { it.toMostTaggedModel() }
+        )
+
     }
 }

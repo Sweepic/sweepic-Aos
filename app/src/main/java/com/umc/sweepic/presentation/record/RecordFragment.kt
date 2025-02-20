@@ -7,6 +7,7 @@ import android.text.SpannableString
 import android.text.style.StyleSpan
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.umc.sweepic.R
@@ -28,6 +29,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
         // RecyclerView의 Nested Scrolling 설정 비활성화
         val recyclerView = binding.vpRecord.getChildAt(0) as RecyclerView
         recyclerView.isNestedScrollingEnabled = false
+        recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
 
         // TabLayout과 ViewPager2 연동
         TabLayoutMediator(binding.tabRecord, binding.vpRecord) { tab, position ->
@@ -38,6 +40,5 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                 else -> null
             }
         }.attach()
-
     }
 }

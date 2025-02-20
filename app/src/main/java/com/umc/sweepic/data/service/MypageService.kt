@@ -2,6 +2,7 @@ package com.umc.sweepic.data.service
 
 import com.umc.sweepic.data.dto.BaseResponse
 import com.umc.sweepic.data.dto.response.mypage.GetUserInformationResponseDto
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 
@@ -12,6 +13,6 @@ interface MypageService {
     @PATCH("user/mypage")
     suspend fun withdrawal(): BaseResponse<Unit>
 
-    @GET("user/mypage/logout")
-    suspend fun logoutUser(): BaseResponse<Unit>
+    @PATCH("user/mypage/logout")
+    suspend fun logoutUser(): Response<Unit>
 }
