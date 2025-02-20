@@ -1,6 +1,12 @@
 package com.umc.sweepic.presentation.challenge
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
@@ -42,8 +48,33 @@ class NewChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.layout.
 
     override fun initView() {
         setupRecyclerView()
-        loadGalleryImagesAndCallApi()
+        checkAndLoadGalleryImages()
         viewModel.fetchGetChallenge()
+    }
+
+    private fun checkAndLoadGalleryImages() {
+        val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        if (requiredPermissions.all { ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED }) {
+            loadGalleryImagesAndCallApi() // 권한이 있으면 바로 실행
+        } else {
+            requestPermissionsLauncher.launch(requiredPermissions)
+        }
+    }
+
+    // 권한 요청 런처
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.all { it.value }) {
+            loadGalleryImagesAndCallApi() // 권한 승인 시 다시 실행
+        } else {
+            Toast.makeText(requireContext(), "갤러리 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -74,14 +105,10 @@ class NewChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.layout.
         val endTime = startTime + (30 * 60 * 1000) // 30분 후의 밀리초 값
 
         Log.d("ChallengeViewModel", "필터링할 시간 범위: ${Date(startTime)} ~ ${Date(endTime)}")
-        Log.d(
-            "ChallengeViewModel",
-            "필터링 기준: startTime=${Date(startTime)}, endTime=${Date(endTime)}"
-        )
 
         // `finalDate` 기준으로 필터링
         val filteredImages = galleryImages.filter { image ->
-            Log.d("GalleryFilter", "사진 ID=${image.id}, finalDate=${Date(image.addedDate.time)}, 밀리초=${image.addedDate.time}")
+//            Log.d("GalleryFilter", "사진 ID=${image.id}, finalDate=${Date(image.addedDate.time)}, 밀리초=${image.addedDate.time}")
             image.addedDate.time in startTime..endTime // **밀리초 단위 비교**
         }
 

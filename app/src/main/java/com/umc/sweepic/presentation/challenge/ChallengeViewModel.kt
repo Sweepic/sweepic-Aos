@@ -19,7 +19,9 @@ import com.umc.sweepic.domain.repository.sweep.SweepRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,8 +44,6 @@ class ChallengeViewModel @Inject constructor(
     private val _inProgressChallengeList = MutableLiveData<List<ChallengeWithImages>>()
     val inProgressChallengeList: LiveData<List<ChallengeWithImages>> get() = _inProgressChallengeList
 
-    var imageListForChallenge: List<Gallery> = emptyList()
-
     private var lastSentImageIds: List<String> = emptyList()
 
     private val _userInfo = MutableLiveData<GetUserInformationResponseModel>() // 사용자 정보 LiveData
@@ -51,6 +51,12 @@ class ChallengeViewModel @Inject constructor(
 
     private val _totalImageCount = MutableLiveData<Int>()
     val totalImageCount: LiveData<Int> get() = _totalImageCount
+
+    private val _todayImageCount = MutableLiveData<Int>().apply { value = 0 } // 기본값 0
+    val todayImageCount: LiveData<Int> get() = _todayImageCount
+
+    private val _recentImageCount = MutableLiveData<Int>()
+    val recentImageCount: LiveData<Int> get() = _recentImageCount
 
 
     // 갤러리 이미지 로드
@@ -190,6 +196,8 @@ class ChallengeViewModel @Inject constructor(
                 .onSuccess { response ->
                     _userInfo.postValue(response)
                     Log.d("ChallengeViewModel", "getUserInformation 성공: $response")
+
+                    updateRecentImageCount()
                 }
                 .onFailure { exception ->
                     Log.d("ChallengeViewModel", "getUserInformation 성공: ${exception.message}")
@@ -197,8 +205,35 @@ class ChallengeViewModel @Inject constructor(
         }
     }
 
-    fun loadTotalImageCount() {
-        val allImages = galleryRepository.getAllGalleryImagesDesc()
-        _totalImageCount.value = allImages.size // 🔥 총 사진 개수 저장
+    fun loadImageCounts() {
+        viewModelScope.launch {
+            val allImages = galleryRepository.getAllGalleryImagesDesc() // 모든 갤러리 이미지 가져오기
+
+            // 총 사진 개수 업데이트
+            _totalImageCount.postValue(allImages.size)
+
+            // 오늘 날짜의 시작과 끝 시간 계산
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val startOfDay = calendar.timeInMillis // 오늘 00:00:00
+            val endOfDay = startOfDay + TimeUnit.DAYS.toMillis(1) - 1 // 오늘 23:59:59
+
+            // 오늘 추가된 사진 개수 필터링
+            val todayImages = allImages.filter { it.addedDate.time in startOfDay..endOfDay }
+            _todayImageCount.postValue(todayImages.size)
+
+            updateRecentImageCount()
+
+        }
+    }
+
+    fun updateRecentImageCount() {
+        val totalCount = _totalImageCount.value ?: 0
+        val targetCount = _userInfo.value?.goalCount ?: 0
+        _recentImageCount.postValue(totalCount - targetCount)  // 🔥 tvRecentNumber 값 업데이트
     }
 }

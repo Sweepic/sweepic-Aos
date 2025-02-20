@@ -68,7 +68,7 @@ class SweepTagDialog(
                     onTagEntered(tagText) // 입력값 전달
                     dismiss() // 다이얼로그 닫기
                 } else {
-                    binding.etSweepInputLocation.error = "값을 입력해주세요." // 에러 메시지 표시
+//                    binding.etSweepInputLocation.error = "값을 입력해주세요." // 에러 메시지 표시
                 }
             }
         }
