@@ -34,7 +34,7 @@ interface SweepRepository {
     suspend fun fetchSweepCreateMemoFolder(request: CreateMemoFolderRequestModel): Result<CreateMemoFolderResponseModel>
     suspend fun fetchMoveImageToTrash(imageId: String): Result<String>
     suspend fun fetchRestoreTrashImage(request: TrashImageRequestModel): Result<String>
-    suspend fun fetchDeleteTrashImage(request: TrashImageRequestModel): Result<String>
+    suspend fun fetchDeleteTrashImage(request: TrashImageRequestModel): Result<String?>
     suspend fun fetchSweepImages(request: UpdateImageRequestModel): Result<UpdateImageResponseModel>
     suspend fun fetchLoadTag(mediaId:Long): Result<TagInfoResponseModel>
     suspend fun fetchInputTag(imageId: String, request: TagRequestModel): Result<TagResponseModel>

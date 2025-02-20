@@ -32,9 +32,7 @@ class InProgressChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.
         challengeAdapter = ChallengeAdapter(
             onAcceptChallenge = { challengeId ->
                 // ChallengeActivity 로 이동
-                val intent = Intent(requireContext(), ChallengeActivity::class.java).apply {
-                    putExtra("challengeId", challengeId) // 챌린지 ID 넘기기
-                }
+                val intent = ChallengeActivity.newIntent(requireContext(),"", challengeId)
                 startActivity(intent)
             }
         )

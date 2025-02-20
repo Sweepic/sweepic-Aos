@@ -13,6 +13,7 @@ import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
+import com.umc.sweepic.domain.repository.sweep.MypageRepository
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class ChallengeViewModel @Inject constructor(
     private val repository: ChallengeRepository,
     private val galleryRepository: GalleryRepository,
-    private val sweepRepository: SweepRepository
+    private val sweepRepository: SweepRepository,
+    private val mypageRepository: MypageRepository
 ): ViewModel() {
     private val _locationInfoList = MutableLiveData<List<LocationInfoResponseModel>>()
     val locationInfoList: LiveData<List<LocationInfoResponseModel>> get() = _locationInfoList
@@ -75,7 +77,9 @@ class ChallengeViewModel @Inject constructor(
                     _challengeCreated.value = true // 챌린지 생성 완료 표시
 
                     // 생성된 챌린지 ID를 이용해 fetchUploadChallengeImage 호출
-                    fetchUploadChallengeImage(response.id, lastSentImageIds)
+                    fetchUploadChallengeImage(response.id, lastSentImageIds) {
+                        fetchGetChallenge() // 이미지 업로드 완료 후 챌린지 목록 갱신
+                    }
                 }
                 .onFailure { exception ->
                     Log.e("ChallengeViewModel", "챌린지 생성 실패: ${exception.message}")
@@ -103,11 +107,12 @@ class ChallengeViewModel @Inject constructor(
     }
 
     // 챌린지에 이미지 업로드 API
-    fun fetchUploadChallengeImage(challengeId: String, imageIds: List<String>) {
+    fun fetchUploadChallengeImage(challengeId: String, imageIds: List<String>, onComplete: () -> Unit) {
         viewModelScope.launch {
             repository.fetchUploadChallengeImage(challengeId, imageIds)
                 .onSuccess { response ->
                     Log.d("ChallengeViewModel", "이미지 업로드 성공: $response")
+                    onComplete()
                 }
                 .onFailure { exception ->
                     Log.e("ChallengeViewModel", "이미지 업로드 실패: ${exception.message}")

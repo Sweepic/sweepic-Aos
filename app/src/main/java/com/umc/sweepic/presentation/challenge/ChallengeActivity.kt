@@ -90,6 +90,7 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
     private var pendingUpdatePath: String? = null
     private lateinit var updateTrashCount: () -> Unit // 리스너를 외부로 선언
     private val addedAlbums = mutableListOf<AlbumList>() // 현재 RecyclerView에 표시 중인 앨범 목록
+    private var hasReachedLastPage = false // 마지막 페이지 도달 여부
     private var locationTag: String? = null // 장소 태그를 저장할 변수
     private var peopleTag: String? = null // 사람 태그를 저장할 변수
     private var foodTag: String? = null // 음식 태그를 저장할 변수
@@ -202,7 +203,7 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
 
         if (selectedUri == null) {
             val currentPage = binding.vpSweepMainImg.currentItem
-            viewModel.loadImages() // 최신 이미지 로드
+            viewModel.loadChallengeImages() // 최신 이미지 로드
             binding.vpSweepMainImg.post {
                 if (currentPage in currentImages.indices) {
                     binding.vpSweepMainImg.setCurrentItem(currentPage, false)
@@ -239,6 +240,19 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
         val passedUriString = intent.getStringExtra(EXTRA_IMAGE_URI)
         if (!passedUriString.isNullOrEmpty()) {
             selectedUri = Uri.parse(passedUriString)
+        }
+
+        // 추가된 EXTRA_CHALLENGE_ID 처리
+        val challengeId = intent.getStringExtra(EXTRA_CHALLENGE_ID)
+        if (!challengeId.isNullOrEmpty()) {
+            Log.d("ChallengeActivity", "받은 챌린지 ID: $challengeId")
+            challengeId.let {
+                viewModel.setChallengeId(it)
+                viewModel.fetchChallengeTitle(it) { title ->
+                    val formattedTitle = title.substring(3).replace(Regex("에서의 사진 챌린지!?$"), "") + " 추억 정리하기"
+                    binding.tvSweepTopbar.text = formattedTitle
+                }
+            }
         }
 
         updatePermissionLauncher = registerForActivityResult(
@@ -312,10 +326,12 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
 
     companion object {
         private const val EXTRA_IMAGE_URI = "extra_image_uri"
+        private const val EXTRA_CHALLENGE_ID = "extra_challenge_id"
 
-        fun newIntent(context: Context, imageUriString: String): Intent {
+        fun newIntent(context: Context, imageUriString: String, challengeId: String): Intent {
             return Intent(context, ChallengeActivity::class.java).apply {
-                putExtra(EXTRA_IMAGE_URI, imageUriString)
+                putExtra(EXTRA_IMAGE_URI, imageUriString) // 기존 이미지 URI 전달
+                putExtra(EXTRA_CHALLENGE_ID, challengeId) // 새로운 챌린지 ID 전달
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             }
         }
@@ -325,13 +341,13 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
         // 기존과 동일 (권한 체크)
         if (hasAllPermissions()) {
             // 권한이 있다면 ViewModel에 이미지 로드를 요청
-            viewModel.loadImages()
+            viewModel.loadChallengeImages()
         } else {
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
                 if (permissions.all { it.value }) {
-                    viewModel.loadImages()
+                    viewModel.loadChallengeImages()
                 } else {
                     Toast.makeText(this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
                     finish()
@@ -402,6 +418,13 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
                     currentImages.getOrNull(position)?.let { image ->
                         fetchSweepImagesForCurrentPage(image)
                         viewModel.loadTagForMedia(image.id.toLong())
+                    }
+
+                    // 마지막 페이지에 도달하면 hasReachedLastPage = true
+                    val lastPageIndex = binding.vpSweepMainImg.adapter?.itemCount?.minus(1) ?: return
+                    if (position == lastPageIndex) {
+                        hasReachedLastPage = true
+                        Log.d("ViewPager", "마지막 페이지 도달")
                     }
                 }
             }
@@ -532,16 +555,16 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
     }
 
     private fun setupButtons() {
-        setupMoveButton()
+//        setupMoveButton()
         setupTrashButton()
         setupTags()
     }
 
-    private fun setupMoveButton() {
-        binding.ivSweepMove.setOnClickListener {
-            startActivity(MoveActivity.newIntent(this))
-        }
-    }
+//    private fun setupMoveButton() {
+//        binding.ivSweepMove.setOnClickListener {
+//            startActivity(MoveActivity.newIntent(this))
+//        }
+//    }
 
     private fun setupTrashButton() {
         binding.ivSweepTrash.setOnClickListener {
@@ -1091,7 +1114,7 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
             if (rows > 0) {
                 // 이동 성공
                 Toast.makeText(this, "사진이 '$newPath' 로 이동 되었습니다.", Toast.LENGTH_SHORT).show()
-                viewModel.loadImages()
+                viewModel.loadChallengeImages()
             } else {
                 // rows == 0 → 이동 실패
                 Toast.makeText(this, "이동 실패", Toast.LENGTH_SHORT).show()
@@ -1153,7 +1176,7 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
             val rowsDeleted = resolver.delete(originalUri, null, null)
             if (rowsDeleted > 0) {
                 Toast.makeText(this, "'$fileName'이(가) $finalDownloadPath 폴더로 이동되었습니다.", Toast.LENGTH_SHORT).show()
-                viewModel.loadImages()
+                viewModel.loadChallengeImages()
             } else {
                 Toast.makeText(this, "다운로드는 되었지만 원본 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
@@ -1290,8 +1313,11 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
     }
 
     private fun setupQuitButton() {
-        binding.tvSweepQuit.setOnSingleClickListener {
+        binding.ivChallengeBackBtn.setOnSingleClickListener {
             showQuitConfirmationDialog()
+        }
+        binding.tvSweepQuit.setOnSingleClickListener {
+            completeChallengeDialog()
         }
     }
 
@@ -1334,6 +1360,116 @@ class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activit
 
             }
         ).show(supportFragmentManager, "QuitChallengeDialog")
+    }
+
+    private fun completeChallengeDialog() {
+        val challengeId = intent.getStringExtra(EXTRA_CHALLENGE_ID)
+
+        if (hasReachedLastPage) { // 마지막 페이지에 도달한 적이 있으면
+            val trashCount = TrashRepository.getAllTrashed().size
+            if (trashCount == 0) {
+                // trashCount가 0일 경우 Activity 종료
+                DeletedDialog(
+                    message = "챌린지를 완료했습니다!",
+                    warning = "챌린지 속 사진을 모두 검토했어요!",
+                    onOkClicked = {
+                        challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                        finish()
+                    }
+                ).show(supportFragmentManager, "TrashDeletedDialog")
+                return
+            }
+            // 휴지통에 사진이 있을 경우 확인 다이얼로그 표시
+            QuitChallengeDialog(
+                title = "휴지통 속 ${trashCount}장의 사진을\n비우고 정리를 그만할까요?",
+                explanation = "휴지통을 비우고 다음에 다시 도전할 수 있어요!",
+                confirmText = "그만하기",
+                cancelText = "계속하기",
+                onConfirm = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        val allTrashed = TrashRepository.getAllTrashed()
+                        if (allTrashed.isNotEmpty()) {
+                            val mediaIdList = allTrashed.map { it.id.toString() } // mediaId 리스트 생성
+                            viewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList))
+                            deleteImagesWithPermission(allTrashed)
+                            // 만약 예외 없이 모든 이미지가 삭제되었다면
+                            if (pendingTrashGalleries.isEmpty()) {
+                                DeletedDialog(
+                                    message = "챌린지를 완료했습니다!",
+                                    warning = "챌린지 속 사진을 모두 검토했어요!",
+                                    onOkClicked = {
+                                        challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                                        finish()
+                                    }
+                                ).show(supportFragmentManager, "TrashDeletedDialog")
+                            }
+                        }
+                    }
+                },
+                onCancel = {
+
+                }
+            ).show(supportFragmentManager, "QuitChallengeDialog")
+        } else { // 아직 마지막 페이지를 보지 않은 경우
+            QuitChallengeDialog(
+                title = "아직 챌린지 속 사진을\n" + "모두 검토하지 않았어요!",
+                explanation = "남은 사진을 검토한 후 완료해 주세요!\n" +
+                        "이대로 끝내면 해당 챌린지는 완료되어\n" +
+                        "다시 수행할 수 없습니다!",
+                confirmText = "검토하기",
+                cancelText = "이대로 끝내기",
+                onConfirm = {
+
+                },
+                onCancel = {
+                    val trashCount = TrashRepository.getAllTrashed().size
+
+                    if (trashCount == 0) {
+                        // trashCount가 0일 경우 Activity 종료
+                        DeletedDialog(
+                            message = "챌린지를 완료했습니다!",
+                            warning = "챌린지 속 사진을 모두 검토했어요!",
+                            onOkClicked = {
+                                challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                                finish()
+                            }
+                        ).show(supportFragmentManager, "TrashDeletedDialog")
+                        return@QuitChallengeDialog
+                    }
+                    // 휴지통이 비어있지 않은 경우 휴지통 삭제 다이얼로그 표시
+                    QuitChallengeDialog(
+                        title = "휴지통 속 ${trashCount}장의 사진을\n비우고 정리를 그만할까요?",
+                        explanation = "휴지통을 비우고 다음에 다시 도전할 수 있어요!",
+                        confirmText = "그만하기",
+                        cancelText = "계속하기",
+                        onConfirm = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                val allTrashed = TrashRepository.getAllTrashed()
+                                if (allTrashed.isNotEmpty()) {
+                                    val mediaIdList = allTrashed.map { it.id.toString() } // mediaId 리스트 생성
+                                    viewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList))
+                                    deleteImagesWithPermission(allTrashed)
+                                    // 만약 예외 없이 모든 이미지가 삭제되었다면
+                                    if (pendingTrashGalleries.isEmpty()) {
+                                        DeletedDialog(
+                                            message = "챌린지를 완료했습니다!",
+                                            warning = "챌린지 속 사진을 모두 검토했어요!",
+                                            onOkClicked = {
+                                                challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                                                finish()
+                                            }
+                                        ).show(supportFragmentManager, "TrashDeletedDialog")
+                                    }
+                                }
+                            }
+                        },
+                        onCancel = {
+
+                        }
+                    ).show(supportFragmentManager, "QuitChallengeDialog")
+                }
+            ).show(supportFragmentManager, "QuitChallengeDialog")
+        }
     }
 
     // 태그 관련 코드 정리
