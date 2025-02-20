@@ -185,6 +185,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+
                 <!--어워드-->
                 <!--어워드 타이틀-->
         <!--월 타이틀-->
@@ -365,6 +366,7 @@
                 android:layout_weight="1"
                 android:src="@drawable/img_record_ex" />
         </LinearLayout>
+    </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 </layout>
