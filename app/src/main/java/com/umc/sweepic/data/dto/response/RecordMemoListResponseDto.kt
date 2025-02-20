@@ -1,6 +1,6 @@
 package com.umc.sweepic.data.dto.response
 
-import com.umc.sweepic.domain.model.RecordMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.RecordMemoListModel
 
 
 data class RecordMemoListResponseDto (

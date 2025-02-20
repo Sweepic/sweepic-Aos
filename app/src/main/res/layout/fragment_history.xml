@@ -267,7 +267,6 @@
                         app:layout_constraintTop_toTopOf="@id/layout_subtitle1" />
 
                     <ImageView
-                        android:id="@+id/iv_next_month"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_next"
@@ -282,7 +281,7 @@
                 <LinearLayout
                     android:id="@+id/layout_record_bestpic"
                     android:layout_width="match_parent"
-                    android:layout_height="108dp"
+                    android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/layout_subtitle1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintStart_toEndOf="parent"
@@ -291,30 +290,24 @@
                     android:layout_marginTop="8dp">
 
                     <ImageView
-                        android:id="@+id/iv_month_best_photo1"
                         android:layout_width="108dp"
                         android:layout_height="108dp"
-                        android:layout_margin="2dp"
+                        android:layout_margin="2px"
                         android:layout_weight="1"
-                        android:scaleType="center"
                         android:src="@drawable/img_record_ex" />
 
                     <ImageView
-                        android:id="@+id/iv_month_best_photo2"
-                        android:layout_width="108dp"
-                        android:layout_height="108dp"
-                        android:layout_margin="2dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2px"
                         android:layout_weight="1"
-                        android:scaleType="center"
                         android:src="@drawable/img_record_ex" />
 
                     <ImageView
-                        android:id="@+id/iv_month_best_photo3"
-                        android:layout_width="108dp"
-                        android:layout_height="108dp"
-                        android:layout_margin="2dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2px"
                         android:layout_weight="1"
-                        android:scaleType="center"
                         android:src="@drawable/img_record_ex" />
                 </LinearLayout>
 
@@ -345,7 +338,6 @@
                         app:layout_constraintTop_toTopOf="@id/layout_subtitle2" />
 
                     <ImageView
-                        android:id="@+id/iv_next_last_best"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_next"
@@ -370,7 +362,6 @@
                     android:layout_marginTop="8dp">
 
                     <ImageView
-                        android:id="@+id/iv_last_best_photo1"
                         android:layout_width="108dp"
                         android:layout_height="108dp"
                         android:layout_margin="2px"
@@ -378,7 +369,6 @@
                         android:src="@drawable/img_record_ex" />
 
                     <ImageView
-                        android:id="@+id/iv_last_best_photo2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="2px"
@@ -386,7 +376,6 @@
                         android:src="@drawable/img_record_ex" />
 
                     <ImageView
-                        android:id="@+id/iv_last_best_photo3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="2px"
