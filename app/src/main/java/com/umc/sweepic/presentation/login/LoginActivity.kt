@@ -59,12 +59,6 @@ class LoginActivity : AppCompatActivity() {
             loginViewModel.fetchKakaoLoginUrl()
         }
 
-        // 네이버 로그인 버튼 클릭 시
-        binding.naverLoginLayout.setOnClickListener {
-            Log.d("LoginActivity", "네이버 로그인 버튼 클릭됨")
-            loginViewModel.fetchNaverLoginUrl()
-        }
-
         loginViewModel.loginUrl.observe(this) { url ->
             Log.d("LoginActivity", "WebView 실행, URL: $url")
 
