@@ -10,6 +10,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -55,6 +57,36 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         setupYearSelector()
         setupMonthRecyclerView()
         checkPermissions()
+
+        //태그 검색
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val query = s.toString().trim()
+                filterImagesByTag(query) // ✅ 입력된 태그로 필터링
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    //검색 이미지 그룹 필터링
+    private fun filterImagesByTag(query: String) {
+        if (query.isEmpty()) {
+            // 검색어가 없으면 모든 데이터 표시
+            setupRecyclerView(imagesByDate, tagsByDate)
+            return
+        }
+
+        val filteredImages = imagesByDate.filter { (dateKey, _) ->
+            val tags = tagsByDate[dateKey] ?: emptyList()
+            tags.any { it.contains(query, ignoreCase = true) } // ✅ 태그가 포함된 경우 필터링
+        }
+
+        Log.d("TagBoardFragment", "✅ 검색어: $query, 필터링된 그룹 개수: ${filteredImages.size}")
+
+        // ✅ RecyclerView 업데이트
+        setupRecyclerView(filteredImages, tagsByDate.filterKeys { it in filteredImages.keys })
     }
 
     private fun checkPermissions() {
