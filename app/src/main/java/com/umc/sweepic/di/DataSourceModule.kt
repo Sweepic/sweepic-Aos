@@ -72,4 +72,9 @@ object DataSourceModule {
     @Singleton
     fun provideChallengeDataSource(challengeDataSourceImpl: ChallengeDataSourceImpl): ChallengeDataSource =
         challengeDataSourceImpl
+
+    @Provides
+    @Singleton
+    fun provideAwardDataSource(awardDataSourceImpl: AwardDataSourceImpl) : AwardDataSource =
+        awardDataSourceImpl
 }
