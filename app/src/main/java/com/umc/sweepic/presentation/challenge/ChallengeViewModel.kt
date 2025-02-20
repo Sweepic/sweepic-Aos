@@ -10,9 +10,11 @@ import com.umc.sweepic.domain.model.request.challenge.LocationChallengeRequestMo
 import com.umc.sweepic.domain.model.request.challenge.LocationInfoRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
+import com.umc.sweepic.domain.model.response.sweep.GetUserInformationResponseModel
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
+import com.umc.sweepic.domain.repository.sweep.MypageRepository
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -24,7 +26,8 @@ import javax.inject.Inject
 class ChallengeViewModel @Inject constructor(
     private val repository: ChallengeRepository,
     private val galleryRepository: GalleryRepository,
-    private val sweepRepository: SweepRepository
+    private val sweepRepository: SweepRepository,
+    private val mypageRepository: MypageRepository
 ): ViewModel() {
     private val _locationInfoList = MutableLiveData<List<LocationInfoResponseModel>>()
     val locationInfoList: LiveData<List<LocationInfoResponseModel>> get() = _locationInfoList
@@ -42,6 +45,12 @@ class ChallengeViewModel @Inject constructor(
     var imageListForChallenge: List<Gallery> = emptyList()
 
     private var lastSentImageIds: List<String> = emptyList()
+
+    private val _userInfo = MutableLiveData<GetUserInformationResponseModel>() // 사용자 정보 LiveData
+    val userInfo: LiveData<GetUserInformationResponseModel> get() = _userInfo
+
+    private val _totalImageCount = MutableLiveData<Int>()
+    val totalImageCount: LiveData<Int> get() = _totalImageCount
 
 
     // 갤러리 이미지 로드
@@ -75,7 +84,9 @@ class ChallengeViewModel @Inject constructor(
                     _challengeCreated.value = true // 챌린지 생성 완료 표시
 
                     // 생성된 챌린지 ID를 이용해 fetchUploadChallengeImage 호출
-                    fetchUploadChallengeImage(response.id, lastSentImageIds)
+                    fetchUploadChallengeImage(response.id, lastSentImageIds) {
+                        fetchGetChallenge() // 이미지 업로드 완료 후 챌린지 목록 갱신
+                    }
                 }
                 .onFailure { exception ->
                     Log.e("ChallengeViewModel", "챌린지 생성 실패: ${exception.message}")
@@ -103,11 +114,12 @@ class ChallengeViewModel @Inject constructor(
     }
 
     // 챌린지에 이미지 업로드 API
-    fun fetchUploadChallengeImage(challengeId: String, imageIds: List<String>) {
+    fun fetchUploadChallengeImage(challengeId: String, imageIds: List<String>, onComplete: () -> Unit) {
         viewModelScope.launch {
             repository.fetchUploadChallengeImage(challengeId, imageIds)
                 .onSuccess { response ->
                     Log.d("ChallengeViewModel", "이미지 업로드 성공: $response")
+                    onComplete()
                 }
                 .onFailure { exception ->
                     Log.e("ChallengeViewModel", "이미지 업로드 실패: ${exception.message}")
@@ -170,5 +182,23 @@ class ChallengeViewModel @Inject constructor(
             }
             onComplete() // 모든 요청이 끝난 후 실행
         }
+    }
+
+    fun getUserInformation() {
+        viewModelScope.launch {
+            mypageRepository.getUserInformation()
+                .onSuccess { response ->
+                    _userInfo.postValue(response)
+                    Log.d("ChallengeViewModel", "getUserInformation 성공: $response")
+                }
+                .onFailure { exception ->
+                    Log.d("ChallengeViewModel", "getUserInformation 성공: ${exception.message}")
+                }
+        }
+    }
+
+    fun loadTotalImageCount() {
+        val allImages = galleryRepository.getAllGalleryImagesDesc()
+        _totalImageCount.value = allImages.size // 🔥 총 사진 개수 저장
     }
 }

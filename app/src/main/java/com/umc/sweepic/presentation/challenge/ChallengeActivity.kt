@@ -1,4 +1,4 @@
-package com.umc.sweepic.presentation.sweep
+package com.umc.sweepic.presentation.challenge
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -36,7 +36,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.umc.sweepic.R
-import com.umc.sweepic.databinding.ActivitySweepBinding
+import com.umc.sweepic.databinding.ActivityChallengeBinding
 import com.umc.sweepic.domain.model.request.sweep.CreateMemoFolderRequestModel
 import com.umc.sweepic.domain.model.request.sweep.TagRequestModel
 import com.umc.sweepic.domain.model.request.sweep.TrashImageRequestModel
@@ -46,6 +46,11 @@ import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
 import com.umc.sweepic.presentation.MainActivity
 import com.umc.sweepic.presentation.base.BaseActivity
+import com.umc.sweepic.presentation.sweep.AlbumViewModel
+import com.umc.sweepic.presentation.sweep.MoveActivity
+import com.umc.sweepic.presentation.sweep.MoveViewModel
+import com.umc.sweepic.presentation.sweep.SweepViewModel
+import com.umc.sweepic.presentation.sweep.TrashActivity
 import com.umc.sweepic.presentation.sweep.adapter.AlbumListRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepMemoFolderRVA
 import com.umc.sweepic.presentation.sweep.adapter.SweepTagRVA
@@ -67,7 +72,7 @@ import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
-class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep) {
+class ChallengeActivity: BaseActivity<ActivityChallengeBinding>(R.layout.activity_challenge) {
     private lateinit var adapter: SweepTagRVA
     private lateinit var pagerAdapter: SweepVPA
     private lateinit var albumAdapter: AlbumListRVA
@@ -85,6 +90,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private var pendingUpdatePath: String? = null
     private lateinit var updateTrashCount: () -> Unit // 리스너를 외부로 선언
     private val addedAlbums = mutableListOf<AlbumList>() // 현재 RecyclerView에 표시 중인 앨범 목록
+    private var hasReachedLastPage = false // 마지막 페이지 도달 여부
     private var locationTag: String? = null // 장소 태그를 저장할 변수
     private var peopleTag: String? = null // 사람 태그를 저장할 변수
     private var foodTag: String? = null // 음식 태그를 저장할 변수
@@ -197,7 +203,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
         if (selectedUri == null) {
             val currentPage = binding.vpSweepMainImg.currentItem
-            viewModel.loadImages() // 최신 이미지 로드
+            viewModel.loadChallengeImages() // 최신 이미지 로드
             binding.vpSweepMainImg.post {
                 if (currentPage in currentImages.indices) {
                     binding.vpSweepMainImg.setCurrentItem(currentPage, false)
@@ -236,6 +242,19 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             selectedUri = Uri.parse(passedUriString)
         }
 
+        // 추가된 EXTRA_CHALLENGE_ID 처리
+        val challengeId = intent.getStringExtra(EXTRA_CHALLENGE_ID)
+        if (!challengeId.isNullOrEmpty()) {
+            Log.d("ChallengeActivity", "받은 챌린지 ID: $challengeId")
+            challengeId.let {
+                viewModel.setChallengeId(it)
+                viewModel.fetchChallengeTitle(it) { title ->
+                    val formattedTitle = title.substring(3).replace(Regex("에서의 사진 챌린지!?$"), "") + " 추억 정리하기"
+                    binding.tvSweepTopbar.text = formattedTitle
+                }
+            }
+        }
+
         updatePermissionLauncher = registerForActivityResult(
             ActivityResultContracts.StartIntentSenderForResult()
         ) { result ->
@@ -269,10 +288,10 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 iterator.remove()  // 삭제 성공 시 목록에서 제거
                 successfulDeletions++
             } catch (e: RecoverableSecurityException) {
-                Log.e("SweepActivity", "재시도 중 권한 요청 실패: ${gallery.uri}", e)
+                Log.e("ChallengeActivity", "재시도 중 권한 요청 실패: ${gallery.uri}", e)
                 // 만약 여전히 예외가 발생하면 해당 이미지는 그대로 둡니다.
             } catch (e: Exception) {
-                Log.e("SweepActivity", "재시도 중 삭제 실패: ${gallery.uri}", e)
+                Log.e("ChallengeActivity", "재시도 중 삭제 실패: ${gallery.uri}", e)
             }
         }
         if (successfulDeletions > 0) {
@@ -307,10 +326,12 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
     companion object {
         private const val EXTRA_IMAGE_URI = "extra_image_uri"
+        private const val EXTRA_CHALLENGE_ID = "extra_challenge_id"
 
-        fun newIntent(context: Context, imageUriString: String): Intent {
-            return Intent(context, SweepActivity::class.java).apply {
-                putExtra(EXTRA_IMAGE_URI, imageUriString)
+        fun newIntent(context: Context, imageUriString: String, challengeId: String): Intent {
+            return Intent(context, ChallengeActivity::class.java).apply {
+                putExtra(EXTRA_IMAGE_URI, imageUriString) // 기존 이미지 URI 전달
+                putExtra(EXTRA_CHALLENGE_ID, challengeId) // 새로운 챌린지 ID 전달
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             }
         }
@@ -320,13 +341,13 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         // 기존과 동일 (권한 체크)
         if (hasAllPermissions()) {
             // 권한이 있다면 ViewModel에 이미지 로드를 요청
-            viewModel.loadImages()
+            viewModel.loadChallengeImages()
         } else {
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
                 if (permissions.all { it.value }) {
-                    viewModel.loadImages()
+                    viewModel.loadChallengeImages()
                 } else {
                     Toast.makeText(this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
                     finish()
@@ -355,14 +376,14 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             val rowsUpdated = contentResolver.update(gallery.uri, values, null, null)
             if (rowsUpdated > 0) {
                 TrashRepository.removeFromTrash(gallery)
-                Log.d("SweepActivity", "Image moved to MediaStore trash: ${gallery.uri}")
+                Log.d("ChallengeActivity", "Image moved to MediaStore trash: ${gallery.uri}")
             } else {
-                Log.e("SweepActivity", "Failed to move image to MediaStore trash: ${gallery.uri}")
+                Log.e("ChallengeActivity", "Failed to move image to MediaStore trash: ${gallery.uri}")
             }
         } catch (e: RecoverableSecurityException) {
             throw e  // 호출자에서 처리하도록 전달
         } catch (e: Exception) {
-            Log.e("SweepActivity", "Error deleting image: ${gallery.uri}", e)
+            Log.e("ChallengeActivity", "Error deleting image: ${gallery.uri}", e)
         }
     }
 
@@ -397,6 +418,13 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                     currentImages.getOrNull(position)?.let { image ->
                         fetchSweepImagesForCurrentPage(image)
                         viewModel.loadTagForMedia(image.id.toLong())
+                    }
+
+                    // 마지막 페이지에 도달하면 hasReachedLastPage = true
+                    val lastPageIndex = binding.vpSweepMainImg.adapter?.itemCount?.minus(1) ?: return
+                    if (position == lastPageIndex) {
+                        hasReachedLastPage = true
+                        Log.d("ViewPager", "마지막 페이지 도달")
                     }
                 }
             }
@@ -509,7 +537,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
         binding.tvSweepTotalCount.text = "0"
         binding.tvSweepCount.text = "0"
         binding.tvSweepDate.text = "날짜 정보 없음"
-        Log.d("SweepActivity", "갤러리에 이미지가 없습니다.")
+        Log.d("ChallengeActivity", "갤러리에 이미지가 없습니다.")
     }
 
 
@@ -527,16 +555,16 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     }
 
     private fun setupButtons() {
-        setupMoveButton()
+//        setupMoveButton()
         setupTrashButton()
         setupTags()
     }
 
-    private fun setupMoveButton() {
-        binding.ivSweepMove.setOnClickListener {
-            startActivity(MoveActivity.newIntent(this))
-        }
-    }
+//    private fun setupMoveButton() {
+//        binding.ivSweepMove.setOnClickListener {
+//            startActivity(MoveActivity.newIntent(this))
+//        }
+//    }
 
     private fun setupTrashButton() {
         binding.ivSweepTrash.setOnClickListener {
@@ -751,26 +779,26 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             lifecycleScope.launch {
                 viewModel.fetchSweepSaveTextMemo(folder.folderId, imagePart).onSuccess { response ->
                     if (response.folder_id == null) {
-                        Toast.makeText(this@SweepActivity, "폴더 ID가 없습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ChallengeActivity, "폴더 ID가 없습니다.", Toast.LENGTH_SHORT).show()
                         return@onSuccess
                     }
 
                     // imageText가 없는 경우도 대비 (그냥 저장만 하고 이미지 삭제 안 함)
                     if (response.image_text == null) {
-                        Toast.makeText(this@SweepActivity, "이미지에서 텍스트를 추출하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ChallengeActivity, "이미지에서 텍스트를 추출하지 못했습니다.", Toast.LENGTH_SHORT).show()
                         return@onSuccess
                     }
 
                     // folderId와 imageText가 정상적으로 왔을 때만 실행
                     deleteCurrentImage(currentPosition)
 //                    Toast.makeText(
-//                        this@SweepActivity,
+//                        this@ChallengeActivity,
 //                        "텍스트가 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folder_id})",
 //                        Toast.LENGTH_SHORT
 //                    ).show()
                 }.onFailure { e ->
                     Toast.makeText(
-                        this@SweepActivity,
+                        this@ChallengeActivity,
                         "폴더 저장 실패: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -854,13 +882,13 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                     // API 호출 성공 시 현재 이미지 삭제
                     deleteCurrentImage(currentPosition)
 //                    Toast.makeText(
-//                        this@SweepActivity,
+//                        this@ChallengeActivity,
 //                        "사진이 폴더 ${folder.folderName}에 저장되었습니다. (ID: ${response.folderId})",
 //                        Toast.LENGTH_SHORT
 //                    ).show()
                 }.onFailure { e ->
                     Toast.makeText(
-                        this@SweepActivity,
+                        this@ChallengeActivity,
                         "폴더 저장 실패: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -906,13 +934,13 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 // 성공 시 → 실제 파일 OS에서 삭제
                 deleteCurrentImage(currentPosition)
 //                Toast.makeText(
-//                    this@SweepActivity,
+//                    this@ChallengeActivity,
 //                    "폴더 생성+텍스트 저장 성공: folderId=${response.folder_id} imageText=${response.image_text}",
 //                    Toast.LENGTH_SHORT
 //                ).show()
             }.onFailure { e ->
                 Toast.makeText(
-                    this@SweepActivity,
+                    this@ChallengeActivity,
                     "폴더 생성 실패: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
@@ -953,13 +981,13 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 viewModel.fetchSweepSaveImageMemo(folderId, imagePart).onSuccess { response ->
                     deleteCurrentImage(currentPosition)
 //                    Toast.makeText(
-//                        this@SweepActivity,
+//                        this@ChallengeActivity,
 //                        "사진이 폴더 ${response.folderName}에 저장되었습니다. (ID: ${response.folderId})",
 //                        Toast.LENGTH_SHORT
 //                    ).show()
                 }.onFailure { e ->
                     Toast.makeText(
-                        this@SweepActivity,
+                        this@ChallengeActivity,
                         "사진 저장 실패: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -1012,7 +1040,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private fun setupBackPressHandler() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                startActivity(MainActivity.newIntent(this@SweepActivity))
+                startActivity(MainActivity.newIntent(this@ChallengeActivity))
                 finish()
             }
         })
@@ -1068,7 +1096,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
         restoreAlbums()
         binding.rvSweepSaveToAlbum.apply {
-            layoutManager = LinearLayoutManager(this@SweepActivity, LinearLayoutManager.HORIZONTAL, false)
+            layoutManager = LinearLayoutManager(this@ChallengeActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = albumAdapter
         }
     }
@@ -1086,7 +1114,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             if (rows > 0) {
                 // 이동 성공
                 Toast.makeText(this, "사진이 '$newPath' 로 이동 되었습니다.", Toast.LENGTH_SHORT).show()
-                viewModel.loadImages()
+                viewModel.loadChallengeImages()
             } else {
                 // rows == 0 → 이동 실패
                 Toast.makeText(this, "이동 실패", Toast.LENGTH_SHORT).show()
@@ -1148,7 +1176,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
             val rowsDeleted = resolver.delete(originalUri, null, null)
             if (rowsDeleted > 0) {
                 Toast.makeText(this, "'$fileName'이(가) $finalDownloadPath 폴더로 이동되었습니다.", Toast.LENGTH_SHORT).show()
-                viewModel.loadImages()
+                viewModel.loadChallengeImages()
             } else {
                 Toast.makeText(this, "다운로드는 되었지만 원본 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
@@ -1263,7 +1291,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 // 2) albumViewModel.albums 관찰 결과를 받은 뒤,
                 //    "albumName"과 동일한 앨범을 찾으면 addedAlbums 에 추가
                 //    (혹은 ID 비교를 위해 앨범이름 대신 absolutePath / id 등으로 찾을 수도 있음)
-                albumViewModel.albums.observe(this@SweepActivity) { albumList ->
+                albumViewModel.albums.observe(this@ChallengeActivity) { albumList ->
                     // "Pictures/$albumName"에 해당하는 앨범 찾기
                     val newlyCreatedAlbum = albumList.find { it.name == albumName }
                     // 만약 찾았다면 => addedAlbums 에 추가 + 중복 방지
@@ -1285,8 +1313,11 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     }
 
     private fun setupQuitButton() {
-        binding.tvSweepQuit.setOnSingleClickListener {
+        binding.ivChallengeBackBtn.setOnSingleClickListener {
             showQuitConfirmationDialog()
+        }
+        binding.tvSweepQuit.setOnSingleClickListener {
+            completeChallengeDialog()
         }
     }
 
@@ -1329,6 +1360,116 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
 
             }
         ).show(supportFragmentManager, "QuitChallengeDialog")
+    }
+
+    private fun completeChallengeDialog() {
+        val challengeId = intent.getStringExtra(EXTRA_CHALLENGE_ID)
+
+        if (hasReachedLastPage) { // 마지막 페이지에 도달한 적이 있으면
+            val trashCount = TrashRepository.getAllTrashed().size
+            if (trashCount == 0) {
+                // trashCount가 0일 경우 Activity 종료
+                DeletedDialog(
+                    message = "챌린지를 완료했습니다!",
+                    warning = "챌린지 속 사진을 모두 검토했어요!",
+                    onOkClicked = {
+                        challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                        finish()
+                    }
+                ).show(supportFragmentManager, "TrashDeletedDialog")
+                return
+            }
+            // 휴지통에 사진이 있을 경우 확인 다이얼로그 표시
+            QuitChallengeDialog(
+                title = "휴지통 속 ${trashCount}장의 사진을\n비우고 정리를 그만할까요?",
+                explanation = "휴지통을 비우고 다음에 다시 도전할 수 있어요!",
+                confirmText = "그만하기",
+                cancelText = "계속하기",
+                onConfirm = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        val allTrashed = TrashRepository.getAllTrashed()
+                        if (allTrashed.isNotEmpty()) {
+                            val mediaIdList = allTrashed.map { it.id.toString() } // mediaId 리스트 생성
+                            viewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList))
+                            deleteImagesWithPermission(allTrashed)
+                            // 만약 예외 없이 모든 이미지가 삭제되었다면
+                            if (pendingTrashGalleries.isEmpty()) {
+                                DeletedDialog(
+                                    message = "챌린지를 완료했습니다!",
+                                    warning = "챌린지 속 사진을 모두 검토했어요!",
+                                    onOkClicked = {
+                                        challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                                        finish()
+                                    }
+                                ).show(supportFragmentManager, "TrashDeletedDialog")
+                            }
+                        }
+                    }
+                },
+                onCancel = {
+
+                }
+            ).show(supportFragmentManager, "QuitChallengeDialog")
+        } else { // 아직 마지막 페이지를 보지 않은 경우
+            QuitChallengeDialog(
+                title = "아직 챌린지 속 사진을\n" + "모두 검토하지 않았어요!",
+                explanation = "남은 사진을 검토한 후 완료해 주세요!\n" +
+                        "이대로 끝내면 해당 챌린지는 완료되어\n" +
+                        "다시 수행할 수 없습니다!",
+                confirmText = "검토하기",
+                cancelText = "이대로 끝내기",
+                onConfirm = {
+
+                },
+                onCancel = {
+                    val trashCount = TrashRepository.getAllTrashed().size
+
+                    if (trashCount == 0) {
+                        // trashCount가 0일 경우 Activity 종료
+                        DeletedDialog(
+                            message = "챌린지를 완료했습니다!",
+                            warning = "챌린지 속 사진을 모두 검토했어요!",
+                            onOkClicked = {
+                                challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                                finish()
+                            }
+                        ).show(supportFragmentManager, "TrashDeletedDialog")
+                        return@QuitChallengeDialog
+                    }
+                    // 휴지통이 비어있지 않은 경우 휴지통 삭제 다이얼로그 표시
+                    QuitChallengeDialog(
+                        title = "휴지통 속 ${trashCount}장의 사진을\n비우고 정리를 그만할까요?",
+                        explanation = "휴지통을 비우고 다음에 다시 도전할 수 있어요!",
+                        confirmText = "그만하기",
+                        cancelText = "계속하기",
+                        onConfirm = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                val allTrashed = TrashRepository.getAllTrashed()
+                                if (allTrashed.isNotEmpty()) {
+                                    val mediaIdList = allTrashed.map { it.id.toString() } // mediaId 리스트 생성
+                                    viewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList))
+                                    deleteImagesWithPermission(allTrashed)
+                                    // 만약 예외 없이 모든 이미지가 삭제되었다면
+                                    if (pendingTrashGalleries.isEmpty()) {
+                                        DeletedDialog(
+                                            message = "챌린지를 완료했습니다!",
+                                            warning = "챌린지 속 사진을 모두 검토했어요!",
+                                            onOkClicked = {
+                                                challengeId?.let { viewModel.fetchCompleteChallenge(it) }
+                                                finish()
+                                            }
+                                        ).show(supportFragmentManager, "TrashDeletedDialog")
+                                    }
+                                }
+                            }
+                        },
+                        onCancel = {
+
+                        }
+                    ).show(supportFragmentManager, "QuitChallengeDialog")
+                }
+            ).show(supportFragmentManager, "QuitChallengeDialog")
+        }
     }
 
     // 태그 관련 코드 정리
@@ -1387,7 +1528,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 updateTagViewDefault(binding.tvSweepPeopleTag)
                 updateTagViewDefault(binding.tvSweepFoodTag)
                 updateTagViewDefault(binding.tvSweepEtcTag)
-                Log.d("SweepActivity", "태그 정보 없음 또는 API 실패")
+                Log.d("ChallengeActivity", "태그 정보 없음 또는 API 실패")
                 return@observe
             }
             // 성공 응답인 경우 각 텍스트뷰 업데이트

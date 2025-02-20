@@ -1,5 +1,6 @@
 package com.umc.sweepic.presentation.challenge
 
+import android.content.Intent
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.umc.sweepic.R
@@ -30,7 +31,9 @@ class InProgressChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.
     private fun setupRecyclerView() {
         challengeAdapter = ChallengeAdapter(
             onAcceptChallenge = { challengeId ->
-//                viewModel.fetchAcceptChallenge(challengeId) // 챌린지 수락 API 호출
+                // ChallengeActivity 로 이동
+                val intent = ChallengeActivity.newIntent(requireContext(),"", challengeId)
+                startActivity(intent)
             }
         )
         binding.rvChallengeContainer.layoutManager = LinearLayoutManager(context)

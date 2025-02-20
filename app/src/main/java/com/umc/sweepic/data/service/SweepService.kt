@@ -82,7 +82,7 @@ interface SweepService {
     @HTTP(method = "DELETE", path = "trash/images", hasBody = true)
     suspend fun fetchDeleteTrashImage(
         @Body request: TrashImageRequestDto
-    ): BaseResponse<String>
+    ): BaseResponse<String?>
 
     // 이미지 정보 넘기기
     @POST("images")
