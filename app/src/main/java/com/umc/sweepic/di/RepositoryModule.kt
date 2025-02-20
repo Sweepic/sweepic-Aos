@@ -3,8 +3,8 @@ package com.umc.sweepic.di
 import android.app.Application
 import android.content.Context
 import com.umc.sweepic.data.repositoryImpl.TestRepositoryImpl
-import com.umc.sweepic.data.repositoryImpl.sweep.AwardRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.challenge.ChallengeRepositoryImpl
+import com.umc.sweepic.data.repositoryImpl.sweep.AwardRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.GalleryRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.LoginRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.HistoryRepositoryImpl

@@ -1,9 +1,9 @@
 package com.umc.sweepic.di
 
+import com.umc.sweepic.data.service.AwardService
 import com.umc.sweepic.data.service.LoginService
 import com.umc.sweepic.data.service.ChallengeService
 import com.umc.sweepic.data.service.HistoryService
-import com.umc.sweepic.data.service.AwardService
 import com.umc.sweepic.data.service.SweepService
 import com.umc.sweepic.data.service.MemoService
 import com.umc.sweepic.data.service.MypageService
@@ -74,7 +74,7 @@ object ServiceModule {
 
     @Provides
     @Singleton
-    fun provideAwardService(retrofit: Retrofit) : AwardService{
+    fun provideAwardService(retrofit: Retrofit) : AwardService {
         return retrofit.buildService()
     }
 }
