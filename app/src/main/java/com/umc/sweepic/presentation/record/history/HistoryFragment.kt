@@ -81,28 +81,11 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
     }
 
     override fun initView() {
-        binding.icNext.setOnClickListener {
-            findNavController().navigate(R.id.historyTagFragment)
-        }
-
         //award
         binding.ivNextMonth.setOnClickListener {
             navigateToHistoryMonthFragment()
         }
 
-        binding.ivNextLastBest.setOnClickListener {
-            navigateToHistoryLastBestFragment()
-        }
-
-        //viewModel.imageIdCheck("2025-02-19T04:07:08.911Z", "image_123")
-
-        //viewModel.getAwards()
-
-        //loadSelectedBestPhotos(requireContext())
-
-        //fetchLastMonthPhotos(requireContext())
-
-        //loadPhotosFromJson(requireContext())
         awardViewModel.loadSelectedBestPhotos(requireContext())
     }
 
