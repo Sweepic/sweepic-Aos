@@ -10,6 +10,7 @@ import com.umc.sweepic.data.repositoryImpl.sweep.SweepRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.MemoRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.MypageRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.OnboardingRepositoryImpl
+import com.umc.sweepic.data.repositoryImpl.sweep.TagboardRepositoryImpl
 import com.umc.sweepic.data.service.TestService
 import com.umc.sweepic.domain.repository.LoginRepository
 import com.umc.sweepic.domain.repository.TestRepository
@@ -19,6 +20,7 @@ import com.umc.sweepic.domain.repository.sweep.SweepRepository
 import com.umc.sweepic.domain.repository.sweep.MemoRepository
 import com.umc.sweepic.domain.repository.sweep.MypageRepository
 import com.umc.sweepic.domain.repository.sweep.OnboardingRepository
+import com.umc.sweepic.domain.repository.sweep.TagboardRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -85,5 +87,12 @@ object RepositoryModule {
     fun providesMypageRepository(
         mypageRepositoryImpl: MypageRepositoryImpl
     ): MypageRepository = mypageRepositoryImpl
+
+    @Singleton
+    @Provides
+    fun provideTagboardRepository(
+        tagboardRepositoryImpl: TagboardRepositoryImpl
+    ): TagboardRepository = tagboardRepositoryImpl
+
 
 }

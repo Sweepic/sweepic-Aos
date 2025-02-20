@@ -7,6 +7,7 @@ import com.umc.sweepic.data.service.SweepService
 import com.umc.sweepic.data.service.MemoService
 import com.umc.sweepic.data.service.MypageService
 import com.umc.sweepic.data.service.OnboardingService
+import com.umc.sweepic.data.service.TagboardService
 import com.umc.sweepic.data.service.TestService
 import dagger.Module
 import dagger.Provides
@@ -61,6 +62,12 @@ object ServiceModule {
     @Provides
     @Singleton
     fun provideMypageService(retrofit: Retrofit) : MypageService{
+        return retrofit.buildService()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTagboardService(retrofit: Retrofit) : TagboardService{
         return retrofit.buildService()
     }
 
