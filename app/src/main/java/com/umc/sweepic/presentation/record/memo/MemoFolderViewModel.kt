@@ -5,14 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.umc.sweepic.domain.model.MemoFolderDetailModel
-import com.umc.sweepic.domain.model.RecordMemoListModel
+import com.umc.sweepic.domain.model.response.sweep.MemoFolderDetailModel
 import com.umc.sweepic.domain.repository.sweep.MemoRepository
 import com.umc.sweepic.presentation.record.memo.MemoFolder.Companion.toMemoFolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -106,6 +103,32 @@ class MemoFolderViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     Log.e("MemoFolderViewModel", "사진 삭제 실패: ${error.message}")
+                }
+        }
+    }
+
+    fun updateFolderName(folderId: String, newName: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            memoRepository.updateFolderName(folderId, newName)
+                .onSuccess {
+                    onSuccess()
+                }
+                .onFailure { error ->
+                    onFailure(error.message ?: "폴더 이름 변경오류")
+                }
+        }
+    }
+
+
+    fun updateMemoText(folderId: String, newText: String) {
+        viewModelScope.launch {
+            memoRepository.updateMemoText(folderId, newText)
+                .onSuccess {
+                    Log.d("MemoFolderViewModel", "폴더 이름 수정 성공: $newText")
+                    fetchMemoFolderDetails(folderId.toLong())
+                }
+                .onFailure {
+                    Log.e("MemoFolderViewModel", "폴더 이름 수정 실패: ${it.message}")
                 }
         }
     }

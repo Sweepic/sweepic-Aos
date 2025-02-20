@@ -20,13 +20,14 @@
         android:padding="16dp"
         android:text="기존 앨범 추가하기"
         android:textSize="18dp"
-        android:textAppearance="?attr/textAppearanceSubtitle1" />
+        style="@style/TextAppearance.Sweepic.Regular.Body_16_R" />
 
     <TextView
         android:id="@+id/tv_add_existing_album_ex"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.Sweepic.Content.Light"
+        style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
+        android:textSize="15sp"
         android:layout_marginStart="15dp"
         android:text="안드로이드의 기존 앨범을 불러옵니다."
         android:textColor="@color/sw_gray2"/>
@@ -45,13 +46,14 @@
         android:padding="16dp"
         android:textSize="18dp"
         android:text="새 앨범 만들기"
-        android:textAppearance="?attr/textAppearanceSubtitle1" />
+        style="@style/TextAppearance.Sweepic.Regular.Body_16_R" />
 
     <TextView
         android:id="@+id/tv_create_new_album_ex"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.Sweepic.Content.Light"
+        style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
+        android:textSize="15sp"
         android:layout_marginStart="15dp"
         android:text="안드로이드에 새로운 앨범을 생성합니다."
         android:textColor="@color/sw_gray2"/>

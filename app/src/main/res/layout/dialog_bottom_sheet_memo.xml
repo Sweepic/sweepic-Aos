@@ -22,13 +22,14 @@
         android:padding="16dp"
         android:text="폴더 선택하기"
         android:textSize="18dp"
-        android:textAppearance="?attr/textAppearanceSubtitle1" />
+        style="@style/TextAppearance.Sweepic.Regular.Body_16_R" />
 
     <TextView
         android:id="@+id/tv_memo_add_folder_ex"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.Sweepic.Content.Light"
+        style="@style/TextAppearance.Sweepic.Regular.Caption_13_R"
+        android:textSize="15sp"
         android:layout_marginStart="15dp"
         android:text="저장할 폴더를 선택해주세요."
         android:textColor="@color/sw_gray2" />
@@ -56,7 +57,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            style="@style/TextAppearance.Sweepic.Content"
+            style="@style/TextAppearance.Sweepic.Bold.Title_16sp"
             android:text="폴더 추가하기"
             android:textColor="@color/sw_point"
             android:gravity="center"
@@ -87,6 +88,6 @@
         android:padding="16dp"
         android:text="취소"
         android:textColor="@color/sw_gray2"
-        android:textAppearance="?attr/textAppearanceSubtitle1" />
+        style="@style/TextAppearance.Sweepic.Regular.Body_16_R" />
 
 </LinearLayout>

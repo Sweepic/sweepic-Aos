@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -6,6 +9,9 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
 }
+
+val properties = Properties()
+properties.load(FileInputStream(rootProject.file("local.properties")))
 
 android {
     namespace = "com.umc.sweepic"
@@ -17,8 +23,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["kakao_native_app_key"] = properties["KAKAO_NATIVE_APP_KEY"] as String
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"${properties["KAKAO_NATIVE_APP_KEY"]}\"")
     }
 
     buildTypes {
@@ -108,5 +115,8 @@ dependencies {
     //splash 화면 구성
     implementation("androidx.core:core-splashscreen:1.0.1")
 
+    //kakao 로그인
+    implementation ("com.kakao.sdk:v2-all:2.20.6") // 전체 모듈 설치, 2.11.0 버전부터 지원
+    implementation ("com.kakao.sdk:v2-user:2.20.6") // 카카오 로그인 API 모듈
 
 }

@@ -1,11 +1,14 @@
 package com.umc.sweepic.presentation.record.history
 
+import android.os.Bundle
+import android.view.View
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 
 import android.content.Context
-import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -26,27 +29,51 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.umc.sweepic.presentation.record.memo.HistoryBestPicAdapter
 
 @AndroidEntryPoint
 class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_history) {
 
-    private val viewModel: HistoryViewModel by viewModels()
+    private val viewModel: HistoryTagViewModel by viewModels()
+    private lateinit var bestPictureAdapter: HistoryBestPicAdapter
+    private lateinit var pastBestPictureAdapter: HistoryBestPicAdapter
+    private var currentYear: Double = 0.0 // 현재 연도 저장 변수.
+    private var currentMonth: Double = 0.0 // 현재 월 저장 변수.
+
+    private val awardViewModel: HistoryViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initObserver()
+        setCurrentDate()
         initView()
+
+        //award
         updateSubtitle()
 
+        viewModel.fetchMostTaggedData(currentYear, currentMonth)
+
+        //award
         fetchLastMonthPhotos(requireContext())
         loadPhotosFromJson(requireContext())
-        viewModel.loadSelectedBestPhotos(requireContext())
+        awardViewModel.loadSelectedBestPhotos(requireContext())
     }
 
-
     override fun initObserver() {
-        viewModel.bestPhotos.observe(viewLifecycleOwner) { photos ->
+        viewModel.mostTaggedData.observe(viewLifecycleOwner) { mostTagged ->
+            val placeTag = mostTagged[currentMonth]?.find { it.tagCategoryId == "1" }
+            val peopleTag = mostTagged[currentMonth]?.find { it.tagCategoryId == "2" }
+            val foodTag = mostTagged[currentMonth]?.find { it.tagCategoryId == "3" }
+
+            binding.tvRecordMonthtitle.text = "${currentMonth.toInt()}월"
+
+            binding.tvRecordVisittag.text = "#${placeTag?.content ?: "알 수 없음"}"
+            binding.tvRecordPeopletag.text = "#${peopleTag?.content ?: "알 수 없음"}"
+            binding.tvRecordFoodtag.text = "#${foodTag?.content ?: "알 수 없음"}"
+        }
+
+        //award
+        awardViewModel.bestPhotos.observe(viewLifecycleOwner) { photos ->
             if (photos.isNotEmpty()) {
                 displayPhotos(photos)
             }
@@ -54,7 +81,11 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
     }
 
     override fun initView() {
-        // UI 초기화 추가
+        binding.icNext.setOnClickListener {
+            findNavController().navigate(R.id.historyTagFragment)
+        }
+
+        //award
         binding.ivNextMonth.setOnClickListener {
             navigateToHistoryMonthFragment()
         }
@@ -72,9 +103,18 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(R.layout.fragment_h
         //fetchLastMonthPhotos(requireContext())
 
         //loadPhotosFromJson(requireContext())
-        viewModel.loadSelectedBestPhotos(requireContext())
-
+        awardViewModel.loadSelectedBestPhotos(requireContext())
     }
+
+
+
+    private fun setCurrentDate() {
+        val calendar = Calendar.getInstance()
+        currentYear = calendar.get(Calendar.YEAR).toDouble()
+        currentMonth = (calendar.get(Calendar.MONTH) + 1).toDouble()
+    }
+
+    //award
     private fun loadSelectedBestPhotos(context: Context) {
         try {
             val file = File(context.filesDir, "selected_best_photos.json")

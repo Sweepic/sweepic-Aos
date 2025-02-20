@@ -7,6 +7,18 @@
     android:background="@color/white"
     android:padding="16dp">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- WebView를 화면 전체로 설정 -->
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:elevation="10dp"/>
+    </FrameLayout>
     <!-- 앱 로고 -->
     <ImageView
         app:layout_constraintTop_toTopOf="parent"

@@ -12,10 +12,12 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.GridLayoutManager
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ActivityTrashBinding
+import com.umc.sweepic.domain.model.request.sweep.TrashImageRequestModel
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
 import com.umc.sweepic.presentation.base.BaseActivity
@@ -30,6 +32,7 @@ class TrashActivity: BaseActivity<ActivityTrashBinding>(R.layout.activity_trash)
     private lateinit var deletePermissionLauncher: ActivityResultLauncher<IntentSenderRequest>
     private var selectedCount: Int = 0
     private val pendingTrashGalleries: MutableList<Gallery> = mutableListOf()
+    private val sweepViewModel: SweepViewModel by viewModels()
 
     override fun initObserver() {
 
@@ -176,6 +179,9 @@ class TrashActivity: BaseActivity<ActivityTrashBinding>(R.layout.activity_trash)
             warning = "선택된 사진을 삭제하시겠습니까?",
             onCancel = {},
             onConfirm = {
+                val mediaIdList = selectedItems.map { it.id.toString() } // mediaId 리스트 생성
+                sweepViewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList)) // API 호출
+
                 deleteImagesWithPermission(selectedItems)
             },
             confirmButtonText = "삭제"
@@ -196,6 +202,9 @@ class TrashActivity: BaseActivity<ActivityTrashBinding>(R.layout.activity_trash)
             warning = "정말 모든 사진을 삭제하시겠습니까?",
             onCancel = {},
             onConfirm = {
+                val mediaIdList = allTrashed.map { it.id.toString() } // mediaId 리스트 생성
+                sweepViewModel.fetchDeleteTrashImage(TrashImageRequestModel(mediaIdList)) // API 호출
+
                 deleteImagesWithPermission(allTrashed)
             }
         )
@@ -246,10 +255,11 @@ class TrashActivity: BaseActivity<ActivityTrashBinding>(R.layout.activity_trash)
                 // 취소 시 아무것도 안 함
             },
             onConfirm = {
+                val mediaIdList = selectedItems.map { it.id.toString() } // Gallery의 id 사용
+                sweepViewModel.fetchRestoreTrashImage(TrashImageRequestModel(mediaIdList))
+
                 selectedItems.forEach { gallery ->
                     TrashRepository.removeFromTrash(gallery)
-                    // SweepActivity에 다시 보여주기 로직
-                    // 예: GalleryRepository.add(gallery) 등
                 }
 
                 // 복구 후 리스트 갱신
@@ -284,6 +294,11 @@ class TrashActivity: BaseActivity<ActivityTrashBinding>(R.layout.activity_trash)
                 // 취소 시 아무것도 안 함
             },
             onConfirm = {
+                // 1) 모든 이미지의 mediaId 리스트 생성
+                val mediaIdList = allTrashed.map { it.id.toString() }
+                // 2) API 호출
+                sweepViewModel.fetchRestoreTrashImage(TrashImageRequestModel(mediaIdList))
+
                 // "복구" 누른 경우, 실제 복구 로직
                 allTrashed.forEach { gallery ->
                     TrashRepository.removeFromTrash(gallery)

@@ -1,5 +1,6 @@
 package com.umc.sweepic.di
 
+import android.content.Context
 import android.content.SharedPreferences
 import com.umc.sweepic.SweepicApplication
 import com.umc.sweepic.R
@@ -8,6 +9,7 @@ import com.umc.sweepic.util.network.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -68,6 +70,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthInterceptor(sharedPreferences: SharedPreferences): AuthInterceptor =
-        AuthInterceptor(sharedPreferences)
+
+    fun provideAuthInterceptor(@ApplicationContext context: Context): AuthInterceptor {
+        return AuthInterceptor(context)
+    }
+
+
 }

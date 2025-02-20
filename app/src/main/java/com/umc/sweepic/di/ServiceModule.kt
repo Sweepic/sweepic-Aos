@@ -1,8 +1,12 @@
 package com.umc.sweepic.di
 
+import com.umc.sweepic.data.service.LoginService
+import com.umc.sweepic.data.service.ChallengeService
+import com.umc.sweepic.data.service.HistoryService
 import com.umc.sweepic.data.service.AwardService
 import com.umc.sweepic.data.service.SweepService
 import com.umc.sweepic.data.service.MemoService
+import com.umc.sweepic.data.service.MypageService
 import com.umc.sweepic.data.service.OnboardingService
 import com.umc.sweepic.data.service.TestService
 import dagger.Module
@@ -42,6 +46,31 @@ object ServiceModule {
     fun provideOnboardingService(retrofit: Retrofit) : OnboardingService {
         return retrofit.buildService()
     }
+
+    @Provides
+    @Singleton
+    fun provideLoginService(retrofit: Retrofit) : LoginService {
+        return retrofit.buildService()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryService(retrofit: Retrofit) : HistoryService {
+        return retrofit.buildService()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMypageService(retrofit: Retrofit) : MypageService{
+        return retrofit.buildService()
+    }
+
+    @Provides
+    @Singleton
+    fun provideChallengeService(retrofit: Retrofit): ChallengeService {
+        return retrofit.buildService()
+    }
+
 
     @Provides
     @Singleton
