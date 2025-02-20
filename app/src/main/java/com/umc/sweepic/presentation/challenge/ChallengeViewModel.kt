@@ -10,6 +10,7 @@ import com.umc.sweepic.domain.model.request.challenge.LocationChallengeRequestMo
 import com.umc.sweepic.domain.model.request.challenge.LocationInfoRequestModel
 import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
+import com.umc.sweepic.domain.model.response.sweep.GetUserInformationResponseModel
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
@@ -44,6 +45,9 @@ class ChallengeViewModel @Inject constructor(
     var imageListForChallenge: List<Gallery> = emptyList()
 
     private var lastSentImageIds: List<String> = emptyList()
+
+    private val _userInfo = MutableLiveData<GetUserInformationResponseModel>() // 사용자 정보 LiveData
+    val userInfo: LiveData<GetUserInformationResponseModel> get() = _userInfo
 
 
     // 갤러리 이미지 로드
@@ -174,6 +178,19 @@ class ChallengeViewModel @Inject constructor(
                     }
             }
             onComplete() // 모든 요청이 끝난 후 실행
+        }
+    }
+
+    fun getUserInformation() {
+        viewModelScope.launch {
+            mypageRepository.getUserInformation()
+                .onSuccess { response ->
+                    _userInfo.postValue(response)
+                    Log.d("ChallengeViewModel", "getUserInformation 성공: $response")
+                }
+                .onFailure { exception ->
+                    Log.d("ChallengeViewModel", "getUserInformation 성공: ${exception.message}")
+                }
         }
     }
 }

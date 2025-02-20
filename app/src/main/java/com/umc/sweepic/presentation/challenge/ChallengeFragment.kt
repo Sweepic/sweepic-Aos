@@ -1,22 +1,30 @@
 package com.umc.sweepic.presentation.challenge
 
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.tabs.TabLayoutMediator
 import com.umc.sweepic.databinding.FragmentChallengeBinding
 import com.umc.sweepic.presentation.base.BaseFragment
 import com.umc.sweepic.R
+import com.umc.sweepic.domain.model.response.sweep.GetUserInformationResponseModel
 import com.umc.sweepic.util.extension.setOnSingleClickListener
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ChallengeFragment: BaseFragment<FragmentChallengeBinding>(R.layout.fragment_challenge) {
+    private val viewModel: ChallengeViewModel by viewModels()
     override fun initObserver() {
-
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            if (userInfo != null) {
+                goalUpdate(userInfo)
+            }
+        }
     }
 
     override fun initView() {
         setUpMyPage()
         setupViewPagerAndTabs()
+        viewModel.getUserInformation()
     }
 
     private fun setUpMyPage() {
@@ -37,6 +45,11 @@ class ChallengeFragment: BaseFragment<FragmentChallengeBinding>(R.layout.fragmen
                 else -> ""
             }
         }.attach()
+    }
+
+    private fun goalUpdate(getUserInformationResponseModel: GetUserInformationResponseModel) {
+        binding.tvName.text = getUserInformationResponseModel.name + "님"
+        binding.tvTargetNumber.text = getUserInformationResponseModel.goalCount.toString()
     }
 
 }
