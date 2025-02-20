@@ -17,10 +17,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class GalleryDataSourceImpl @Inject constructor(
-    @ApplicationContext context: Context
+    @ApplicationContext private val context: Context
 ) : GalleryDataSource {
     private val contentResolver = context.contentResolver
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun fetchGalleryImages(limit: Int, offset: Int): List<GalleryModel> {
         val contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
@@ -96,7 +97,7 @@ class GalleryDataSourceImpl @Inject constructor(
                 val actualId = cursor.getLong(idColumn)
 
                 val uri = Uri.withAppendedPath(contentUri, actualId.toString())
-                val (latitude, longitude) = getLatLongFromImage(uri, contentResolver) ?: Pair(0.0, 0.0)
+                val (latitude, longitude) = getLatLongFromImage(uri, context)
 
                 galleryImage.add(
                     GalleryModel(
@@ -118,7 +119,7 @@ class GalleryDataSourceImpl @Inject constructor(
                         longitude = longitude
                     )
                 )
-                Log.d("GalleryDataSourceImpl", "dateTaken=$dateTaken, dateAdded=$dateAdded, finalDate=$finalDate, actualId=$actualId")
+//                Log.d("GalleryDataSourceImpl", "dateTaken=$dateTaken, dateAdded=$dateAdded, finalDate=$finalDate, actualId=$actualId")
 
             }
         }
