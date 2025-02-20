@@ -10,4 +10,7 @@ interface LoginService {
 
     @GET("oauth2/callback/kakao")
     suspend fun kakaoLoginCallback(): Response<LoginResponseDto>
+
+    @GET("oauth2/login/naver")
+    suspend fun getNaverLoginUrl() : Response<Void>
 }

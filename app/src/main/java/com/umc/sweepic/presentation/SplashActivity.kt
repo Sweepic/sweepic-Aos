@@ -6,22 +6,24 @@ import android.util.Log
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.umc.sweepic.R
 import com.umc.sweepic.presentation.login.LoginActivity
+import com.umc.sweepic.presentation.onboarding.OnboardingStep1Activity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import java.io.IOException
 
 @AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
 
-    private lateinit var progressBar: ProgressBar
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_splash)
 
         // 저장된 세션 확인
         val sessionId = getSessionId()
@@ -32,7 +34,7 @@ class SplashActivity : AppCompatActivity() {
             navigateToLogin()
         } else {
             lifecycleScope.launch(Dispatchers.IO) {
-                checkSessionValidity(sessionId)
+                checkSessionAndStatus(sessionId)
             }
         }
     }
@@ -42,25 +44,24 @@ class SplashActivity : AppCompatActivity() {
         return sharedPreferences.getString("SESSION_ID", null)
     }
 
-    private suspend fun checkSessionValidity(sessionId: String) {
-        val isValid = validateSession(sessionId)
+    private suspend fun checkSessionAndStatus(sessionId: String) {
+        val userStatus = validateSessionAndFetchStatus(sessionId)
 
         withContext(Dispatchers.Main) {
-            when (isValid) {
-                "VALID" -> navigateToMain() // 세션이 유효하면 메인 화면으로 이동
+            when (userStatus) {
+                "VALID_EXISTING" -> navigateToMain()
+                "VALID_NEW" -> navigateToOnboarding()
                 "INVALID" -> {
-                    clearSession() // 세션 만료, 삭제하고 로그인 화면으로 이동
+                    clearSession()
                     navigateToLogin()
                 }
-                else -> {
-                    navigateToMain()
-                }
+                else -> navigateToMain() // 기본적으로 메인으로 이동 (예외 처리)
             }
         }
     }
 
-    private suspend fun validateSession(sessionId: String): String {
-        return withContext(Dispatchers.IO) { // ✅ IO 스레드에서 실행
+    private suspend fun validateSessionAndFetchStatus(sessionId: String): String {
+        return withContext(Dispatchers.IO) {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
@@ -69,11 +70,22 @@ class SplashActivity : AppCompatActivity() {
                     .build()
 
                 val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
 
                 when (response.code) {
-                    200 -> "VALID" // 세션 유효함
-                    401 -> "INVALID" // 세션 관련 오류면 유효하지 않은걸로
-                    else -> "ERROR" //
+                    200 -> {
+                        val jsonObject = JSONObject(responseBody ?: "{}")
+                        val status = jsonObject.optJSONObject("success")?.optInt("status", 1) ?: 1
+
+                        Log.d("SplashActivity", "사용자 status: $status")
+                        if (status == 2) {
+                            "VALID_NEW"
+                        } else {
+                            "VALID_EXISTING"
+                        }
+                    }
+                    401 -> "INVALID" // 세션 만료
+                    else -> "ERROR"
                 }
             } catch (e: IOException) {
                 Log.e("SplashActivity", "네트워크 오류 발생: ${e.message}")
@@ -96,6 +108,12 @@ class SplashActivity : AppCompatActivity() {
 
     private fun navigateToLogin() {
         val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun navigateToOnboarding() {
+        val intent = Intent(this, OnboardingStep1Activity::class.java)
         startActivity(intent)
         finish()
     }

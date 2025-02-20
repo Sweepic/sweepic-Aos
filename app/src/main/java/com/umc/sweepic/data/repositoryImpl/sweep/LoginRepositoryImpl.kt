@@ -56,4 +56,20 @@ class LoginRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun getNaverLoginUrl(): Result<String> {
+        return runCatching {
+            val response = loginDataSource.getNaverLoginUrl()
+
+            if (!response.isSuccessful) {
+                throw Exception(
+                    "Failed to fetch Naverlogin URL: ${
+                        response.errorBody()?.string()
+                    }"
+                )
+            }
+
+            response.raw().request.url.toString()
+        }
+    }
 }

@@ -6,4 +6,5 @@ import retrofit2.Response
 interface LoginDataSource {
     suspend fun getKakaoLoginUrl(): Response<Void>
     suspend fun kakaoLoginCallback(): Response<LoginResponseDto>
+    suspend fun getNaverLoginUrl() : Response<Void>
 }

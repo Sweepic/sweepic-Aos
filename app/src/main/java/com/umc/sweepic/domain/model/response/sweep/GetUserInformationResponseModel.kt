@@ -6,5 +6,6 @@ data class GetUserInformationResponseModel(
     val name: String,
     val goalCount: Int,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    val status: Int
 )
