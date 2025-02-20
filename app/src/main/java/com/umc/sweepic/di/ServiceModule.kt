@@ -1,7 +1,7 @@
 package com.umc.sweepic.di
 
-
 import com.umc.sweepic.data.service.LoginService
+import com.umc.sweepic.data.service.ChallengeService
 import com.umc.sweepic.data.service.HistoryService
 import com.umc.sweepic.data.service.SweepService
 import com.umc.sweepic.data.service.MemoService
@@ -61,6 +61,12 @@ object ServiceModule {
     @Provides
     @Singleton
     fun provideMypageService(retrofit: Retrofit) : MypageService{
+        return retrofit.buildService()
+    }
+
+    @Provides
+    @Singleton
+    fun provideChallengeService(retrofit: Retrofit): ChallengeService {
         return retrofit.buildService()
     }
 

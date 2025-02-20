@@ -1,16 +1,11 @@
 package com.umc.sweepic.data.repositoryImpl.sweep
 
-import android.app.Activity
-import android.app.RecoverableSecurityException
-import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.umc.sweepic.data.datasource.GalleryDataSource
 import com.umc.sweepic.domain.model.sweep.Gallery
-import com.umc.sweepic.domain.model.sweep.GalleryModel
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
 import javax.inject.Inject
 
