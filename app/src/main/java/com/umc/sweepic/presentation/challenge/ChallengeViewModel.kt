@@ -49,6 +49,9 @@ class ChallengeViewModel @Inject constructor(
     private val _userInfo = MutableLiveData<GetUserInformationResponseModel>() // 사용자 정보 LiveData
     val userInfo: LiveData<GetUserInformationResponseModel> get() = _userInfo
 
+    private val _totalImageCount = MutableLiveData<Int>()
+    val totalImageCount: LiveData<Int> get() = _totalImageCount
+
 
     // 갤러리 이미지 로드
     fun loadImages(): List<Gallery> {
@@ -192,5 +195,10 @@ class ChallengeViewModel @Inject constructor(
                     Log.d("ChallengeViewModel", "getUserInformation 성공: ${exception.message}")
                 }
         }
+    }
+
+    fun loadTotalImageCount() {
+        val allImages = galleryRepository.getAllGalleryImagesDesc()
+        _totalImageCount.value = allImages.size // 🔥 총 사진 개수 저장
     }
 }

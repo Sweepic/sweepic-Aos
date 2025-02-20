@@ -19,12 +19,16 @@ class ChallengeFragment: BaseFragment<FragmentChallengeBinding>(R.layout.fragmen
                 goalUpdate(userInfo)
             }
         }
+        viewModel.totalImageCount.observe(viewLifecycleOwner) { count ->
+            binding.tvTotal.text = count.toString() // UI 업데이트
+        }
     }
 
     override fun initView() {
         setUpMyPage()
         setupViewPagerAndTabs()
         viewModel.getUserInformation()
+        viewModel.loadTotalImageCount()
     }
 
     private fun setUpMyPage() {
