@@ -13,15 +13,12 @@ import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,27 +44,6 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
     private var selectedYear: String? = null
     private var selectedMonth: String? = null
 
-    private val _imageGroups = MutableLiveData<Map<String, List<String>>>()  // ✅ 추가된 부분
-    val imageGroups: LiveData<Map<String, List<String>>> get() = _imageGroups
-
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupSearchFeature()
-        observeViewModel()
-
-        viewModel.fetchDateTagsFromMediaStore(requireContext())
-    }
-
-    private fun observeViewModel() {
-        viewModel.imageDateTags.observe(viewLifecycleOwner) { tagsByDate ->
-            viewModel.imageGroups.observe(viewLifecycleOwner) { imagesByDate ->
-                if (tagsByDate != null && imagesByDate != null) {
-                    updateImgGroupRecyclerView(tagsByDate, imagesByDate)
-                }
-            }
-        }
-    }
 
     override fun initObserver() {
         // 필요하면 데이터 관찰 추가
@@ -77,41 +53,6 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         setupYearSelector()
         setupMonthRecyclerView()
         checkPermissions()
-    }
-
-    private fun testGetImageTags(mediaId: Double) {
-        viewModel.fetchImageTags(mediaId)  // ✅ ViewModel을 통해 API 호출
-
-        viewModel.imageTags.observe(viewLifecycleOwner) { response ->
-            if (response != null) {
-                Log.d("tagboard", "이미지 태그 조회 성공: $response")
-            } else {
-                Log.e("tagboard", "이미지 태그 조회 실패: 응답이 null입니다.")
-            }
-        }
-    }
-
-    private fun testGetDateTags(year: Double, month: Double, date: Double) {
-        viewModel.fetchDateTags(year, month, date)  // ✅ ViewModel을 통해 API 호출
-
-        viewModel.imageTags.observe(viewLifecycleOwner) { response ->
-            if (response != null) {
-                Log.d("tagboard", "날짜 기반 태그 조회 성공: $response")
-            } else {
-                Log.e("tagboard", "날짜 기반 태그 조회 실패: 응답이 null입니다.")
-            }
-        }
-    }
-
-
-
-    // ✅ 날짜별 태그 & 이미지 그룹을 RecyclerView에 업데이트하는 함수
-    private fun updateImgGroupRecyclerView(tagsByDate: Map<String, List<String>>, imagesByDate: Map<String, List<String>>) {
-        binding.rcImgGroups.layoutManager = LinearLayoutManager(requireContext())
-        binding.rcImgGroups.adapter = ImgGroupAdapter(tagsByDate, imagesByDate) { selectedTag ->
-            binding.etSearch.setText(selectedTag)
-            viewModel.searchImgGroupsByTag(selectedTag, imagesByDate, tagsByDate)
-        }
     }
 
     private fun checkPermissions() {
