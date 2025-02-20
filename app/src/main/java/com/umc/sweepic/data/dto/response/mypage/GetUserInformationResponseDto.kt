@@ -9,7 +9,8 @@ data class GetUserInformationResponseDto(
     @SerializedName("name") val name: String,
     @SerializedName("goalCount") val goalCount: Int,
     @SerializedName("createdAt") val createdAt: String,
-    @SerializedName("updatedAt") val updatedAt: String
+    @SerializedName("updatedAt") val updatedAt: String,
+    @SerializedName("status") val status: Int
 ) {
     fun toGetUserInformationResponseModel(): GetUserInformationResponseModel {
         return GetUserInformationResponseModel(
@@ -18,7 +19,8 @@ data class GetUserInformationResponseDto(
             name = name,
             goalCount = goalCount,
             createdAt = createdAt,
-            updatedAt = updatedAt
+            updatedAt = updatedAt,
+            status = status
         )
     }
 }

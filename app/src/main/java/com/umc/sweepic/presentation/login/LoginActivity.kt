@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.umc.sweepic.databinding.ActivityLoginBinding
 import com.umc.sweepic.presentation.MainActivity
+import com.umc.sweepic.presentation.mypage.MypageViewModel
 import com.umc.sweepic.presentation.onboarding.OnboardingStep1Activity
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val loginViewModel: LoginViewModel by viewModels()
+    private val mypageViewModel: MypageViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,9 +26,8 @@ class LoginActivity : AppCompatActivity() {
         val storedSessionId = getSessionId()
         Log.d("LoginActivity", "현재 저장된 세션 ID: $storedSessionId")
 
-        if (storedSessionId != null) {
-            // 세션이 있으면 로그인 건너뛰고 메인 화면으로 이동
-            navigateToMain()
+        if (!storedSessionId.isNullOrEmpty()) {
+            mypageViewModel.fetchUserInfo()
         }
 
         initObservers()
@@ -37,14 +38,31 @@ class LoginActivity : AppCompatActivity() {
         loginViewModel.sessionId.observe(this) { sessionId ->
             Log.d("LoginActivity", "세션 ID 저장 완료: $sessionId")
             saveSessionId(sessionId)
-            navigateToStep1()
+            mypageViewModel.fetchUserInfo()
+        }
+
+        mypageViewModel.userInfo.observe(this) { user ->
+            val status = user?.status ?: 1
+            Log.d("LoginActivity", "사용자 status: $status") //사용자 상태 확인
+            when (status) {
+                2 -> navigateToStep1()
+                1 -> navigateToMain()
+            }
         }
     }
 
     private fun initView() {
+
+        //카카오 로그인 클릭 시
         binding.kakaoLoginLayout.setOnClickListener {
             Log.d("LoginActivity", "카카오 로그인 버튼 클릭됨")
             loginViewModel.fetchKakaoLoginUrl()
+        }
+
+        // 네이버 로그인 버튼 클릭 시
+        binding.naverLoginLayout.setOnClickListener {
+            Log.d("LoginActivity", "네이버 로그인 버튼 클릭됨")
+            loginViewModel.fetchNaverLoginUrl()
         }
 
         loginViewModel.loginUrl.observe(this) { url ->
@@ -66,7 +84,7 @@ class LoginActivity : AppCompatActivity() {
 
             if (!sessionId.isNullOrEmpty()) {
                 saveSessionId(sessionId)
-                navigateToStep1()
+                mypageViewModel.fetchUserInfo()
             } else {
                 Log.e("LoginActivity", "세션 ID가 비어 있음")
             }
@@ -87,16 +105,17 @@ class LoginActivity : AppCompatActivity() {
         return sharedPreferences.getString("SESSION_ID", null)
     }
 
-    private fun navigateToStep1() {
-        Log.d("LoginActivity", "온보딩 화면으로 이동")
-        val intent = Intent(this, OnboardingStep1Activity::class.java)
-        startActivity(intent)
-        finish()
-    }
 
     private fun navigateToMain() {
         Log.d("LoginActivity", "메인 화면으로 이동")
         val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun navigateToStep1() {
+        Log.d("LoginActivity", "온보딩 화면으로 이동")
+        val intent = Intent(this, OnboardingStep1Activity::class.java)
         startActivity(intent)
         finish()
     }

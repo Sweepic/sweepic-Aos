@@ -17,4 +17,8 @@ class LoginDataSourceImpl @Inject constructor(
     override suspend fun kakaoLoginCallback(): Response<LoginResponseDto> {
         return loginService.kakaoLoginCallback()
     }
+
+    override suspend fun getNaverLoginUrl(): Response<Void> {
+        return loginService.getNaverLoginUrl()
+    }
 }
