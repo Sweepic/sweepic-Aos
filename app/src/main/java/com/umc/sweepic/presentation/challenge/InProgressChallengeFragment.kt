@@ -20,13 +20,17 @@ class InProgressChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.
 
     override fun initView() {
         setupRecyclerView()
+    }
+
+    override fun onResume() {
+        super.onResume()
         viewModel.fetchGetChallenge()
     }
 
     private fun setupRecyclerView() {
         challengeAdapter = ChallengeAdapter(
             onAcceptChallenge = { challengeId ->
-                viewModel.fetchAcceptChallenge(challengeId) // 챌린지 수락 API 호출
+//                viewModel.fetchAcceptChallenge(challengeId) // 챌린지 수락 API 호출
             }
         )
         binding.rvChallengeContainer.layoutManager = LinearLayoutManager(context)

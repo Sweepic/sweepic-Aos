@@ -72,4 +72,10 @@ interface ChallengeService {
     suspend fun fetchGeoCode(
         @Path("hashedLocation") hashedLocation: String
     ): BaseResponse<String>
+
+    @POST("challenge/images/upload/{challengeId}")
+    suspend fun fetchUploadChallengeImage(
+        @Path("challengeId") challengeId: String,
+        @Body request: List<String>
+    ): BaseResponse<String>
 }

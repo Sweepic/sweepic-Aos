@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.umc.sweepic.databinding.ItemVpBinding
+import com.umc.sweepic.domain.model.ChallengeWithImages
 
 class ChallengeAdapter(
     private val onAcceptChallenge: (String) -> Unit // 챌린지 수락 콜백 추가

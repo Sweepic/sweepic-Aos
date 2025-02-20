@@ -59,4 +59,7 @@ class ChallengeRepositoryImpl @Inject constructor(
         challengeService.fetchGeoCode(hashedLocation).success
     }
 
+    override suspend fun fetchUploadChallengeImage(challengeId: String, request: List<String>): Result<String> = runCatching {
+        challengeService.fetchUploadChallengeImage(challengeId, request).success
+    }
 }

@@ -7,6 +7,7 @@ data class GetChallengeResponseModel(
     val context: String,
     val challengeLocation: String,
     val challengeDate: String?,
+    val images: List<String>,
     val requiredCount: Int,
     val remainingCount: Int,
     val createdAt: String,

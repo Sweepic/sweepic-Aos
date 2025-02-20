@@ -8,6 +8,7 @@ import com.umc.sweepic.databinding.FragmentChallengeListBinding
 import com.umc.sweepic.domain.model.request.challenge.LocationChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.LocationInfoRequestModel
 import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
+import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -85,21 +86,32 @@ class NewChallengeFragment: BaseFragment<FragmentChallengeListBinding>(R.layout.
         }
 
         if (filteredImages.isNotEmpty()) {
-            val requestList = filteredImages.map { image ->
-                LocationInfoRequestModel(
-                    timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale("ko", "KR")).format(Date(image.addedDate.time)),
-                    latitude = image.latitude,
-                    longitude = image.longitude,
-                    displayName = image.name,
-                    id = image.id.toString()
-                )
+            Log.d("ChallengeViewModel", "최근 30분 사진 ${filteredImages.size}개 발견, fetchSweepImages() 호출")
+
+            // `fetchSweepImages()`를 먼저 호출 (새로 생성된 이미지들의 ID를 전송)
+            viewModel.fetchSweepImages(filteredImages) {
+                // `fetchSweepImages()` 완료 후 `fetchObserveLocationChallenge()` 실행
+                startObserveLocationChallenge(filteredImages)
             }
-            viewModel.imageListForChallenge = galleryImages  // ViewModel에 이미지 리스트 저장
-            Log.d("ChallengeViewModel", "최근 30분 사진 ${requestList.size}개 API 요청")
-            viewModel.fetchObserveLocationChallenge(requestList) // API 호출
         } else {
             Log.d("ChallengeViewModel", "최근 30분 동안 찍힌 사진이 없음")
         }
+    }
+
+    // `fetchObserveLocationChallenge()` 호출을 분리하여, `fetchSweepImages()` 완료 후 실행되도록 함
+    private fun startObserveLocationChallenge(filteredImages: List<Gallery>) {
+        val requestList = filteredImages.map { image ->
+            LocationInfoRequestModel(
+                timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale("ko", "KR")).format(image.addedDate),
+                latitude = image.latitude,
+                longitude = image.longitude,
+                displayName = image.name,
+                id = image.id.toString()
+            )
+        }
+
+        Log.d("ChallengeViewModel", "fetchObserveLocationChallenge() 실행, request 개수: ${requestList.size}")
+        viewModel.fetchObserveLocationChallenge(requestList)
     }
 
     private fun createLocationChallenge(locationResponse: List<LocationInfoResponseModel>) {

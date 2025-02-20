@@ -49,4 +49,6 @@ class ChallengeDataSourceImpl @Inject constructor(
     override suspend fun fetchGeoCode(hashedLocation: String): BaseResponse<String> =
         challengeService.fetchGeoCode(hashedLocation)
 
+    override suspend fun fetchUploadChallengeImage(challengeId: String, request: List<String>): BaseResponse<String> =
+        challengeService.fetchUploadChallengeImage(challengeId, request)
 }

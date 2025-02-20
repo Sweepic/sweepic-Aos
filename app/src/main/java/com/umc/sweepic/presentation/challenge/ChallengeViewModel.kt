@@ -1,31 +1,30 @@
 package com.umc.sweepic.presentation.challenge
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.umc.sweepic.R
-import com.umc.sweepic.domain.model.Challenge
+import com.umc.sweepic.domain.model.ChallengeWithImages
 import com.umc.sweepic.domain.model.request.challenge.LocationChallengeRequestModel
 import com.umc.sweepic.domain.model.request.challenge.LocationInfoRequestModel
-import com.umc.sweepic.domain.model.response.challenge.CommonChallengeResponseModel
-import com.umc.sweepic.domain.model.response.challenge.GetChallengeResponseModel
+import com.umc.sweepic.domain.model.request.sweep.UpdateImageRequestModel
 import com.umc.sweepic.domain.model.response.challenge.LocationInfoResponseModel
 import com.umc.sweepic.domain.model.sweep.Gallery
 import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
-import com.umc.sweepic.domain.repository.sweep.TrashRepository
-import dagger.hilt.android.internal.Contexts.getApplication
+import com.umc.sweepic.domain.repository.sweep.SweepRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class ChallengeViewModel @Inject constructor(
     private val repository: ChallengeRepository,
-    private val galleryRepository: GalleryRepository
+    private val galleryRepository: GalleryRepository,
+    private val sweepRepository: SweepRepository
 ): ViewModel() {
     private val _locationInfoList = MutableLiveData<List<LocationInfoResponseModel>>()
     val locationInfoList: LiveData<List<LocationInfoResponseModel>> get() = _locationInfoList
@@ -40,9 +39,10 @@ class ChallengeViewModel @Inject constructor(
     private val _inProgressChallengeList = MutableLiveData<List<ChallengeWithImages>>()
     val inProgressChallengeList: LiveData<List<ChallengeWithImages>> get() = _inProgressChallengeList
 
-
-
     var imageListForChallenge: List<Gallery> = emptyList()
+
+    private var lastSentImageIds: List<String> = emptyList()
+
 
     // 갤러리 이미지 로드
     fun loadImages(): List<Gallery> {
@@ -56,6 +56,9 @@ class ChallengeViewModel @Inject constructor(
                 .onSuccess { response ->
                     _locationInfoList.value = response
                     Log.d("ChallengeViewModel", "Location info success: $response")
+
+                    // 성공 시 보낸 이미지 ID 저장
+                    lastSentImageIds = request.map { it.id }
                 }
                 .onFailure { exception ->
                     Log.e("ChallengeViewModel", "Location info failed: ${exception.message}")
@@ -70,6 +73,9 @@ class ChallengeViewModel @Inject constructor(
                 .onSuccess { response ->
                     Log.d("ChallengeViewModel", "챌린지 생성 성공: $response")
                     _challengeCreated.value = true // 챌린지 생성 완료 표시
+
+                    // 생성된 챌린지 ID를 이용해 fetchUploadChallengeImage 호출
+                    fetchUploadChallengeImage(response.id, lastSentImageIds)
                 }
                 .onFailure { exception ->
                     Log.e("ChallengeViewModel", "챌린지 생성 실패: ${exception.message}")
@@ -96,20 +102,43 @@ class ChallengeViewModel @Inject constructor(
         }
     }
 
+    // 챌린지에 이미지 업로드 API
+    fun fetchUploadChallengeImage(challengeId: String, imageIds: List<String>) {
+        viewModelScope.launch {
+            repository.fetchUploadChallengeImage(challengeId, imageIds)
+                .onSuccess { response ->
+                    Log.d("ChallengeViewModel", "이미지 업로드 성공: $response")
+                }
+                .onFailure { exception ->
+                    Log.e("ChallengeViewModel", "이미지 업로드 실패: ${exception.message}")
+                }
+        }
+    }
+
     // 챌린지 조회 API
     fun fetchGetChallenge() {
         viewModelScope.launch {
             repository.fetchGetChallenge()
                 .onSuccess { response ->
+                    val localGalleryImages = loadImages()
+
                     val newChallenges = response
                         .filter { it.status == 1 } // status가 1인 챌린지만 필터링
                         .map { challenge ->
-                            ChallengeWithImages(challenge, imageListForChallenge.take(3)) // 각 챌린지에 대해 이미지 3개 포함
+                            val matchedImages = challenge.images.mapNotNull { imageId ->
+                                localGalleryImages.find { it.id.toString() == imageId }
+                            }.take(3) // 3장만 선택
+
+                            ChallengeWithImages(challenge, matchedImages)
                         }
                     val inProgressChallenges = response
                         .filter { it.status == 2 } // status가 2인 것 (진행 중 챌린지)
                         .map { challenge ->
-                            ChallengeWithImages(challenge, imageListForChallenge.take(3))
+                            val matchedImages = challenge.images.mapNotNull { imageId ->
+                                localGalleryImages.find { it.id.toString() == imageId }
+                            }.take(3) // 3장만 선택
+
+                            ChallengeWithImages(challenge, matchedImages)
                         }
 
                     _challengeList.postValue(newChallenges) // 기존 리스트 업데이트
@@ -123,27 +152,23 @@ class ChallengeViewModel @Inject constructor(
         }
     }
 
-//    fun fetchGetLocationChallenge(challengeId: String) {
-//        viewModelScope.launch {
-//            repository.fetchGetLocationChallenge(challengeId)
-//                .onSuccess { response ->
-//                    if (response.status == 1) {
-//                        val challengeWithImages = ChallengeWithImages(response, imageListForChallenge.take(3))
-//                        val currentList = _challengeList.value.orEmpty().toMutableList()
-//                        currentList.add(challengeWithImages)
-//                        _challengeList.value = currentList
-//                        Log.d("ChallengeViewModel", "챌린지 조회 성공: $response")
-//                    } else {
-//                        Log.d("ChallengeViewModel", "챌린지 상태가 1이 아니므로 추가되지 않음: $response")
-//                    }
-//                }
-//                .onFailure { exception ->
-//                    Log.e("ChallengeViewModel", "챌린지 조회 실패: ${exception.message}")
-//                }
-//        }
-//    }
+    fun fetchSweepImages(images: List<Gallery>, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            images.forEach { image -> // 하나씩 호출
+                val request = UpdateImageRequestModel(
+                    timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale("ko", "KR")).format(image.addedDate),
+                    mediaId = image.id.toString()
+                )
+
+                sweepRepository.fetchSweepImages(request)
+                    .onSuccess { response ->
+                        Log.d("ChallengeViewModel", "fetchSweepImages 성공: ${response.imageId}")
+                    }
+                    .onFailure { exception ->
+                        Log.e("ChallengeViewModel", "fetchSweepImages 실패: ${exception.message}")
+                    }
+            }
+            onComplete() // 모든 요청이 끝난 후 실행
+        }
+    }
 }
-data class ChallengeWithImages(
-    val challenge: GetChallengeResponseModel,
-    val images: List<Gallery>
-)

@@ -26,4 +26,5 @@ interface ChallengeRepository {
     suspend fun fetchCompleteChallenge(id: String): Result<CommonChallengeResponseModel>
     suspend fun fetchGetChallenge(): Result<List<GetChallengeResponseModel>>
     suspend fun fetchGeoCode(hashedLocation: String): Result<String>
+    suspend fun fetchUploadChallengeImage(challengeId: String, request: List<String>): Result<String>
 }

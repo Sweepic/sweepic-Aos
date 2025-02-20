@@ -28,4 +28,5 @@ interface ChallengeDataSource {
     suspend fun fetchCompleteChallenge(id: String): BaseResponse<CommonChallengeResponseDto>
     suspend fun fetchGetChallenge(): BaseResponse<List<GetChallengeResponseDto>>
     suspend fun fetchGeoCode(hashedLocation: String): BaseResponse<String>
+    suspend fun fetchUploadChallengeImage(challengeId: String, request: List<String>): BaseResponse<String>
 }
