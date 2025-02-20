@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.ItemBestPhotoBinding
 import com.umc.sweepic.databinding.ItemChoicePhotoBinding
+import com.umc.sweepic.databinding.ItemChoicedPhotoBinding
 
 /** 📌 RecyclerView에서 사진을 표시하는 Adapter */
 class ChoicePhotoAdapter(
@@ -21,10 +22,10 @@ class ChoicePhotoAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = if (itemLayoutResId == R.layout.item_best_photo) {
-            ItemBestPhotoBinding.inflate(inflater, parent, false) // ✅ `item_best_photo` 사용
-        } else {
-            ItemChoicePhotoBinding.inflate(inflater, parent, false) // ✅ 기본 `item_choice_photo` 사용
+        val binding: ViewBinding = when (itemLayoutResId) {
+            R.layout.item_best_photo -> ItemBestPhotoBinding.inflate(inflater, parent, false)
+            R.layout.item_choiced_photo -> ItemChoicedPhotoBinding.inflate(inflater, parent, false) // ✅ 추가된 부분
+            else -> ItemChoicePhotoBinding.inflate(inflater, parent, false)
         }
         return PhotoViewHolder(binding)
     }
@@ -37,9 +38,8 @@ class ChoicePhotoAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(photo: SelectedPhoto) {
-            val isSelected = selectedPhotos?.invoke()?.any { it.mediaId == photo.mediaId } ?: false // ✅ 현재 선택된 사진인지 확인
+            val isSelected = selectedPhotos?.invoke()?.any { it.mediaId == photo.mediaId } ?: false
 
-            // ✅ ViewBinding 타입에 따라 처리 방식 변경
             when (binding) {
                 is ItemBestPhotoBinding -> {
                     Glide.with(binding.root.context)
@@ -50,16 +50,19 @@ class ChoicePhotoAdapter(
                     Glide.with(binding.root.context)
                         .load(photo.photoPath)
                         .into(binding.ivPhoto)
-
                     binding.ivPhoto.alpha = if (isSelected) 0.5f else 1.0f
-
+                }
+                is ItemChoicedPhotoBinding -> { // ✅ item_choiced_photo 추가
+                    Glide.with(binding.root.context)
+                        .load(photo.photoPath)
+                        .into(binding.ivChoicedPhoto)
+                    binding.ivChoicedPhoto.alpha = if (isSelected) 0.5f else 1.0f
                 }
             }
 
             binding.root.setOnClickListener {
                 Log.d("PhotoAdapter", "📌 사진 클릭됨: ${photo.photoPath}")
                 onPhotoSelected(photo)
-
                 notifyItemChanged(adapterPosition)
             }
         }
@@ -77,5 +80,3 @@ class ChoicePhotoAdapter(
         }
     }
 }
-
-

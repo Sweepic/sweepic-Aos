@@ -280,10 +280,11 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                     ?.let { it as? NavHostFragment }
                     ?.navController
 
-                parentNavController?.navigate(R.id.action_recordFragment_to_detailImgFragment, bundle)
+               // parentNavController?.navigate(R.id.action_recordFragment_to_detailImgFragment, bundle)
             },
             { selectedTag ->
-                onTagClicked(selectedTag)
+
+               // onTagClicked(selectedTag)
             }
         )
 
@@ -299,6 +300,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         return listOf("#잠실", "#지은", "#인하대학교") // 예제 태그
     }
 
+/*
     private fun onTagClicked(selectedTag: String) {
         Log.d("TagBoardFragment", "Clicked tag: $selectedTag")
 
@@ -316,6 +318,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
 
         findNavController().navigate(R.id.action_recordFragment_to_tagImgFragment, bundle)
     }
+*/
 
 
     override fun onRequestPermissionsResult(

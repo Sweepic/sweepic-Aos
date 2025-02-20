@@ -73,25 +73,12 @@
         <!-- 태그 그룹 -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/chip"
-            android:background="@color/sw_gray_lightly"
+
             android:layout_width="match_parent"
             android:layout_height="52dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rc_chip"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                app:singleLine="false"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:listitem="@layout/item_detail_chip"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

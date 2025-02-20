@@ -2,6 +2,7 @@ package com.umc.sweepic.di
 
 import android.content.ContentResolver
 import android.content.Context
+import com.umc.sweepic.data.datasource.AwardDataSource
 import com.umc.sweepic.data.datasource.GalleryDataSource
 import com.umc.sweepic.data.datasource.LoginDataSource
 import com.umc.sweepic.data.datasource.HistoryDataSource
