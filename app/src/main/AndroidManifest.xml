@@ -89,6 +89,11 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".presentation.challenge.ChallengeActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".presentation.sweep.MoveActivity"
             android:exported="true"
             android:screenOrientation="portrait"

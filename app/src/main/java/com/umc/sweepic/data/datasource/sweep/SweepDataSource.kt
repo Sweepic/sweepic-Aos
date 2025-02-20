@@ -26,7 +26,7 @@ interface SweepDataSource {
     suspend fun fetchSweepCreateMemoFolder(request: CreateMemoFolderRequestDto): BaseResponse<CreateMemoFolderResponseDto>
     suspend fun fetchMoveImageToTrash(imageId: String): BaseResponse<String>
     suspend fun fetchRestoreTrashImage(request: TrashImageRequestDto): BaseResponse<String>
-    suspend fun fetchDeleteTrashImage(request: TrashImageRequestDto): BaseResponse<String>
+    suspend fun fetchDeleteTrashImage(request: TrashImageRequestDto): BaseResponse<String?>
     suspend fun fetchSweepImages(request: UpdateImageRequestDto): BaseResponse<UpdateImageResponseDto>
     suspend fun fetchLoadTag(mediaId: Long): BaseResponse<TagInfoResponseDto>
     suspend fun fetchInputTag(imageId: String, request: TagRequestDto): BaseResponse<TagResponseDto>

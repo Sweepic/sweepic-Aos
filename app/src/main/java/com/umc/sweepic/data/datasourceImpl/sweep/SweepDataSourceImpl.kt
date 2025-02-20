@@ -63,7 +63,7 @@ class SweepDataSourceImpl @Inject constructor(
     override suspend fun fetchRestoreTrashImage(request: TrashImageRequestDto): BaseResponse<String> =
         sweepService.fetchRestoreTrashImage(request)
 
-    override suspend fun fetchDeleteTrashImage(request: TrashImageRequestDto): BaseResponse<String> =
+    override suspend fun fetchDeleteTrashImage(request: TrashImageRequestDto): BaseResponse<String?> =
         sweepService.fetchDeleteTrashImage(request)
 
     override suspend fun fetchSweepImages(request: UpdateImageRequestDto): BaseResponse<UpdateImageResponseDto> =

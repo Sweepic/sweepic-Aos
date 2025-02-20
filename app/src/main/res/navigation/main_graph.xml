@@ -28,6 +28,7 @@
         <action
             android:id="@+id/action_recordFragment_to_tagImgFragment"
             app:destination="@id/tagImgFragment" />
+
     </fragment>
 
     <fragment
@@ -35,6 +36,34 @@
         android:name="com.umc.sweepic.presentation.record.history.HistoryTagFragment"
         android:label="HistoryTagFragment"
         tools:layout="@layout/fragment_history_tag" />
+
+    <fragment
+        android:id="@+id/historyMonthFragment"
+        android:name="com.umc.sweepic.presentation.record.history.award.HistoryMonthFragment"
+        android:label="HistoryMonthFragment"
+        tools:layout="@layout/fragment_history_month">
+        <action
+            android:id="@+id/action_historyMonthFragment_to_historyMonthChoiceFragment"
+            app:destination="@id/historyMonthChoiceFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/historyLastBestFragment"
+        android:name="com.umc.sweepic.presentation.record.history.award.HistoryLastBestFragment"
+        android:label="HistoryLastBestFragment"
+        tools:layout="@layout/fragment_history_last_best" />
+
+    <action
+        android:id="@+id/action_historyFragment_to_historyLastBestFragment"
+        app:destination="@id/historyLastBestFragment" />
+
+
+    <fragment
+        android:id="@+id/historyMonthChoiceFragment"
+        android:name="com.umc.sweepic.presentation.record.history.award.HistoryMonthChoiceFragment"
+        android:label="HistoryMonthChoiceFragment"
+        tools:layout="@layout/fragment_history_month_choice" />
+
 
     <fragment
         android:id="@+id/myPageFragment"

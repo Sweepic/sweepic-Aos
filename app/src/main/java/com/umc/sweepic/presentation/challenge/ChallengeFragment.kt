@@ -1,59 +1,59 @@
 package com.umc.sweepic.presentation.challenge
 
-import android.widget.ImageView
-import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.tabs.TabLayoutMediator
 import com.umc.sweepic.databinding.FragmentChallengeBinding
 import com.umc.sweepic.presentation.base.BaseFragment
 import com.umc.sweepic.R
+import com.umc.sweepic.domain.model.response.sweep.GetUserInformationResponseModel
+import com.umc.sweepic.util.extension.setOnSingleClickListener
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ChallengeFragment: BaseFragment<FragmentChallengeBinding>(R.layout.fragment_challenge) {
-
-    private lateinit var pagerAdapter: ChallengePagerAdapter
-
-    private val viewModel: ChallengeViewModel by lazy {
-        ViewModelProvider(this).get(ChallengeViewModel::class.java)
-    }
-
-    private lateinit var adapter: ChallengeAdapter
-
+    private val viewModel: ChallengeViewModel by viewModels()
     override fun initObserver() {
-        // LiveData 초기 상태 확인 (필요시 추가 로직 가능)
-        viewModel.inProgressChallenges.observe(viewLifecycleOwner) { inProgress ->
-            // 데이터를 확인하거나 추가 처리 가능
-            if (inProgress.isEmpty()) {
-                // 초기 상태에서 도전 중인 챌린지가 비어 있음을 확인
-                println("도전 중인 챌린지 초기화 완료")
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            if (userInfo != null) {
+                goalUpdate(userInfo)
             }
+        }
+        viewModel.totalImageCount.observe(viewLifecycleOwner) { count ->
+            binding.tvTotal.text = count.toString() // UI 업데이트
         }
     }
 
     override fun initView() {
+        setUpMyPage()
+        setupViewPagerAndTabs()
+        viewModel.getUserInformation()
+        viewModel.loadTotalImageCount()
+    }
 
-        // iv_mypage 클릭 이벤트
-        binding.ivMypage.setOnClickListener {
+    private fun setUpMyPage() {
+        binding.ivMypage.setOnSingleClickListener {
             findNavController().navigate(R.id.action_challengeFragment_to_myPageFragment)
         }
-
-        setupViewPagerAndTabs()
     }
 
     private fun setupViewPagerAndTabs() {
-        val pagerAdapter = ChallengePagerAdapter(this)
-        binding.vpChallenge.adapter = pagerAdapter
+        val adapter = ChallengePagerAdapter(this)
+        binding.vpChallenge.adapter = adapter
 
-        binding.vpChallenge.isNestedScrollingEnabled = false
-        binding.vpChallenge.getChildAt(0).setOnTouchListener { _, _ -> true }
-
+        // TabLayoutMediator를 사용하여 TabLayout과 ViewPager2 연결
         TabLayoutMediator(binding.tabLayout, binding.vpChallenge) { tab, position ->
             tab.text = when (position) {
-                0 -> "새로운 챌린지"
-                1 -> "도전 중인 챌린지"
-                else -> null
+                0 -> "새로운 챌린지"  // 첫 번째 탭 텍스트
+                1 -> "도전 중인 챌린지" // 두 번째 탭 텍스트
+                else -> ""
             }
         }.attach()
-
     }
+
+    private fun goalUpdate(getUserInformationResponseModel: GetUserInformationResponseModel) {
+        binding.tvName.text = getUserInformationResponseModel.name + "님"
+        binding.tvTargetNumber.text = getUserInformationResponseModel.goalCount.toString()
+    }
+
 }

@@ -51,7 +51,7 @@ class OnboardingStep4Activity : AppCompatActivity() {
     }
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isPermissionRequested) {
-            isPermissionRequested = true // 🚀 권한 요청 플래그 설정
+            isPermissionRequested = true // 권한 요청 플래그 설정
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -71,8 +71,8 @@ class OnboardingStep4Activity : AppCompatActivity() {
     }
 
     private fun goToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java) // ✅ MainActivity로 이동
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // 🔹 기존 스택 삭제 (온보딩 종료)
+        val intent = Intent(this, MainActivity::class.java) //
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK //
         startActivity(intent)
         finish()
     }

@@ -23,6 +23,7 @@ import com.umc.sweepic.domain.model.response.sweep.TagInfoResponseModel
 import com.umc.sweepic.domain.model.response.sweep.TagResponseModel
 import com.umc.sweepic.domain.model.response.sweep.UpdateImageResponseModel
 import com.umc.sweepic.domain.model.sweep.Gallery
+import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
 import com.umc.sweepic.domain.repository.sweep.TrashRepository
@@ -37,6 +38,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SweepViewModel @Inject constructor(
     private val repository: SweepRepository,
+    private val challengeRepository: ChallengeRepository,
     private val galleryRepository: GalleryRepository
 ): ViewModel() {
     private val _folderList = MutableLiveData<List<SweepMemoListModel.MemoFolderModel>>()
@@ -60,6 +62,13 @@ class SweepViewModel @Inject constructor(
     private val _aiTagResponse = MutableLiveData<BaseResponse<AiTagResponseModel>?>()
     val aiTagResponse: LiveData<BaseResponse<AiTagResponseModel>?> get() = _aiTagResponse
 
+    private var _challengeId: String? = null
+    val challengeId: String? get() = _challengeId
+
+    // challengeId 저장
+    fun setChallengeId(id: String) {
+        _challengeId = id
+    }
 
     fun fetchFolderList() {
         viewModelScope.launch {
@@ -226,6 +235,73 @@ class SweepViewModel @Inject constructor(
                 .onFailure { exception ->
                     Log.e("SweepViewModel", "AI Tag fetch failed: ${exception.message}")
                     _aiTagResponse.value = null
+                }
+        }
+    }
+
+    fun loadChallengeImages() {
+        val id = _challengeId ?: return // challengeId가 설정되지 않았다면 실행 안 함
+        viewModelScope.launch {
+            // 모든 갤러리 이미지 가져오기
+            val allImages = galleryRepository.getAllGalleryImagesDesc()
+
+            // fetchGetChallenge() 호출하여 챌린지 리스트 가져오기
+            challengeRepository.fetchGetChallenge()
+                .onSuccess { response ->
+                    // challengeId 와 일치하는 챌린지 찾기
+                    val targetChallenge = response.find { it.id == id }
+
+                    if (targetChallenge != null) {
+                        val challengeMediaIds = targetChallenge.images // 챌린지와 연결된 이미지 ID 리스트
+
+                        // 휴지통에 있는 이미지들 가져오기
+                        val trashedUris = TrashRepository.getAllTrashed().map { it.uri }
+
+                        // MediaStore에서 가져온 이미지 중 challengeMediaIds에 포함된 것만 필터링
+                        val filteredImages = allImages
+                            .filter { it.id.toString() in challengeMediaIds } // challengeId에 해당하는 이미지만 필터링
+                            .filterNot { trashedUris.contains(it.uri) } // 휴지통 제외
+
+                        // LiveData 업데이트
+                        _imagesLiveData.postValue(filteredImages)
+
+                        Log.d("ChallengeViewModel", "loadChallengeImages 성공: ${filteredImages.size}개 이미지")
+                    } else {
+                        Log.e("ChallengeViewModel", "해당 challengeId ($challengeId) 에 대한 챌린지 데이터를 찾을 수 없음")
+                    }
+                }
+                .onFailure { exception ->
+                    Log.e("ChallengeViewModel", "fetchGetChallenge 실패: ${exception.message}")
+                }
+        }
+    }
+
+    fun fetchChallengeTitle(challengeId: String, onResult: (String) -> Unit) {
+        viewModelScope.launch {
+            challengeRepository.fetchGetChallenge()
+                .onSuccess { response ->
+                    val challenge = response.find { it.id == challengeId }
+                    if (challenge != null) {
+                        onResult(challenge.title) // title 전달
+                    } else {
+                        Log.e("ChallengeViewModel", "해당 challengeId ($challengeId) 에 대한 챌린지 데이터를 찾을 수 없음")
+                    }
+                }
+                .onFailure { exception ->
+                    Log.e("ChallengeViewModel", "fetchGetChallenge 실패: ${exception.message}")
+                }
+        }
+    }
+
+    // 챌린지 완료
+    fun fetchCompleteChallenge(challengeId: String) {
+        viewModelScope.launch {
+            challengeRepository.fetchCompleteChallenge(challengeId)
+                .onSuccess { response ->
+                    Log.d("ChallengeViewModel", "챌린지 완료 성공: $response")
+                }
+                .onFailure { exception ->
+                    Log.e("ChallengeViewModel", "챌린지 완료 실패: ${exception.message}")
                 }
         }
     }

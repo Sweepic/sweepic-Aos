@@ -185,6 +185,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+
                 <!--어워드-->
                 <!--어워드 타이틀-->
         <!--월 타이틀-->
@@ -210,90 +211,162 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-        <!-- 12월 베스트 사진 Top5 -->
-        <LinearLayout
+
+        <!--월 베스트 사진 Top5 타이틀-->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_subtitle1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/tv_record_awardtitle">
 
             <TextView
                 android:id="@+id/tv_record_subtitle1"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2.5dp"
+                android:layout_marginBottom="2.5dp"
                 android:text="12월 베스트 사진 Top5"
-                android:textColor="@color/sw_bk"
+                android:textColor="@color/black"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/layout_subtitle1"
+                app:layout_constraintStart_toStartOf="@id/layout_subtitle1"
+                app:layout_constraintTop_toTopOf="@id/layout_subtitle1" />
 
             <ImageView
+                android:id="@+id/iv_next_month"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_next" />
-        </LinearLayout>
+                android:src="@drawable/ic_next"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+            </ImageView>
 
-        <!-- 사진 리스트 (12월 베스트 사진 Top5) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_best_pictures"
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <!--사진 리스트-->
+        <LinearLayout
+            android:id="@+id/layout_record_bestpic"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="108dp"
+            app:layout_constraintTop_toBottomOf="@id/layout_subtitle1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:overScrollMode="never"
-            android:orientation="horizontal"
-            android:paddingBottom="8dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+            android:layout_marginTop="8dp">
 
-        <!-- 지난 베스트 사진 타이틀 -->
-        <LinearLayout
+            <ImageView
+                android:id="@+id/iv_month_best_photo1"
+                android:layout_width="108dp"
+                android:layout_height="108dp"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:scaleType="center"
+                android:src="@drawable/img_record_ex" />
+
+            <ImageView
+                android:id="@+id/iv_month_best_photo2"
+                android:layout_width="108dp"
+                android:layout_height="108dp"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:scaleType="center"
+                android:src="@drawable/img_record_ex" />
+
+            <ImageView
+                android:id="@+id/iv_month_best_photo3"
+                android:layout_width="108dp"
+                android:layout_height="108dp"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:scaleType="center"
+                android:src="@drawable/img_record_ex" />
+        </LinearLayout>
+
+        <!--지난 베스트 사진 타이틀-->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_subtitle2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/layout_record_bestpic">
 
             <TextView
                 android:id="@+id/tv_record_subtitle2"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2.5dp"
+                android:layout_marginBottom="2.5dp"
                 android:text="지난 베스트 사진"
-                android:textColor="@color/sw_bk"
+                android:textColor="@color/black"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/layout_subtitle2"
+                app:layout_constraintStart_toStartOf="@id/layout_subtitle2"
+                app:layout_constraintTop_toTopOf="@id/layout_subtitle2" />
 
             <ImageView
+                android:id="@+id/iv_next_last_best"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_next" />
-        </LinearLayout>
+                android:src="@drawable/ic_next"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <!-- 사진 리스트 (지난 베스트 사진) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_best_pictures_past"
+            </ImageView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!--사진 리스트-->
+        <LinearLayout
+            android:id="@+id/layout_record_bestpic2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/layout_subtitle2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:overScrollMode="never"
-            android:paddingBottom="8dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:orientation="horizontal"
-            app:spanCount="3" />
+            android:layout_marginTop="8dp">
 
+            <ImageView
+                android:id="@+id/iv_last_best_photo1"
+                android:layout_width="108dp"
+                android:layout_height="108dp"
+                android:layout_margin="2px"
+                android:layout_weight="1"
+                android:src="@drawable/img_record_ex" />
+
+            <ImageView
+                android:id="@+id/iv_last_best_photo2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="2px"
+                android:layout_weight="1"
+                android:src="@drawable/img_record_ex" />
+
+            <ImageView
+                android:id="@+id/iv_last_best_photo3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="2px"
+                android:layout_weight="1"
+                android:src="@drawable/img_record_ex" />
+        </LinearLayout>
     </LinearLayout>
 
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
 </layout>

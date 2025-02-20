@@ -3,6 +3,8 @@ package com.umc.sweepic.di
 import android.app.Application
 import android.content.Context
 import com.umc.sweepic.data.repositoryImpl.TestRepositoryImpl
+import com.umc.sweepic.data.repositoryImpl.challenge.ChallengeRepositoryImpl
+import com.umc.sweepic.data.repositoryImpl.sweep.AwardRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.GalleryRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.LoginRepositoryImpl
 import com.umc.sweepic.data.repositoryImpl.sweep.HistoryRepositoryImpl
@@ -14,6 +16,8 @@ import com.umc.sweepic.data.repositoryImpl.sweep.TagboardRepositoryImpl
 import com.umc.sweepic.data.service.TestService
 import com.umc.sweepic.domain.repository.LoginRepository
 import com.umc.sweepic.domain.repository.TestRepository
+import com.umc.sweepic.domain.repository.challenge.ChallengeRepository
+import com.umc.sweepic.domain.repository.sweep.AwardRepository
 import com.umc.sweepic.domain.repository.sweep.GalleryRepository
 import com.umc.sweepic.domain.repository.sweep.HistoryRepository
 import com.umc.sweepic.domain.repository.sweep.SweepRepository
@@ -88,6 +92,17 @@ object RepositoryModule {
         mypageRepositoryImpl: MypageRepositoryImpl
     ): MypageRepository = mypageRepositoryImpl
 
+    @Singleton
+    @Provides
+    fun providesChallengeRepository(
+        challengeRepositoryImpl: ChallengeRepositoryImpl
+    ): ChallengeRepository = challengeRepositoryImpl
+
+    @Provides
+    @Singleton
+    fun providesAwardRepository(
+        awardRepositoryImpl: AwardRepositoryImpl
+    ): AwardRepository = awardRepositoryImpl
     @Singleton
     @Provides
     fun provideTagboardRepository(

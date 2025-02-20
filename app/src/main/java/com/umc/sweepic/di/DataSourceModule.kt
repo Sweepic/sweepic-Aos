@@ -9,6 +9,9 @@ import com.umc.sweepic.data.datasource.sweep.SweepDataSource
 import com.umc.sweepic.data.datasource.MemoDataSource
 import com.umc.sweepic.data.datasource.MypageDataSource
 import com.umc.sweepic.data.datasource.OnboardingDataSource
+import com.umc.sweepic.data.datasource.challenge.ChallengeDataSource
+import com.umc.sweepic.data.datasourceImpl.challenge.ChallengeDataSourceImpl
+import com.umc.sweepic.data.datasourceImpl.sweep.AwardDataSourceImpl
 import com.umc.sweepic.data.datasource.TagboardDataSource
 import com.umc.sweepic.data.datasourceImpl.sweep.GalleryDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.LoginDataSourceImpl
@@ -68,6 +71,15 @@ object DataSourceModule {
     fun provideMypageDataSource(mypageDataSourceImpl: MypageDataSourceImpl) : MypageDataSource =
         mypageDataSourceImpl
 
+    @Provides
+    @Singleton
+    fun provideChallengeDataSource(challengeDataSourceImpl: ChallengeDataSourceImpl): ChallengeDataSource =
+        challengeDataSourceImpl
+
+    @Provides
+    @Singleton
+    fun provideAwardDataSource(awardDataSourceImpl: AwardDataSourceImpl) : AwardDataSource =
+        awardDataSourceImpl
     @Provides
     @Singleton
     fun provideTagboardDataSource(tagboardDataSourceImpl: TagboardDataSourceImpl) : TagboardDataSource =

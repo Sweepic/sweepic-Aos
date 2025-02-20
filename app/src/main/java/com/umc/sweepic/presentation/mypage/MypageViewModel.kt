@@ -37,7 +37,6 @@ class MypageViewModel @Inject constructor(
     private val _updatedGoalCount = MutableLiveData<Int>()
     val updatedGoalCount: LiveData<Int> = _updatedGoalCount
 
-
     private val _userInfo = MutableLiveData<GetUserInformationResponseModel?>()
     val userInfo: LiveData<GetUserInformationResponseModel?> = _userInfo
 

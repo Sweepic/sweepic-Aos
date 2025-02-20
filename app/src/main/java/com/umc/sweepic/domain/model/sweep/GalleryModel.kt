@@ -14,6 +14,8 @@ data class GalleryModel(
     val size: Long,
     val width: Int,
     val height: Int,
+    val latitude: Double,
+    val longitude: Double
 ){
     fun toGallery() = Gallery(
         id,
@@ -26,6 +28,8 @@ data class GalleryModel(
         size,
         width,
         height,
+        latitude,
+        longitude
     )
 
 }
@@ -42,4 +46,6 @@ data class Gallery(
     val size: Long,
     val width: Int,
     val height: Int,
+    val latitude: Double,
+    val longitude: Double
 )

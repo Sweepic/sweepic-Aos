@@ -61,7 +61,7 @@ class SweepRepositoryImpl @Inject constructor(
     override suspend fun fetchRestoreTrashImage(request: TrashImageRequestModel): Result<String> = runCatching {
         sweepDataSource.fetchRestoreTrashImage(request.toTrashImageRequestDto()).success
     }
-    override suspend fun fetchDeleteTrashImage(request: TrashImageRequestModel): Result<String> = runCatching {
+    override suspend fun fetchDeleteTrashImage(request: TrashImageRequestModel): Result<String?> = runCatching {
         sweepDataSource.fetchDeleteTrashImage(request.toTrashImageRequestDto()).success
     }
 

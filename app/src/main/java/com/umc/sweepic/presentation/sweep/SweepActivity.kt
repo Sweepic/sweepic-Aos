@@ -83,10 +83,6 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
     private var selectedUri: Uri? = null
     private var pendingUpdateUri: Uri? = null
     private var pendingUpdatePath: String? = null
-//    private val approvedUriSet = mutableSetOf<Uri>()
-//    private var pendingTrashImage: Gallery? = null
-//    private var pendingTrashPosition: Int? = null
-//    private var pendingAllImages: List<Gallery>? = null
     private lateinit var updateTrashCount: () -> Unit // 리스너를 외부로 선언
     private val addedAlbums = mutableListOf<AlbumList>() // 현재 RecyclerView에 표시 중인 앨범 목록
     private var locationTag: String? = null // 장소 태그를 저장할 변수
@@ -143,7 +139,9 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                                 folder = "",
                                 size = 0L,
                                 width = 0,
-                                height = 0
+                                height = 0,
+                                latitude = 0.0,
+                                longitude = 0.0
                             )
                             currentImages.add(0, newGallery)
                             pagerAdapter.notifyDataSetChanged()
