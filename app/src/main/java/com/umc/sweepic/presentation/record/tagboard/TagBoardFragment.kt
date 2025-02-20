@@ -219,7 +219,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                 }
 
                 // 날짜별 데이터 추가
-                combinedList.add(Triple(timestamp, "$year-$formattedDate", imageUri))
+                combinedList.add(Triple(timestamp, "$formattedDate", imageUri))
 
                 // 날짜 기반 태그 조회 및 추가
                 viewModel.fetchDateTags(year.toDouble(), month.toDouble(), day.toDouble()) { tags ->
@@ -283,7 +283,8 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                 parentNavController?.navigate(R.id.action_recordFragment_to_detailImgFragment, bundle)
             },
             { selectedTag ->
-                onTagClicked(selectedTag)
+
+               // onTagClicked(selectedTag)
             }
         )
 
@@ -299,6 +300,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         return listOf("#잠실", "#지은", "#인하대학교") // 예제 태그
     }
 
+/*
     private fun onTagClicked(selectedTag: String) {
         Log.d("TagBoardFragment", "Clicked tag: $selectedTag")
 
@@ -316,6 +318,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
 
         findNavController().navigate(R.id.action_recordFragment_to_tagImgFragment, bundle)
     }
+*/
 
 
     override fun onRequestPermissionsResult(
@@ -425,13 +428,8 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
 
         // 이미지 및 태그 데이터 필터링
         val filteredImages = imagesByDate.filter { (dateKey, _) ->
-            val parts = dateKey.split("-") // 예: "2024-06월 15일"
-            if (parts.size < 2) return@filter false // 예외 방지
-
-            val dateYear = parts[0] // "2024"
-            val dateMonth = parts[1].split("월")[0].trim().padStart(2, '0') // "06"
-
-            (year == null || dateYear == year) && (formattedMonth == null || dateMonth == formattedMonth)
+            val dateMonth = dateKey.split("월")[0].trim().padStart(2, '0') // "02"
+            (formattedMonth == null || dateMonth == formattedMonth)
         }
 
         val filteredTags = tagsByDate.filter { (dateKey, _) ->

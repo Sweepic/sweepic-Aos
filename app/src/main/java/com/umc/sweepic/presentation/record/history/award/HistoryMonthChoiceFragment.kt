@@ -102,7 +102,7 @@ class HistoryMonthChoiceFragment :
     private fun setupSelectedRecyclerView() {
             selectedPhotoAdapter = ChoicePhotoAdapter(
                 onPhotoSelected = { photo -> viewModel.togglePhotoSelection(photo) },
-                itemLayoutResId = R.layout.item_choice_photo
+                itemLayoutResId = R.layout.item_choiced_photo
             )
 
             binding.rvSelectedPhotos.apply {
