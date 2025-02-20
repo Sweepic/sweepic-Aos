@@ -35,6 +35,7 @@ class MemoDetailFragment : Fragment() {
     private var isSelectionMode = false //사진 선택 버튼 눌렀는지 안눌렀는지를 저장할 변수
 
     private val memoFolderViewModel: MemoFolderViewModel by activityViewModels() // 뷰모델 연결
+    private var originalFolderName: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,40 +61,39 @@ class MemoDetailFragment : Fragment() {
             binding.etMemoDetailFolderTitle.requestFocus()
         }
 
+
         binding.etMemoDetailFolderTitle.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
+            if (!hasFocus) { // 사용자가 포커스를 잃었을 때 실행
                 val newName = binding.etMemoDetailFolderTitle.text.toString().trim()
                 val folderId = arguments?.getLong("folderId")?.toString() ?: return@setOnFocusChangeListener
 
-                if (newName.isEmpty()) {
+                if (newName.isBlank()) {
+                    // 공백 입력 방지 & 기존 폴더명 복원
                     Toast.makeText(requireContext(), "폴더 제목을 입력해주세요.", Toast.LENGTH_SHORT).show()
 
-                    binding.etMemoDetailFolderTitle.setText(binding.tvMemoDetailFolderTitle.text.toString())
-                    binding.tvMemoDetailFolderTitle.visibility = View.VISIBLE
-                    binding.etMemoDetailFolderTitle.visibility = View.GONE
+                    binding.etMemoDetailFolderTitle.setText(" ")
+                    binding.etMemoDetailFolderTitle.requestFocus() // 포커스 유지
+                } else if (newName != originalFolderName) {
+                    memoFolderViewModel.updateFolderName(folderId, newName,
+                        onSuccess = {
+                            binding.tvMemoDetailFolderTitle.text = newName
+                            binding.etMemoDetailFolderTitle.clearFocus()
+                        },
+                        onFailure = { errorMessage ->
+                            if (errorMessage.contains("409")) {
+                                Toast.makeText(requireContext(), "이미 존재하는 폴더명입니다.", Toast.LENGTH_SHORT).show()
+                                binding.etMemoDetailFolderTitle.setText(binding.tvMemoDetailFolderTitle.text.toString())
+                                binding.tvMemoDetailFolderTitle.visibility = View.VISIBLE
+                                binding.etMemoDetailFolderTitle.visibility = View.GONE
 
-                    return@setOnFocusChangeListener
-                }
-
-                memoFolderViewModel.updateFolderName(folderId, newName,
-                    onSuccess = {
-                        binding.tvMemoDetailFolderTitle.text = newName
-                        binding.tvMemoDetailFolderTitle.visibility = View.VISIBLE
-                        binding.etMemoDetailFolderTitle.visibility = View.GONE
-                    },
-
-                    onFailure = { errorMessage ->
-                        if (errorMessage.contains("409")) {
-                            Toast.makeText(requireContext(), "이미 존재하는 폴더명입니다.", Toast.LENGTH_SHORT).show()
+                            }
                         }
-
-                        binding.etMemoDetailFolderTitle.setText(binding.tvMemoDetailFolderTitle.text.toString())
-                        binding.tvMemoDetailFolderTitle.visibility = View.VISIBLE
-                        binding.etMemoDetailFolderTitle.visibility = View.GONE
-                    }
-                )
+                    )
+                }
             }
         }
+
+
 
         binding.tvMemoDetailFolderContent.setOnClickListener {
             binding.etMemoDetailFolderContent.setText(binding.tvMemoDetailFolderContent.text.toString())
@@ -301,30 +301,22 @@ class MemoDetailFragment : Fragment() {
 
         Log.d("MemoDetailFragment", "사진 이동 요청: folderId=$folderId, targetFolderId=$targetFolderId, imageIds=$selectedImageIds") // ✅ 로그 추가
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("사진 이동")
-            .setMessage("선택한 사진을 '${selectedFolder.title}' 폴더로 이동하시겠습니까?")
-            .setPositiveButton("이동") { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        memoFolderViewModel.moveImages(folderId, targetFolderId, selectedImageIds)
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                memoFolderViewModel.moveImages(folderId, targetFolderId, selectedImageIds)
+                memoFolderViewModel.fetchMemoFolderDetails(folderId)
 
-                        memoFolderViewModel.fetchMemoFolderDetails(folderId)
-
-                        requireActivity().runOnUiThread {
-                            imageAdapter.setSelectionMode(false) // 선택 모드 종료
-                            imageAdapter.notifyDataSetChanged() // RecyclerView 새로고침
-                        }
-
-                        Toast.makeText(requireContext(), "사진이 이동되었습니다.", Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Log.e("MemoDetailFragment", "사진 이동 실패: ${e.message}")
-                        Toast.makeText(requireContext(), "사진 이동 실패", Toast.LENGTH_SHORT).show()
-                    }
+                requireActivity().runOnUiThread {
+                    imageAdapter.setSelectionMode(false)
+                    imageAdapter.notifyDataSetChanged()
                 }
+                Toast.makeText(requireContext(), "사진이 이동되었습니다.", Toast.LENGTH_SHORT).show()
+
+            } catch (e: Exception) {
+                Log.e("MemoDetailFragment", "사진 이동 실패: ${e.message}")
+                Toast.makeText(requireContext(), "사진 이동 실패", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("취소", null)
-            .show()
+        }
     }
 
     //다이얼로그 창 닫을때 실행되는 메서드
