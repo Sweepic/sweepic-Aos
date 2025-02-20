@@ -28,22 +28,29 @@ class HistoryTagViewModel @Inject constructor(
 
     fun fetchMostTaggedData(year: Double, month: Double? = null) {
         viewModelScope.launch {
-            val tagsByMonth = mutableMapOf<Double, List<GetMostTaggedModel.MostTaggedItem>>()
+            Log.d("HistoryTagViewModel", "Fetching most tagged data for Year: $year, Month: ${month ?: "전체"}")
 
+            val tagsByMonth = mutableMapOf<Double, List<GetMostTaggedModel.MostTaggedItem>>()
             val startMonth = month ?: if (year == currentYear) currentMonth else 12.0
 
             for (m in startMonth.toInt() downTo 1) {
+                Log.d("HistoryTagViewModel", "Calling repository for Year: $year, Month: $m")
+
                 historyRepository.getMostTagged(year, m.toDouble())
                     .onSuccess { data ->
-                        tagsByMonth[m.toDouble()] = data.success
+                        Log.d("HistoryTagViewModel", "Success: Received ${data.success.size} tags for Month: $m")
+                        if (data.success.isNotEmpty()) {
+                            tagsByMonth[m.toDouble()] = data.success
+                        }
                     }
-                    .onFailure {
-                        tagsByMonth[m.toDouble()] = emptyList()
+                    .onFailure { error ->
+                        Log.e("HistoryTagViewModel", "Error fetching most tagged data for Month: $m - ${error.message}")
                     }
             }
             _mostTaggedData.postValue(tagsByMonth)
         }
     }
+
 
     fun setYear(year: Double) {
         if (year > currentYear) return
