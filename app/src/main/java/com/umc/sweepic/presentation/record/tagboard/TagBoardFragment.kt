@@ -10,6 +10,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -18,18 +20,24 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.umc.sweepic.R
 import com.umc.sweepic.databinding.FragmentTagBoardBinding
+import com.umc.sweepic.domain.model.response.sweep.DateTagsResponseModel
 import com.umc.sweepic.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
+@AndroidEntryPoint
 class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment_tag_board) {
+
+    private val viewModel: TagBoardViewModel by viewModels()
 
     private lateinit var rvAdapter: ImgGroupRVA
     private lateinit var monthAdapter: MonthAdapter
@@ -49,6 +57,36 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         setupYearSelector()
         setupMonthRecyclerView()
         checkPermissions()
+
+        //태그 검색
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val query = s.toString().trim()
+                filterImagesByTag(query) // ✅ 입력된 태그로 필터링
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    //검색 이미지 그룹 필터링
+    private fun filterImagesByTag(query: String) {
+        if (query.isEmpty()) {
+            // 검색어가 없으면 모든 데이터 표시
+            setupRecyclerView(imagesByDate, tagsByDate)
+            return
+        }
+
+        val filteredImages = imagesByDate.filter { (dateKey, _) ->
+            val tags = tagsByDate[dateKey] ?: emptyList()
+            tags.any { it.contains(query, ignoreCase = true) } // ✅ 태그가 포함된 경우 필터링
+        }
+
+        Log.d("TagBoardFragment", "✅ 검색어: $query, 필터링된 그룹 개수: ${filteredImages.size}")
+
+        // ✅ RecyclerView 업데이트
+        setupRecyclerView(filteredImages, tagsByDate.filterKeys { it in filteredImages.keys })
     }
 
     private fun checkPermissions() {
@@ -95,6 +133,23 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         binding.tvYear.text = "2025" // 연도는 동적으로 변경 가능
     }
 
+/*
+    private fun updateChipsWithDateTags(dateTagsResponse: DateTagsResponseModel) {
+        // 태그 목록을 가져옵니다.
+        val dateTags = dateTagsResponse.tags // 실제 필드 이름에 맞게 수정
+
+        // 태그가 있으면만 처리
+        if (dateTags.isNotEmpty()) {
+            // rc_chip RecyclerView에 ChipAdapter 설정 및 데이터 갱신
+            val chipAdapter = ChipAdapter(tags.toMutableList(), isDetail = false, onTagClick)
+                // 태그 클릭 시 처리
+            val groupViewHolder = binding.rcTagboard.findViewHolderForAdapterPosition(0) as? ImgGroupRVA.GroupViewHolder
+            groupViewHolder?.let {
+                val chipRecyclerView = it.itemView.findViewById<RecyclerView>(R.id.rc_chip)
+                chipRecyclerView.adapter = chipAdapter // 새로운 adapter로 갱신
+            }
+        }
+    }*/
 
     private fun loadImagesFromMediaStore() {
         val projection = arrayOf(
@@ -140,6 +195,8 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                 val fullDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(timestamp))
                 val formattedDate = SimpleDateFormat("MM월 dd일", Locale.getDefault()).format(Date(timestamp))
                 val year = fullDate.split("-")[0] // 연도 추출
+                val month = fullDate.split("-")[1] // 월 추출
+                val day = fullDate.split("-")[2] // 날짜 추출
 
                 // 이미지 URI 생성
                 val imageUri = ContentUris.withAppendedId(
@@ -147,10 +204,38 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
                     id
                 ).toString()
 
+                // 날짜 기반 태그 API 호출
+                //viewModel.fetchDateTags(year.toDouble(), month.toDouble(), day.toDouble())
+
+                // 응답으로 받은 태그를 가져옵니다.
+                val tags = viewModel.imageDateTags.value?.tags ?: emptyList() // 태그가 없으면 빈 리스트
+
+                // 태그가 있으면 tagsByDate에 해당 날짜에 태그 추가
+                if (tags.isNotEmpty()) {
+                    tagsByDate[formattedDate] = tags
+                    Log.d("tagboard", "태그 추가: 날짜 = $formattedDate, 태그 = $tags")
+                } else {
+                    Log.d("tagboard", "태그가 없음: 날짜 = $formattedDate")
+                }
+
                 // 날짜별 데이터 추가
                 combinedList.add(Triple(timestamp, "$year-$formattedDate", imageUri))
+
+                // 날짜 기반 태그 조회 및 추가
+                viewModel.fetchDateTags(year.toDouble(), month.toDouble(), day.toDouble()) { tags ->
+                    if (tags.isNotEmpty()) {
+                        val key = "$year-$formattedDate" // ✅ 연도를 포함하여 저장
+                        val existingTags = tagsByDate[key] ?: emptyList()
+                        tagsByDate[key] = (existingTags + tags).distinct()
+                        Log.d("TagBoardFragment", "✅ 태그 저장됨: 키 = $key, 태그 = ${tagsByDate[key]}")
+
+                        // RecyclerView 갱신
+                        setupRecyclerView(imagesByDate, tagsByDate)
+                    }
+                }
             }
         }
+        setupRecyclerView(imagesByDate, tagsByDate)
 
         // 데이터 정렬: 내림차순
         val sortedList = combinedList.sortedByDescending { it.first }
@@ -158,7 +243,7 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         // 데이터를 그룹화하여 imagesByDate에 저장
         sortedList.forEach { (_, dateKey, imageUri) ->
             imagesByDate.getOrPut(dateKey) { mutableListOf() }.add(imageUri)
-            tagsByDate[dateKey] = generateTagsForDate(dateKey)
+            //[dateKey] = generateTagsForDate(dateKey)
         }
 
         // RecyclerView에 정렬된 데이터 적용
@@ -205,12 +290,33 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         // 태그보드 RecyclerView 설정
         binding.rcTagboard.layoutManager = LinearLayoutManager(requireContext())
         binding.rcTagboard.adapter = rvAdapter
+
+        rvAdapter.notifyDataSetChanged()
     }
 
 
     private fun generateTagsForDate(date: String): List<String> {
         return listOf("#잠실", "#지은", "#인하대학교") // 예제 태그
     }
+
+    private fun onTagClicked(selectedTag: String) {
+        Log.d("TagBoardFragment", "Clicked tag: $selectedTag")
+
+        val filteredImages = imagesByDate
+            .filterKeys { dateKey -> tagsByDate[dateKey]?.contains(selectedTag) == true }
+            .values.flatten()
+            .distinct() // ✅ 중복 방지
+
+        Log.d("TagBoardFragment", "Filtered images count: ${filteredImages.size}")
+
+        val bundle = Bundle().apply {
+            putString("selectedTag", selectedTag)
+            putStringArrayList("filteredImages", ArrayList(filteredImages))
+        }
+
+        findNavController().navigate(R.id.action_recordFragment_to_tagImgFragment, bundle)
+    }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -377,24 +483,6 @@ class TagBoardFragment : BaseFragment<FragmentTagBoardBinding>(R.layout.fragment
         }
 
         return yearSet.sortedDescending() // 내림차순 정렬
-    }
-
-    private fun onTagClicked(selectedTag: String) {
-        Log.d("TagBoardFragment", "Clicked tag: $selectedTag")
-
-        val filteredImages = imagesByDate
-            .filterKeys { dateKey -> tagsByDate[dateKey]?.contains(selectedTag) == true }
-            .values.flatten()
-            .distinct() // ✅ 중복 방지
-
-        Log.d("TagBoardFragment", "Filtered images count: ${filteredImages.size}")
-
-        val bundle = Bundle().apply {
-            putString("selectedTag", selectedTag)
-            putStringArrayList("filteredImages", ArrayList(filteredImages))
-        }
-
-        findNavController().navigate(R.id.action_recordFragment_to_tagImgFragment, bundle)
     }
 
 

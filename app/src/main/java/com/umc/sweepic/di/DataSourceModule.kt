@@ -2,7 +2,6 @@ package com.umc.sweepic.di
 
 import android.content.ContentResolver
 import android.content.Context
-import com.umc.sweepic.data.datasource.AwardDataSource
 import com.umc.sweepic.data.datasource.GalleryDataSource
 import com.umc.sweepic.data.datasource.LoginDataSource
 import com.umc.sweepic.data.datasource.HistoryDataSource
@@ -13,6 +12,7 @@ import com.umc.sweepic.data.datasource.OnboardingDataSource
 import com.umc.sweepic.data.datasource.challenge.ChallengeDataSource
 import com.umc.sweepic.data.datasourceImpl.challenge.ChallengeDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.AwardDataSourceImpl
+import com.umc.sweepic.data.datasource.TagboardDataSource
 import com.umc.sweepic.data.datasourceImpl.sweep.GalleryDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.LoginDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.HistoryDataSourceImpl
@@ -20,6 +20,7 @@ import com.umc.sweepic.data.datasourceImpl.sweep.SweepDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.MemoDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.MypageDataSourceImpl
 import com.umc.sweepic.data.datasourceImpl.sweep.OnboardingDataSourceImpl
+import com.umc.sweepic.data.datasourceImpl.sweep.TagboardDataSourceImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,4 +80,8 @@ object DataSourceModule {
     @Singleton
     fun provideAwardDataSource(awardDataSourceImpl: AwardDataSourceImpl) : AwardDataSource =
         awardDataSourceImpl
+    @Provides
+    @Singleton
+    fun provideTagboardDataSource(tagboardDataSourceImpl: TagboardDataSourceImpl) : TagboardDataSource =
+        tagboardDataSourceImpl
 }

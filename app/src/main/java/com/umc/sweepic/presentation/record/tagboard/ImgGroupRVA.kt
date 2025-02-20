@@ -29,10 +29,13 @@ class ImgGroupRVA(
 
     override fun onBindViewHolder(holder: GroupViewHolder, position: Int) {
         val (date, images) = groupedData[position]
-        val formattedDate = date.split("-")[1] // "yyyy-MM월 dd일" 형식에서 MM월 dd일 추출
-        val tags = tagsByDate[date] ?: emptyList()
+        val key = if (!date.contains("-")) "2025-$date" else date // ✅ 연도 추가
 
-        holder.bind(formattedDate, images.distinct(), tags, onItemClick)
+        val tags = tagsByDate[key] ?: emptyList()
+
+        Log.d("ImgGroupRVA", "✅ onBindViewHolder - 날짜: $key, 조회된 태그: $tags")
+
+        holder.bind(key, images.distinct(), tags, onItemClick)
     }
 
     override fun getItemCount(): Int = groupedData.size
@@ -43,6 +46,7 @@ class ImgGroupRVA(
     }
 
     class GroupViewHolder(itemView: View, private val onTagClick: (String) -> Unit) : RecyclerView.ViewHolder(itemView) {
+
         private val dateTextView: TextView = itemView.findViewById(R.id.tv_date)
         private val chipRecyclerView: RecyclerView = itemView.findViewById(R.id.rc_chip)
         private val recyclerView: RecyclerView = itemView.findViewById(R.id.rc_img)
@@ -53,6 +57,7 @@ class ImgGroupRVA(
                  tags: List<String>,
                  onItemClick: (String, List<String>, List<String>) -> Unit
         ) {
+            Log.d("ImgGroupRVA", "bind 호출: 날짜 = $date, 태그 = $tags")
             // 날짜 설정
             dateTextView.text = date
 
@@ -63,7 +68,10 @@ class ImgGroupRVA(
                 false
             )
 
-            chipRecyclerView.adapter = ChipAdapter(tags, isDetail = false, onTagClick)
+            val chipAdapter = ChipAdapter(tags.toMutableList(), isDetail = false, onTagClick)
+            chipRecyclerView.adapter = chipAdapter
+
+            chipAdapter.notifyDataSetChanged()
 
             // 이미지 RecyclerView 설정
             val spanCount = calculateSpanCount(itemView.context, 64)
