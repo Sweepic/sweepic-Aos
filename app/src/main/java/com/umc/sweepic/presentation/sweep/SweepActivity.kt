@@ -567,7 +567,7 @@ class SweepActivity: BaseActivity<ActivitySweepBinding>(R.layout.activity_sweep)
                 hint = hint,
                 onTagEntered = { inputText ->
                     // 확인 시 TextView 업데이트
-                    textView.text = inputText
+                    textView.text = "#"+inputText
                     textView.setTextColor(ContextCompat.getColor(this, R.color.sweepic))
                     textView.setBackgroundResource(R.drawable.shape_rect_16_blue_line)
                     callInputTagApiForCategory(categoryId, inputText)
